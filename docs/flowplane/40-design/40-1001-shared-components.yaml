@@ -1,0 +1,773 @@
+version: "2.0"
+metadata:
+  generated: "2024-02-15"
+  design_system_version: "1.0"
+  total_components: 24
+  token_compliance: "100%"
+
+# Navigation Components
+navigation:
+  main_navigation:
+    type: complex
+    category: navigation
+    design_tokens:
+      colors:
+        background: "colors.semantic.surface"
+        text: "colors.semantic.text.primary"
+        text_active: "colors.semantic.primary"
+        border: "colors.semantic.border.default"
+      spacing:
+        padding: "spacing.semantic.lg"
+        gap: "spacing.semantic.md"
+      typography:
+        font: "typography.semantic.body"
+        weight: "typography.weights.medium"
+      effects:
+        shadow: "effects.semantic.card"
+    props:
+      - name: "items"
+        type: "NavigationItem[]"
+        required: true
+      - name: "activeItem"
+        type: "string"
+        required: false
+      - name: "onItemClick"
+        type: "function"
+        required: true
+    states:
+      default: {}
+      item_hover:
+        design_tokens:
+          colors:
+            background: "colors.semantic.primary_light"
+      item_active:
+        design_tokens:
+          colors:
+            text: "colors.semantic.primary"
+            background: "colors.semantic.primary_light"
+    used_by: ["F006"]
+    first_created: "F006-US001"
+    notes: "Main application navigation with active state highlighting"
+
+  breadcrumb:
+    type: simple
+    category: navigation
+    design_tokens:
+      colors:
+        text: "colors.semantic.text.secondary"
+        text_active: "colors.semantic.text.primary"
+        separator: "colors.semantic.text.tertiary"
+      spacing:
+        gap: "spacing.semantic.sm"
+      typography:
+        font: "typography.semantic.body_sm"
+    props:
+      - name: "path"
+        type: "BreadcrumbItem[]"
+        required: true
+      - name: "onNavigate"
+        type: "function"
+        required: true
+    used_by: ["F005", "F006"]
+    first_created: "F005-US002"
+    notes: "Hierarchical navigation breadcrumbs"
+
+# Form Components
+forms:
+  form_field:
+    type: standard
+    category: form
+    design_tokens:
+      colors:
+        background: "colors.semantic.background"
+        border: "colors.semantic.border.default"
+        border_focus: "colors.semantic.primary"
+        border_error: "colors.semantic.status.error"
+        text: "colors.semantic.text.primary"
+        label: "colors.semantic.text.secondary"
+        placeholder: "colors.semantic.text.tertiary"
+      spacing:
+        padding: "spacing.semantic.md"
+        label_spacing: "spacing.semantic.sm"
+        field_spacing: "spacing.semantic.lg"
+      typography:
+        input: "typography.semantic.body"
+        label: "typography.semantic.body_sm"
+      borders:
+        radius: "borders.semantic.input"
+        width: "borders.width.default"
+      effects:
+        transition: "effects.semantic_transitions.focus"
+    props:
+      - name: "label"
+        type: "string"
+        required: true
+      - name: "type"
+        type: "text|number|email|password"
+        required: false
+      - name: "value"
+        type: "string"
+        required: false
+      - name: "error"
+        type: "string"
+        required: false
+      - name: "placeholder"
+        type: "string"
+        required: false
+      - name: "required"
+        type: "boolean"
+        required: false
+    states:
+      default: {}
+      focus:
+        design_tokens:
+          colors:
+            border: "colors.semantic.primary"
+      error:
+        design_tokens:
+          colors:
+            border: "colors.semantic.status.error"
+      disabled:
+        design_tokens:
+          colors:
+            background: "colors.semantic.surface"
+            text: "colors.semantic.interactive.disabled"
+    used_by: ["F001", "F002", "F003", "F004"]
+    first_created: "F001-US003"
+    notes: "Standard form input with validation states"
+
+  button:
+    type: standard
+    category: form
+    design_tokens:
+      colors:
+        background: "colors.semantic.primary"
+        text: "colors.semantic.text.inverse"
+        background_hover: "colors.semantic.primary_hover"
+        background_disabled: "colors.semantic.interactive.disabled"
+      spacing:
+        padding_sm: "spacing.semantic.md spacing.semantic.lg"
+        padding_md: "spacing.semantic.lg spacing.semantic.xl"
+        padding_lg: "spacing.semantic.xl spacing.semantic.2xl"
+      typography:
+        font: "typography.semantic.body"
+        weight: "typography.weights.medium"
+      borders:
+        radius: "borders.semantic.button"
+      effects:
+        shadow: "effects.semantic.card"
+        transition: "effects.semantic_transitions.hover"
+    props:
+      - name: "variant"
+        type: "primary|secondary|danger"
+        required: false
+      - name: "size"
+        type: "sm|md|lg"
+        required: false
+      - name: "disabled"
+        type: "boolean"
+        required: false
+      - name: "loading"
+        type: "boolean"
+        required: false
+      - name: "onClick"
+        type: "function"
+        required: true
+    states:
+      default: {}
+      hover:
+        design_tokens:
+          colors:
+            background: "colors.semantic.primary_hover"
+          effects:
+            shadow: "effects.semantic.card_hover"
+      active:
+        design_tokens:
+          colors:
+            background: "colors.semantic.interactive.active"
+      disabled:
+        design_tokens:
+          colors:
+            background: "colors.semantic.interactive.disabled"
+            text: "colors.semantic.text.tertiary"
+    used_by: ["F001", "F002", "F003", "F004", "F005", "F006"]
+    first_created: "F001-US001"
+    notes: "Primary action button with multiple variants and states"
+
+  select_dropdown:
+    type: standard
+    category: form
+    design_tokens:
+      colors:
+        background: "colors.semantic.background"
+        border: "colors.semantic.border.default"
+        border_focus: "colors.semantic.primary"
+        text: "colors.semantic.text.primary"
+        dropdown_background: "colors.semantic.surface_elevated"
+        option_hover: "colors.semantic.primary_light"
+      spacing:
+        padding: "spacing.semantic.md"
+        dropdown_padding: "spacing.semantic.sm"
+        option_padding: "spacing.semantic.sm spacing.semantic.md"
+      typography:
+        font: "typography.semantic.body"
+      borders:
+        radius: "borders.semantic.input"
+        width: "borders.width.default"
+      effects:
+        shadow: "effects.semantic.dropdown"
+        transition: "effects.semantic_transitions.focus"
+    props:
+      - name: "options"
+        type: "SelectOption[]"
+        required: true
+      - name: "value"
+        type: "string"
+        required: false
+      - name: "placeholder"
+        type: "string"
+        required: false
+      - name: "onChange"
+        type: "function"
+        required: true
+    used_by: ["F001", "F003", "F004"]
+    first_created: "F001-US002"
+    notes: "Dropdown select with searchable options"
+
+# Display Components
+display:
+  data_card:
+    type: standard
+    category: display
+    design_tokens:
+      colors:
+        background: "colors.semantic.surface_elevated"
+        border: "colors.semantic.border.default"
+        text: "colors.semantic.text.primary"
+        text_secondary: "colors.semantic.text.secondary"
+      spacing:
+        padding: "spacing.semantic.2xl"
+        gap: "spacing.semantic.lg"
+        margin: "spacing.semantic.md"
+      typography:
+        heading: "typography.semantic.h5"
+        body: "typography.semantic.body"
+        caption: "typography.semantic.caption"
+      borders:
+        radius: "borders.semantic.card"
+        width: "borders.width.default"
+      effects:
+        shadow: "effects.semantic.card"
+        transition: "effects.semantic_transitions.hover"
+    props:
+      - name: "title"
+        type: "string"
+        required: true
+      - name: "value"
+        type: "string|number"
+        required: true
+      - name: "subtitle"
+        type: "string"
+        required: false
+      - name: "trend"
+        type: "up|down|neutral"
+        required: false
+      - name: "onClick"
+        type: "function"
+        required: false
+    states:
+      default: {}
+      hover:
+        design_tokens:
+          effects:
+            shadow: "effects.semantic.card_hover"
+      trend_positive:
+        design_tokens:
+          colors:
+            accent: "colors.semantic.profit"
+      trend_negative:
+        design_tokens:
+          colors:
+            accent: "colors.semantic.loss"
+    used_by: ["F003", "F005", "F006"]
+    first_created: "F003-US001"
+    notes: "Card for displaying key metrics and data points"
+
+  strategy_card:
+    type: complex
+    category: display
+    design_tokens:
+      colors:
+        background: "colors.semantic.surface_elevated"
+        border: "colors.semantic.border.default"
+        text: "colors.semantic.text.primary"
+        text_secondary: "colors.semantic.text.secondary"
+        status_active: "colors.financial.status_indicators.active_strategy"
+        status_paused: "colors.financial.status_indicators.paused_strategy"
+        profit: "colors.semantic.profit"
+        loss: "colors.semantic.loss"
+      spacing:
+        padding: "spacing.semantic.2xl"
+        gap: "spacing.semantic.lg"
+        header_gap: "spacing.semantic.md"
+      typography:
+        title: "typography.semantic.h5"
+        body: "typography.semantic.body"
+        caption: "typography.semantic.caption"
+        price: "typography.semantic.price"
+      borders:
+        radius: "borders.semantic.card"
+        width: "borders.width.default"
+      effects:
+        shadow: "effects.semantic.card"
+        transition: "effects.semantic_transitions.hover"
+    props:
+      - name: "strategy"
+        type: "StrategyData"
+        required: true
+      - name: "onView"
+        type: "function"
+        required: true
+      - name: "onToggle"
+        type: "function"
+        required: false
+      - name: "showActions"
+        type: "boolean"
+        required: false
+    used_by: ["F001", "F003", "F005", "F006"]
+    first_created: "F001-US003"
+    notes: "Complex card for displaying strategy information and controls"
+
+  data_table:
+    type: complex
+    category: display
+    design_tokens:
+      colors:
+        background: "colors.semantic.surface_elevated"
+        header_background: "colors.semantic.surface"
+        border: "colors.semantic.border.default"
+        text: "colors.semantic.text.primary"
+        text_secondary: "colors.semantic.text.secondary"
+        row_hover: "colors.semantic.primary_light"
+        profit: "colors.semantic.profit"
+        loss: "colors.semantic.loss"
+      spacing:
+        cell_padding: "spacing.semantic.md spacing.semantic.lg"
+        header_padding: "spacing.semantic.lg"
+        row_gap: "spacing.semantic.xs"
+      typography:
+        header: "typography.semantic.body"
+        header_weight: "typography.weights.semibold"
+        cell: "typography.semantic.data_table"
+        price: "typography.semantic.price"
+      borders:
+        radius: "borders.semantic.card"
+        width: "borders.width.default"
+      effects:
+        shadow: "effects.semantic.card"
+    props:
+      - name: "columns"
+        type: "TableColumn[]"
+        required: true
+      - name: "data"
+        type: "any[]"
+        required: true
+      - name: "sortable"
+        type: "boolean"
+        required: false
+      - name: "onRowClick"
+        type: "function"
+        required: false
+    used_by: ["F003", "F004", "F006"]
+    first_created: "F003-US002"
+    notes: "Financial data table with sorting and profit/loss highlighting"
+
+  metric_display:
+    type: simple
+    category: display
+    design_tokens:
+      colors:
+        text: "colors.semantic.text.primary"
+        text_secondary: "colors.semantic.text.secondary"
+        profit: "colors.semantic.profit"
+        loss: "colors.semantic.loss"
+        neutral: "colors.semantic.neutral"
+      spacing:
+        gap: "spacing.semantic.xs"
+      typography:
+        value: "typography.semantic.price_large"
+        label: "typography.semantic.caption"
+        percentage: "typography.semantic.percentage"
+    props:
+      - name: "label"
+        type: "string"
+        required: true
+      - name: "value"
+        type: "string|number"
+        required: true
+      - name: "change"
+        type: "number"
+        required: false
+      - name: "format"
+        type: "currency|percentage|number"
+        required: false
+    used_by: ["F003", "F005", "F006"]
+    first_created: "F003-US003"
+    notes: "Simple metric display with optional change indicator"
+
+# Layout Components
+layout:
+  page_container:
+    type: simple
+    category: layout
+    design_tokens:
+      colors:
+        background: "colors.semantic.background"
+      spacing:
+        padding: "spacing.semantic.2xl"
+        max_width: "1280px"
+        gap: "spacing.semantic.2xl"
+    props:
+      - name: "title"
+        type: "string"
+        required: false
+      - name: "subtitle"
+        type: "string"
+        required: false
+    used_by: ["F005", "F006"]
+    first_created: "F005-US001"
+    notes: "Main page container with consistent spacing"
+
+  grid_layout:
+    type: simple
+    category: layout
+    design_tokens:
+      spacing:
+        gap: "spacing.semantic.lg"
+        column_gap: "spacing.semantic.lg"
+        row_gap: "spacing.semantic.lg"
+    props:
+      - name: "columns"
+        type: "number"
+        required: false
+      - name: "responsive"
+        type: "boolean"
+        required: false
+    used_by: ["F003", "F006"]
+    first_created: "F003-US001"
+    notes: "Responsive grid layout for cards and content"
+
+  sidebar_layout:
+    type: standard
+    category: layout
+    design_tokens:
+      colors:
+        sidebar_background: "colors.semantic.surface"
+        main_background: "colors.semantic.background"
+        border: "colors.semantic.border.default"
+      spacing:
+        sidebar_width: "280px"
+        sidebar_padding: "spacing.semantic.xl"
+        main_padding: "spacing.semantic.2xl"
+        gap: "spacing.semantic.lg"
+      borders:
+        width: "borders.width.default"
+    props:
+      - name: "sidebarContent"
+        type: "ReactNode"
+        required: true
+      - name: "mainContent"
+        type: "ReactNode"
+        required: true
+      - name: "collapsible"
+        type: "boolean"
+        required: false
+    used_by: ["F006"]
+    first_created: "F006-US001"
+    notes: "Main application layout with sidebar navigation"
+
+# Feedback Components
+feedback:
+  alert_banner:
+    type: standard
+    category: feedback
+    design_tokens:
+      colors:
+        background_info: "colors.semantic.primary_light"
+        background_success: "colors.semantic.status.success"
+        background_warning: "colors.semantic.status.warning"
+        background_error: "colors.semantic.status.error"
+        text: "colors.semantic.text.primary"
+        border_info: "colors.semantic.primary"
+        border_success: "colors.semantic.status.success"
+        border_warning: "colors.semantic.status.warning"
+        border_error: "colors.semantic.status.error"
+      spacing:
+        padding: "spacing.semantic.lg spacing.semantic.xl"
+        gap: "spacing.semantic.md"
+      typography:
+        font: "typography.semantic.body"
+        weight: "typography.weights.medium"
+      borders:
+        radius: "borders.semantic.card"
+        width: "borders.width.default"
+    props:
+      - name: "type"
+        type: "info|success|warning|error"
+        required: true
+      - name: "message"
+        type: "string"
+        required: true
+      - name: "dismissible"
+        type: "boolean"
+        required: false
+      - name: "onDismiss"
+        type: "function"
+        required: false
+    used_by: ["F002", "F003", "F004", "F006"]
+    first_created: "F002-US002"
+    notes: "System alerts and notifications banner"
+
+  loading_spinner:
+    type: simple
+    category: feedback
+    design_tokens:
+      colors:
+        primary: "colors.semantic.primary"
+        background: "colors.semantic.surface"
+      spacing:
+        size_sm: "16px"
+        size_md: "24px"
+        size_lg: "32px"
+      effects:
+        transition: "effects.semantic_transitions.normal"
+    props:
+      - name: "size"
+        type: "sm|md|lg"
+        required: false
+      - name: "overlay"
+        type: "boolean"
+        required: false
+    used_by: ["F001", "F002", "F004", "F005", "F006"]
+    first_created: "F001-US002"
+    notes: "Loading indicator for async operations"
+
+  status_badge:
+    type: simple
+    category: feedback
+    design_tokens:
+      colors:
+        background_active: "colors.financial.status_indicators.active_strategy"
+        background_paused: "colors.financial.status_indicators.paused_strategy"
+        background_failed: "colors.financial.status_indicators.failed_strategy"
+        background_pending: "colors.financial.status_indicators.pending_strategy"
+        text: "colors.semantic.text.inverse"
+      spacing:
+        padding: "spacing.semantic.xs spacing.semantic.sm"
+      typography:
+        font: "typography.semantic.caption"
+        weight: "typography.weights.semibold"
+      borders:
+        radius: "borders.semantic.badge"
+    props:
+      - name: "status"
+        type: "active|paused|failed|pending"
+        required: true
+      - name: "text"
+        type: "string"
+        required: false
+    used_by: ["F002", "F003", "F006"]
+    first_created: "F002-US003"
+    notes: "Status indicator badge for strategies and processes"
+
+  progress_bar:
+    type: simple
+    category: feedback
+    design_tokens:
+      colors:
+        background: "colors.semantic.surface"
+        fill: "colors.semantic.primary"
+        text: "colors.semantic.text.secondary"
+      spacing:
+        height: "8px"
+        padding: "spacing.semantic.xs"
+      borders:
+        radius: "borders.radius.full"
+    props:
+      - name: "value"
+        type: "number"
+        required: true
+      - name: "max"
+        type: "number"
+        required: false
+      - name: "showLabel"
+        type: "boolean"
+        required: false
+    used_by: ["F004", "F005"]
+    first_created: "F004-US002"
+    notes: "Progress indicator for validation and processing tasks"
+
+  modal:
+    type: complex
+    category: feedback
+    design_tokens:
+      colors:
+        background: "colors.semantic.surface_elevated"
+        overlay: "rgba(0, 0, 0, 0.5)"
+        border: "colors.semantic.border.default"
+        text: "colors.semantic.text.primary"
+      spacing:
+        padding: "spacing.semantic.3xl"
+        gap: "spacing.semantic.xl"
+        max_width: "600px"
+      typography:
+        title: "typography.semantic.h3"
+        body: "typography.semantic.body"
+      borders:
+        radius: "borders.radius.lg"
+      effects:
+        shadow: "effects.semantic.modal"
+        transition: "effects.semantic_transitions.modal"
+    props:
+      - name: "isOpen"
+        type: "boolean"
+        required: true
+      - name: "title"
+        type: "string"
+        required: true
+      - name: "onClose"
+        type: "function"
+        required: true
+      - name: "children"
+        type: "ReactNode"
+        required: true
+      - name: "size"
+        type: "sm|md|lg"
+        required: false
+    used_by: ["F001", "F002", "F003", "F005"]
+    first_created: "F001-US003"
+    notes: "Modal dialog for confirmations and detailed views"
+
+# Financial-Specific Components
+financial:
+  price_display:
+    type: simple
+    category: display
+    design_tokens:
+      colors:
+        text: "colors.semantic.text.primary"
+        profit: "colors.semantic.profit"
+        loss: "colors.semantic.loss"
+        neutral: "colors.semantic.neutral"
+      typography:
+        price: "typography.semantic.price"
+        change: "typography.semantic.percentage"
+        ticker: "typography.semantic.ticker"
+    props:
+      - name: "price"
+        type: "number"
+        required: true
+      - name: "change"
+        type: "number"
+        required: false
+      - name: "changePercent"
+        type: "number"
+        required: false
+      - name: "ticker"
+        type: "string"
+        required: false
+      - name: "currency"
+        type: "string"
+        required: false
+    used_by: ["F001", "F003", "F005", "F006"]
+    first_created: "F001-US001"
+    notes: "Financial price display with change indicators"
+
+  performance_chart:
+    type: complex
+    category: display
+    design_tokens:
+      colors:
+        primary_line: "colors.financial.chart_colors.primary_line"
+        secondary_line: "colors.financial.chart_colors.secondary_line"
+        profit_area: "colors.financial.chart_colors.profit_area"
+        loss_area: "colors.financial.chart_colors.loss_area"
+        grid_lines: "colors.financial.data_visualization.grid_lines"
+        axis_labels: "colors.financial.data_visualization.axis_labels"
+        tooltips: "colors.financial.data_visualization.tooltips"
+      spacing:
+        padding: "spacing.semantic.lg"
+        height: "300px"
+      typography:
+        axis: "typography.semantic.caption"
+        tooltip: "typography.semantic.body_sm"
+      borders:
+        radius: "borders.semantic.card"
+    props:
+      - name: "data"
+        type: "ChartDataPoint[]"
+        required: true
+      - name: "timeframe"
+        type: "1D|1W|1M|3M|1Y"
+        required: false
+      - name: "showGrid"
+        type: "boolean"
+        required: false
+      - name: "interactive"
+        type: "boolean"
+        required: false
+    used_by: ["F003", "F005", "F006"]
+    first_created: "F003-US003"
+    notes: "Performance chart for strategy and portfolio visualization"
+
+  risk_meter:
+    type: standard
+    category: display
+    design_tokens:
+      colors:
+        low_risk: "colors.semantic.status.success"
+        medium_risk: "colors.semantic.status.warning"
+        high_risk: "colors.semantic.status.error"
+        background: "colors.semantic.surface"
+        text: "colors.semantic.text.primary"
+      spacing:
+        height: "12px"
+        padding: "spacing.semantic.sm"
+        gap: "spacing.semantic.xs"
+      typography:
+        label: "typography.semantic.caption"
+      borders:
+        radius: "borders.radius.full"
+    props:
+      - name: "level"
+        type: "low|medium|high"
+        required: true
+      - name: "value"
+        type: "number"
+        required: false
+      - name: "showLabel"
+        type: "boolean"
+        required: false
+    used_by: ["F003", "F004", "F006"]
+    first_created: "F003-US001"
+    notes: "Risk level indicator for strategies and portfolio"
+
+# Usage Matrix
+component_usage_matrix:
+  F001: ["main_navigation", "form_field", "button", "select_dropdown", "strategy_card", "loading_spinner", "modal", "price_display"]
+  F002: ["button", "alert_banner", "loading_spinner", "status_badge", "modal"]
+  F003: ["form_field", "button", "select_dropdown", "data_card", "strategy_card", "data_table", "metric_display", "grid_layout", "alert_banner", "status_badge", "modal", "price_display", "performance_chart", "risk_meter"]
+  F004: ["form_field", "button", "select_dropdown", "data_table", "alert_banner", "loading_spinner", "progress_bar", "risk_meter"]
+  F005: ["breadcrumb", "data_card", "strategy_card", "metric_display", "page_container", "loading_spinner", "progress_bar", "modal", "price_display", "performance_chart"]
+  F006: ["main_navigation", "breadcrumb", "data_card", "strategy_card", "data_table", "metric_display", "page_container", "grid_layout", "sidebar_layout", "alert_banner", "loading_spinner", "status_badge", "price_display", "performance_chart", "risk_meter"]
+
+# Component Complexity Distribution
+complexity_stats:
+  simple: 9  # 37.5%
+  standard: 10  # 41.7%
+  complex: 5  # 20.8%
+  
+# Reusability Score (features using component)
+high_reuse: ["button", "loading_spinner", "price_display"]  # Used by 4+ features
+medium_reuse: ["form_field", "select_dropdown", "data_card", "strategy_card", "data_table", "metric_display", "alert_banner", "status_badge", "modal", "performance_chart", "risk_meter"]  # Used by 2-3 features
+low_reuse: ["main_navigation", "breadcrumb", "page_container", "grid_layout", "sidebar_layout", "progress_bar"]  # Used by 1-2 features

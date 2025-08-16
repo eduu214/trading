@@ -1,0 +1,52 @@
+version: 2.0
+story: F005-US003
+feature: F005
+
+contributed_tokens:
+  colors:
+    semantic:
+      market_regime_background:
+        value: "gray.50"
+        justification: "Subtle background for market regime indicators in performance context"
+        usage_count: 3
+        elements: ["regime-indicator", "context-panel", "regime-filter"]
+        
+      benchmark_highlight:
+        value: "blue.100"
+        justification: "Highlight color for benchmark comparison sections"
+        usage_count: 2
+        elements: ["benchmark-card", "comparison-row"]
+
+  spacing:
+    semantic:
+      context_section_gap:
+        value: "spacing.scale.8"
+        justification: "Consistent spacing between context sections in performance analysis"
+        usage_count: 4
+        elements: ["context-sections", "benchmark-groups", "regime-panels", "explanation-blocks"]
+
+  typography:
+    semantic:
+      market_explanation:
+        value: "base"
+        justification: "Readable typography for market context explanations"
+        usage_count: 3
+        elements: ["context-text", "regime-explanation", "benchmark-description"]
+
+documented_exceptions:
+  market_regime_gradient:
+    value: "linear-gradient(90deg, rgba(34, 197, 94, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%)"
+    justification: "Visual gradient representing market regime transition from bull to bear, required for intuitive market context visualization"
+    usage: "Market regime timeline background only"
+    mitigation: "Will parameterize when design system adds gradient token support"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 9   # percentage
+  documented_exceptions: 3   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Market context visualization patterns specific to performance analysis but reusable across other strategy insight features F005-US001, F005-US002"

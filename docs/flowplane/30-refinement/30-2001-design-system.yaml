@@ -1,0 +1,375 @@
+design_system:
+  metadata:
+    name: "AI Trading Platform Design System"
+    version: "1.0"
+    complexity_level: "standard"
+    target_platforms: ["web", "mobile_pwa"]
+    design_philosophy: "Financial clarity with modern aesthetics"
+    
+  colors:
+    primitives:
+      # Neutral foundation for financial data
+      gray:
+        50: "#f8fafc"
+        100: "#f1f5f9"
+        200: "#e2e8f0"
+        300: "#cbd5e1"
+        400: "#94a3b8"
+        500: "#64748b"
+        600: "#475569"
+        700: "#334155"
+        800: "#1e293b"
+        900: "#0f172a"
+      
+      # Primary brand - professional blue
+      blue:
+        50: "#eff6ff"
+        100: "#dbeafe"
+        200: "#bfdbfe"
+        300: "#93c5fd"
+        400: "#60a5fa"
+        500: "#3b82f6"
+        600: "#2563eb"
+        700: "#1d4ed8"
+        800: "#1e40af"
+        900: "#1e3a8a"
+      
+      # Financial semantic colors
+      green:
+        50: "#f0fdf4"
+        100: "#dcfce7"
+        200: "#bbf7d0"
+        300: "#86efac"
+        400: "#4ade80"
+        500: "#22c55e"
+        600: "#16a34a"
+        700: "#15803d"
+        800: "#166534"
+        900: "#14532d"
+      
+      red:
+        50: "#fef2f2"
+        100: "#fee2e2"
+        200: "#fecaca"
+        300: "#fca5a5"
+        400: "#f87171"
+        500: "#ef4444"
+        600: "#dc2626"
+        700: "#b91c1c"
+        800: "#991b1b"
+        900: "#7f1d1d"
+      
+      yellow:
+        50: "#fefce8"
+        100: "#fef3c7"
+        200: "#fde68a"
+        300: "#fcd34d"
+        400: "#fbbf24"
+        500: "#f59e0b"
+        600: "#d97706"
+        700: "#b45309"
+        800: "#92400e"
+        900: "#78350f"
+      
+      # Pure values
+      white: "#ffffff"
+      black: "#000000"
+      
+    semantic:
+      # Core brand colors
+      primary: "blue.600"
+      primary_hover: "blue.700"
+      primary_light: "blue.50"
+      
+      # Background system
+      background: "white"
+      surface: "gray.50"
+      surface_elevated: "white"
+      
+      # Text hierarchy
+      text:
+        primary: "gray.900"
+        secondary: "gray.600"
+        tertiary: "gray.400"
+        inverse: "white"
+        
+      # Border system
+      border:
+        default: "gray.200"
+        strong: "gray.300"
+        subtle: "gray.100"
+        
+      # Financial semantic states
+      profit: "green.600"
+      loss: "red.600"
+      warning: "yellow.600"
+      neutral: "gray.500"
+      
+      # Interactive states
+      interactive:
+        default: "blue.600"
+        hover: "blue.700"
+        active: "blue.800"
+        disabled: "gray.300"
+        
+      # Status indicators
+      status:
+        success: "green.600"
+        error: "red.600"
+        warning: "yellow.600"
+        info: "blue.600"
+        
+  typography:
+    families:
+      sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "system-ui", "sans-serif"]
+      mono: ["JetBrains Mono", "Menlo", "Monaco", "Consolas", "monospace"]
+      
+    weights:
+      light: "300"
+      normal: "400"
+      medium: "500"
+      semibold: "600"
+      bold: "700"
+      
+    scale:
+      xs: 
+        size: "12px"
+        line_height: "16px"
+        weight: "normal"
+        letter_spacing: "0.025em"
+      sm: 
+        size: "14px"
+        line_height: "20px"
+        weight: "normal"
+        letter_spacing: "0"
+      base: 
+        size: "16px"
+        line_height: "24px"
+        weight: "normal"
+        letter_spacing: "0"
+      lg: 
+        size: "18px"
+        line_height: "28px"
+        weight: "normal"
+        letter_spacing: "0"
+      xl: 
+        size: "20px"
+        line_height: "28px"
+        weight: "medium"
+        letter_spacing: "-0.025em"
+      "2xl": 
+        size: "24px"
+        line_height: "32px"
+        weight: "semibold"
+        letter_spacing: "-0.025em"
+      "3xl": 
+        size: "30px"
+        line_height: "36px"
+        weight: "semibold"
+        letter_spacing: "-0.025em"
+      "4xl": 
+        size: "36px"
+        line_height: "40px"
+        weight: "bold"
+        letter_spacing: "-0.025em"
+        
+    semantic:
+      # Content hierarchy
+      body: "base"
+      body_sm: "sm"
+      caption: "xs"
+      
+      # Headings
+      h1: "4xl"
+      h2: "3xl"
+      h3: "2xl"
+      h4: "xl"
+      h5: "lg"
+      h6: "base"
+      
+      # Financial data
+      price: "lg"
+      price_large: "2xl"
+      percentage: "sm"
+      ticker: "sm"
+      
+      # Code and data
+      code: "sm"
+      data_table: "sm"
+      
+  spacing:
+    scale: [0, 2, 4, 6, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96, 128]
+    
+    semantic:
+      none: 0      # scale[0] = 0px
+      xs: 1        # scale[1] = 2px
+      sm: 2        # scale[2] = 4px
+      md: 4        # scale[4] = 8px
+      lg: 6        # scale[6] = 12px
+      xl: 8        # scale[8] = 16px
+      "2xl": 10    # scale[10] = 24px
+      "3xl": 12    # scale[12] = 32px
+      "4xl": 14    # scale[14] = 48px
+      "5xl": 16    # scale[16] = 64px
+      
+      # Component-specific spacing
+      component:
+        padding_sm: 3    # scale[3] = 6px
+        padding_md: 4    # scale[4] = 8px
+        padding_lg: 6    # scale[6] = 12px
+        gap_sm: 2        # scale[2] = 4px
+        gap_md: 4        # scale[4] = 8px
+        gap_lg: 6        # scale[6] = 12px
+        
+  borders:
+    radius:
+      none: "0px"
+      sm: "4px"
+      md: "6px"
+      lg: "8px"
+      xl: "12px"
+      "2xl": "16px"
+      full: "9999px"
+      
+    width:
+      none: "0px"
+      thin: "1px"
+      default: "1px"
+      thick: "2px"
+      
+    semantic:
+      card: "md"
+      button: "md"
+      input: "md"
+      badge: "full"
+      
+  effects:
+    shadows:
+      xs: "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
+      sm: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)"
+      md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+      lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
+      xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+      
+    semantic:
+      card: "sm"
+      card_hover: "md"
+      dropdown: "lg"
+      modal: "xl"
+      
+    transitions:
+      fast: "150ms cubic-bezier(0.4, 0, 0.2, 1)"
+      normal: "300ms cubic-bezier(0.4, 0, 0.2, 1)"
+      slow: "500ms cubic-bezier(0.4, 0, 0.2, 1)"
+      
+    semantic_transitions:
+      hover: "fast"
+      focus: "fast"
+      modal: "normal"
+      page: "slow"
+      
+  # Financial-specific design tokens
+  financial:
+    chart_colors:
+      primary_line: "blue.600"
+      secondary_line: "gray.400"
+      profit_area: "green.100"
+      loss_area: "red.100"
+      volume_bars: "gray.300"
+      
+    data_visualization:
+      grid_lines: "gray.200"
+      axis_labels: "gray.500"
+      tooltips: "gray.800"
+      
+    status_indicators:
+      active_strategy: "green.500"
+      paused_strategy: "yellow.500"
+      failed_strategy: "red.500"
+      pending_strategy: "blue.500"
+      
+  # Component-specific tokens
+  components:
+    button:
+      height:
+        sm: "32px"
+        md: "40px"
+        lg: "48px"
+      padding:
+        sm: "spacing.md spacing.lg"
+        md: "spacing.lg spacing.xl"
+        lg: "spacing.xl spacing.2xl"
+        
+    card:
+      padding: "spacing.2xl"
+      gap: "spacing.lg"
+      
+    form:
+      input_height: "40px"
+      label_spacing: "spacing.sm"
+      field_spacing: "spacing.lg"
+      
+    table:
+      row_height: "48px"
+      cell_padding: "spacing.md spacing.lg"
+      header_height: "56px"
+      
+  # Responsive breakpoints
+  breakpoints:
+    sm: "640px"
+    md: "768px"
+    lg: "1024px"
+    xl: "1280px"
+    "2xl": "1536px"
+    
+  # Grid system
+  grid:
+    columns: 12
+    gap: "spacing.lg"
+    container_padding: "spacing.xl"
+    
+platform_transformation:
+  web_css:
+    format: "CSS custom properties"
+    naming: "--token-category-name"
+    example: "primary: blue.600 → --color-primary: #2563eb"
+    file_structure: "tokens/colors.css, tokens/typography.css, tokens/spacing.css"
+    
+  tailwind_config:
+    format: "Tailwind CSS configuration"
+    naming: "tailwind.config.js extend object"
+    example: "primary: blue.600 → colors: { primary: '#2563eb' }"
+    
+  react_native:
+    format: "JavaScript theme object"
+    naming: "camelCase nested objects"
+    example: "primary: blue.600 → colors.primary"
+    
+  design_tokens_json:
+    format: "Design Tokens Community Group format"
+    naming: "Nested JSON with $value properties"
+    example: "primary: { $value: '#2563eb', $type: 'color' }"
+
+design_decisions:
+  color_strategy: "Financial-focused semantic layer with clear profit/loss indicators and professional blue primary"
+  spacing_strategy: "16px base unit with comprehensive scale for financial data density"
+  typography_strategy: "Inter for readability, JetBrains Mono for financial data, clear hierarchy"
+  complexity_rationale: "Standard complexity matches production MVP requirements with professional financial interface needs"
+  financial_considerations: "Specialized tokens for charts, data visualization, and trading status indicators"
+  accessibility_focus: "WCAG AA contrast ratios, clear visual hierarchy for financial data"
+  
+token_usage_patterns:
+  semantic_references:
+    - "All component tokens reference semantic layer"
+    - "Semantic tokens reference primitives only"
+    - "Financial tokens extend semantic system"
+    
+  platform_generation:
+    - "CSS custom properties for web implementation"
+    - "Tailwind config for utility-first approach"
+    - "Design tokens JSON for design tool integration"
+    
+  maintenance_approach:
+    - "Primitives define brand colors and scales"
+    - "Semantic layer handles all component usage"
+    - "Financial extensions for domain-specific needs"

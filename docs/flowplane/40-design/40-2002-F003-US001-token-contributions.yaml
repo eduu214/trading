@@ -1,0 +1,58 @@
+version: 2.0
+story: F003-US001
+feature: F003
+
+contributed_tokens:
+  colors:
+    semantic:
+      correlation_high:
+        value: "red.200"
+        justification: "Background color for high correlation cells in correlation matrix (>0.5)"
+        usage_count: 3
+        elements: ["correlation-cell", "warning-indicator", "risk-highlight"]
+        
+      correlation_medium:
+        value: "yellow.200"
+        justification: "Background color for medium correlation cells in correlation matrix (0.3-0.5)"
+        usage_count: 2
+        elements: ["correlation-cell", "caution-indicator"]
+        
+      correlation_low:
+        value: "green.200"
+        justification: "Background color for low correlation cells in correlation matrix (<0.3)"
+        usage_count: 2
+        elements: ["correlation-cell", "safe-indicator"]
+        
+  spacing:
+    semantic:
+      correlation_matrix_gap:
+        value: "spacing.scale.1"
+        justification: "Tight spacing between correlation matrix cells for dense data display"
+        usage_count: 2
+        elements: ["matrix-cell", "table-border"]
+        
+  typography:
+    semantic:
+      correlation_value:
+        value: "xs"
+        justification: "Small typography for correlation coefficient values in matrix cells"
+        usage_count: 2
+        elements: ["correlation-number", "matrix-label"]
+
+documented_exceptions:
+  correlation_matrix_heatmap:
+    value: "background: linear-gradient(90deg, var(--color-correlation-low) 0%, var(--color-correlation-medium) 50%, var(--color-correlation-high) 100%)"
+    justification: "CSS gradient required for correlation heatmap visualization, design token system doesn't support gradient generation"
+    usage: "Correlation matrix background visualization only"
+    mitigation: "Will parameterize when design system adds gradient token support"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Correlation visualization patterns specific to portfolio management but reusable across other correlation-based features like F001 strategy discovery and F004 validation framework"

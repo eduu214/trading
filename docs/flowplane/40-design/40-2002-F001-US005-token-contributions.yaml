@@ -1,0 +1,58 @@
+version: 2.0
+story: F001-US005
+feature: F001
+
+contributed_tokens:
+  colors:
+    semantic:
+      priority_indicator_high:
+        value: "green.600"
+        justification: "High priority strategy indicator distinct from general success color"
+        usage_count: 3
+        elements: ["priority-badge", "ranking-number", "card-accent"]
+        
+      priority_indicator_medium:
+        value: "yellow.600"
+        justification: "Medium priority strategy indicator for ranking system"
+        usage_count: 3
+        elements: ["priority-badge", "ranking-number", "card-accent"]
+        
+      priority_indicator_low:
+        value: "gray.500"
+        justification: "Low priority strategy indicator for complete ranking system"
+        usage_count: 3
+        elements: ["priority-badge", "ranking-number", "card-accent"]
+
+  spacing:
+    semantic:
+      strategy_ranking_gap:
+        value: "spacing.scale.4"
+        justification: "Consistent spacing between ranking elements in priority display"
+        usage_count: 4
+        elements: ["rank-number", "priority-badge", "metric-group", "card-header"]
+
+  typography:
+    semantic:
+      priority_rank:
+        value: "xl"
+        justification: "Prominent display for strategy priority ranking numbers"
+        usage_count: 2
+        elements: ["rank-display", "priority-number"]
+
+documented_exceptions:
+  sharpe_ratio_precision:
+    value: "toFixed(3)"
+    justification: "Financial industry standard requires 3 decimal places for Sharpe ratio display, not configurable via design tokens"
+    usage: "Sharpe ratio metric display only"
+    mitigation: "Consider adding number formatting tokens in future design system update"
+
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 8   # percentage
+  documented_exceptions: 4   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Priority ranking system requires consistent visual hierarchy not covered by base status tokens but reusable across discovery features F001-US002, F001-US003, F001-US005"

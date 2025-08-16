@@ -1,0 +1,58 @@
+version: 2.0
+story: F002-US001
+feature: F002
+
+contributed_tokens:
+  colors:
+    semantic:
+      code_syntax_highlight:
+        value: "blue.700"
+        justification: "Syntax highlighting for generated code requires distinct color from primary blue"
+        usage_count: 3
+        elements: ["code-keywords", "code-functions", "code-variables"]
+        
+      deployment_success:
+        value: "green.700"
+        justification: "Stronger success color needed for deployment confirmation states"
+        usage_count: 2
+        elements: ["deploy-button-active", "success-status-strong"]
+
+  spacing:
+    semantic:
+      code_preview_padding:
+        value: "spacing.scale.5"
+        justification: "Specific padding for code preview containers to ensure readability"
+        usage_count: 2
+        elements: ["code-container", "syntax-block"]
+        
+      safety_check_gap:
+        value: "spacing.scale.4"
+        justification: "Consistent gap between safety check items in validation summary"
+        usage_count: 3
+        elements: ["safety-item-gap", "validation-list-gap", "check-result-spacing"]
+
+  effects:
+    transitions:
+      code_generation_progress:
+        value: "500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+        justification: "Smooth progress animation for multi-step code generation process"
+        usage_count: 2
+        elements: ["progress-step-transition", "status-change-animation"]
+
+documented_exceptions:
+  syntax_highlighter_theme:
+    value: "{ background: '#f8fafc', color: '#334155', keyword: '#1d4ed8' }"
+    justification: "Code syntax highlighter requires object configuration, not individual CSS properties"
+    usage: "Code preview component only"
+    mitigation: "Will create semantic token mapping when syntax highlighter supports CSS custom properties"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Code generation workflows require specialized visual patterns for syntax highlighting and multi-step progress indication, reusable across code generation features F002 and validation features F004"

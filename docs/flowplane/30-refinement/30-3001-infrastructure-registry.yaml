@@ -1,0 +1,177 @@
+# Infrastructure Registry for AI Trading Strategy Platform
+# Generated from comprehensive architecture analysis
+
+metadata:
+  version: "2.0"
+  generated: "2024-02-15"
+  platform: "AI Trading Strategy Platform MVP"
+  token_count: 2985
+
+shared_services:
+  - id: "SVC-001"
+    name: "market_data_pipeline"
+    type: "data_service"
+    purpose: "Aggregate and process market data from multiple sources"
+    created_by: "F001-US001"
+    used_by: 
+      - "F001-US001"
+      - "F001-US004"
+      - "F004-US001"
+      - "F005-US003"
+    technology: "Celery + Polygon.io WebSocket"
+    dependencies: ["EXT-001"]  # Polygon.io API
+    performance_targets:
+      - "Process 1000+ symbols per scan"
+      - "Sub-minute latency for intraday opportunities"
+
+  - id: "SVC-002"
+    name: "strategy_execution_engine"
+    type: "computation_service"
+    purpose: "Execute and manage trading strategies across platforms"
+    created_by: "F002-US001"
+    used_by:
+      - "F002-US001"
+      - "F002-US002"
+      - "F003-US001"
+      - "F004-US003"
+    technology: "FastAPI + Alpaca SDK + Vectorbt"
+    dependencies: 
+      - "EXT-002"  # Alpaca Trading API
+      - "SVC-001"  # Market Data Pipeline
+    performance_targets:
+      - "Support 50+ concurrent strategies"
+      - "Sub-second strategy validation"
+
+  - id: "SVC-003"
+    name: "validation_framework"
+    type: "validation_service"
+    purpose: "Rigorously test and validate trading strategies"
+    created_by: "F004-US001"
+    used_by:
+      - "F001-US002"
+      - "F002-US001"
+      - "F004-US002"
+      - "F006-US002"
+    technology: "Pytest + Pydantic + Custom Validation Rules"
+    dependencies: 
+      - "SVC-001"  # Market Data Pipeline
+      - "SVC-002"  # Strategy Execution Engine
+    performance_targets:
+      - "Complete validation within 1 hour"
+      - "Maintain 100+ validation rules"
+
+  - id: "SVC-004"
+    name: "async_task_processor"
+    type: "background_processing"
+    purpose: "Manage long-running background tasks and scheduled jobs"
+    created_by: "F001-US002"
+    used_by:
+      - "F001-US002"
+      - "F003-US002"
+      - "F004-US002"
+      - "F005-US001"
+    technology: "Celery + Redis"
+    performance_targets:
+      - "Process 10+ complex tasks simultaneously"
+      - "Sub-minute task scheduling"
+
+  - id: "SVC-005"
+    name: "real_time_notifications"
+    type: "communication_service"
+    purpose: "Provide real-time updates and alerts across system"
+    created_by: "F002-US002"
+    used_by:
+      - "F002-US002"
+      - "F003-US003"
+      - "F004-US003"
+      - "F006-US001"
+      - "F006-US003"
+    technology: "WebSocket + Server-Sent Events"
+    dependencies: 
+      - "SVC-002"  # Strategy Execution Engine
+
+external_apis:
+  - id: "EXT-001"
+    name: "polygon_market_data"
+    provider: "Polygon.io"
+    purpose: "Comprehensive market data across assets"
+    used_by: 
+      - "F001-US001"
+      - "F004-US001"
+    rate_limits: 
+      - "5 calls/minute (free tier)"
+      - "$79/month for unlimited calls"
+    authentication: "API Key"
+
+  - id: "EXT-002"
+    name: "alpaca_trading_api"
+    provider: "Alpaca"
+    purpose: "Trading execution and paper trading"
+    used_by:
+      - "F002-US003"
+      - "F003-US001"
+    features:
+      - "Commission-free trading"
+      - "Paper trading simulation"
+      - "WebSocket real-time updates"
+    authentication: "OAuth + API Key"
+
+  - id: "EXT-003"
+    name: "openai_explanation_api"
+    provider: "OpenAI"
+    purpose: "Generate natural language strategy explanations"
+    used_by: 
+      - "F005-US001"
+    rate_limits: "Depends on selected model"
+    authentication: "Bearer Token"
+
+databases:
+  - id: "DB-001"
+    name: "trading_strategies_db"
+    type: "PostgreSQL with TimescaleDB"
+    purpose: "Store strategy parameters, backtests, and performance history"
+    created_by: "F001-US003"
+    used_by:
+      - "F003-US001"
+      - "F004-US003"
+      - "F005-US003"
+    schema_features:
+      - "Time-series optimized"
+      - "5+ years historical data storage"
+    performance_targets:
+      - "Store 20GB of historical market data"
+      - "Sub-second query performance"
+
+development_infrastructure:
+  environments:
+    - type: "development"
+      requirements: 
+        - "Docker"
+        - "Node 18+"
+        - "Python 3.11+"
+    - type: "staging"
+      requirements: 
+        - "Railway.app PaaS"
+        - "PostgreSQL Add-on"
+        - "Redis Add-on"
+    - type: "production"
+      requirements:
+        - "Railway Pro Plan"
+        - "8GB RAM"
+        - "50GB PostgreSQL Storage"
+
+  ci_cd:
+    platform: "GitHub Actions"
+    deployment: "Railway Auto-Deploy"
+    testing:
+      - "80% Backend Coverage (Pytest)"
+      - "Frontend Jest Tests"
+      - "E2E Playwright Tests"
+
+monitoring:
+  - service: "Grafana"
+    purpose: "System health and performance dashboards"
+  - service: "Prometheus"
+    purpose: "Metrics collection"
+  - service: "Sentry"
+    purpose: "Error tracking and reporting"

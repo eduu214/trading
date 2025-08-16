@@ -1,0 +1,58 @@
+version: 2.0
+story: F001-US002
+feature: F001
+
+contributed_tokens:
+  colors:
+    semantic:
+      pattern_confidence_high:
+        value: "green.600"
+        justification: "High confidence pattern indicator used across pattern cards and detail views"
+        usage_count: 3
+        elements: ["confidence-badge", "pattern-score", "approval-indicator"]
+        
+      pattern_confidence_medium:
+        value: "yellow.600"
+        justification: "Medium confidence pattern indicator for cautionary patterns"
+        usage_count: 3
+        elements: ["confidence-badge", "pattern-score", "warning-indicator"]
+        
+      pattern_confidence_low:
+        value: "red.600"
+        justification: "Low confidence pattern indicator for risky patterns"
+        usage_count: 2
+        elements: ["confidence-badge", "pattern-score"]
+
+  spacing:
+    semantic:
+      pattern_card_padding:
+        value: "spacing.scale.5"
+        justification: "Consistent padding for pattern cards to accommodate confidence indicators and metrics"
+        usage_count: 4
+        elements: ["pattern-card", "confidence-section", "metrics-section", "action-section"]
+
+  typography:
+    semantic:
+      confidence_score:
+        value: "lg"
+        justification: "Prominent display for pattern confidence scores across discovery interface"
+        usage_count: 2
+        elements: ["confidence-display", "score-badge"]
+
+documented_exceptions:
+  pattern_heatmap_gradient:
+    value: "linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #22c55e 100%)"
+    justification: "Pattern confidence heatmap requires CSS gradient for visual correlation strength display"
+    usage: "Pattern correlation matrix visualization only"
+    mitigation: "Will parameterize when design system adds gradient token support"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Pattern confidence indicators are core to F001 discovery workflow and will be reused in F004 validation and F005 research features for consistent confidence scoring display"

@@ -1,0 +1,46 @@
+version: 2.0
+story: F006-US002
+feature: F006
+
+contributed_tokens:
+  spacing:
+    semantic:
+      dashboard_section_gap:
+        value: "spacing.scale.12"
+        justification: "Large gap between major dashboard sections for clear visual separation"
+        usage_count: 3
+        elements: ["summary-section", "strategies-section", "risk-panel"]
+        
+  colors:
+    semantic:
+      dashboard_accent:
+        value: "blue.500"
+        justification: "Accent color for dashboard-specific interactive elements and highlights"
+        usage_count: 4
+        elements: ["section-dividers", "active-tab", "chart-highlights", "metric-accents"]
+
+  effects:
+    semantic:
+      dashboard_panel_shadow:
+        value: "0 2px 8px -2px rgba(0, 0, 0, 0.08)"
+        justification: "Subtle shadow for dashboard panels to create depth without overwhelming"
+        usage_count: 2
+        elements: ["risk-panel", "summary-panel"]
+
+documented_exceptions:
+  real_time_indicator_pulse:
+    value: "animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+    justification: "CSS animation for real-time data indicators, no animation tokens in current design system"
+    usage: "Real-time status indicators only"
+    mitigation: "Will add animation category to design system in next version"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 8   # percentage
+  documented_exceptions: 4   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Dashboard-specific spacing and visual hierarchy patterns needed for complex multi-section layout not covered by standard card/form patterns"
