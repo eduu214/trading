@@ -1,0 +1,44 @@
+version: 2.0
+story: F002-US002
+feature: F002
+
+contributed_tokens:
+  colors:
+    semantic:
+      validation_progress:
+        value: "blue.500"
+        justification: "Distinct color for safety validation progress indicators"
+        usage_count: 3
+        elements: ["progress-bar-fill", "validation-spinner", "check-icon"]
+        
+      deployment_pending:
+        value: "yellow.200"
+        justification: "Background for deployment pending state in safety workflow"
+        usage_count: 2
+        elements: ["pending-banner", "approval-card-background"]
+
+  spacing:
+    semantic:
+      safety_check_gap:
+        value: "spacing.scale.4"
+        justification: "Consistent spacing between individual safety check items"
+        usage_count: 4
+        elements: ["check-list-items", "validation-sections", "safety-categories", "approval-buttons"]
+
+documented_exceptions:
+  validation_timeout_indicator:
+    value: "rgba(239, 68, 68, 0.1)"
+    justification: "Specific opacity for timeout warning overlay, not covered by existing semantic tokens"
+    usage: "Safety validation timeout warning background only"
+    mitigation: "Will add opacity variants to semantic error colors in next design system update"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 8   # percentage
+  documented_exceptions: 4   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Safety validation workflow requires specific visual states for validation progress and deployment approval that extend beyond standard form patterns"

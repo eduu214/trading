@@ -1,0 +1,7 @@
+Context: F001-US001
+Error Type: UNKNOWN_ERROR
+Message: Request spec not found: F001-US001
+Retryable: false
+Stack Trace:
+Error: Request spec not found: F001-US001
+    at InferenceRequestProcessor.processRequest (file:///Users/andywillis/dev/workspace/flowplane/packages/shared/dist/core/processors/InferenceRequestProcessor.js:66:31)

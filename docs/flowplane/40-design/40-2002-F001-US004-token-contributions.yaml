@@ -1,0 +1,64 @@
+version: 2.0
+story: F001-US004
+feature: F001
+
+contributed_tokens:
+  colors:
+    semantic:
+      correlation_low:
+        value: "green.600"
+        justification: "Visual indicator for low correlation values (<0.3) in correlation matrix and strategy cards"
+        usage_count: 4
+        elements: ["correlation-cell", "correlation-badge", "matrix-legend", "threshold-indicator"]
+        
+      correlation_medium:
+        value: "yellow.600"
+        justification: "Visual indicator for medium correlation values (0.3-0.5) requiring user attention"
+        usage_count: 3
+        elements: ["correlation-cell", "correlation-badge", "threshold-warning"]
+        
+      correlation_high:
+        value: "red.600"
+        justification: "Visual indicator for high correlation values (>0.5) that should be avoided"
+        usage_count: 3
+        elements: ["correlation-cell", "correlation-badge", "rejection-indicator"]
+
+  spacing:
+    semantic:
+      correlation_matrix_cell:
+        value: "spacing.scale.8"
+        justification: "Consistent cell size for correlation matrix ensuring readability and touch targets"
+        usage_count: 2
+        elements: ["matrix-cell", "matrix-header"]
+        
+      strategy_selection_gap:
+        value: "spacing.scale.5"
+        justification: "Optimal spacing between selectable strategy cards for visual separation"
+        usage_count: 2
+        elements: ["strategy-grid", "selection-container"]
+
+  typography:
+    semantic:
+      correlation_value:
+        value: "sm"
+        justification: "Specific typography for correlation coefficient display with tabular formatting"
+        usage_count: 3
+        elements: ["correlation-cell", "correlation-tooltip", "summary-metrics"]
+
+documented_exceptions:
+  correlation_heatmap_gradient:
+    value: "linear-gradient(90deg, #22c55e 0%, #fbbf24 50%, #ef4444 100%)"
+    justification: "Correlation matrix requires continuous color gradient for heatmap visualization, not supported by discrete color tokens"
+    usage: "Correlation matrix background gradient only"
+    mitigation: "Will evaluate gradient token system for data visualization in design system v2.0"
+    
+token_usage_summary:
+  existing_tokens_used: 88
+  new_patterns_proposed: 10
+  documented_exceptions: 2
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Correlation analysis requires specific color coding system for financial risk visualization that extends beyond basic semantic colors. These patterns will be reusable across portfolio management features F003 and validation framework F004."

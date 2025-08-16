@@ -1,0 +1,50 @@
+version: 2.0
+story: F004-US001
+feature: F004
+
+contributed_tokens:
+  colors:
+    semantic:
+      validation_pass_light:
+        value: "green.50"
+        justification: "Light background for validation success indicators in preview panels"
+        usage_count: 3
+        elements: ["validation-status-card", "rule-preview-success", "confirmation-banner"]
+        
+      validation_warning_border:
+        value: "yellow.400"
+        justification: "Border color for validation warnings that need attention but aren't errors"
+        usage_count: 2
+        elements: ["warning-validation-card", "impact-alert-border"]
+
+  spacing:
+    semantic:
+      validation_panel_gap:
+        value: "spacing.scale.5"
+        justification: "Consistent spacing between validation preview elements"
+        usage_count: 4
+        elements: ["preview-card-stack", "metric-group-spacing", "requirement-list-gap", "confirmation-section-gap"]
+        
+      rule_configuration_section:
+        value: "spacing.scale.8"
+        justification: "Larger spacing between major configuration sections for better visual hierarchy"
+        usage_count: 3
+        elements: ["asset-class-sections", "parameter-groups", "form-major-divisions"]
+
+documented_exceptions:
+  validation_timeline_gradient:
+    value: "linear-gradient(90deg, #22c55e 0%, #fbbf24 50%, #ef4444 100%)"
+    justification: "Progress bar requires CSS gradient for validation timeline visualization showing pass/warning/fail states"
+    usage: "Validation timeline progress bar background only"
+    mitigation: "Will parameterize when design system adds gradient token support"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Validation-specific visual patterns for success/warning states and specialized spacing for configuration interfaces, reusable across validation features F004-US002 and F004-US003"

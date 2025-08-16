@@ -1,0 +1,58 @@
+version: 2.0
+story: F006-US003
+feature: F006
+
+contributed_tokens:
+  colors:
+    semantic:
+      dashboard_panel_border:
+        value: "gray.200"
+        justification: "Subtle border for dashboard panels to separate monitoring sections without visual noise"
+        usage_count: 4
+        elements: ["system-health-panel", "strategy-panel", "alert-panel", "performance-panel"]
+        
+      real_time_pulse:
+        value: "blue.400"
+        justification: "Animated pulse indicator for real-time data updates across monitoring interface"
+        usage_count: 3
+        elements: ["live-indicator", "chart-update-dot", "status-pulse"]
+
+  spacing:
+    semantic:
+      dashboard_section_gap:
+        value: "spacing.scale.8"
+        justification: "Consistent spacing between major dashboard sections for clear visual hierarchy"
+        usage_count: 3
+        elements: ["panel-separator", "section-divider", "widget-gap"]
+        
+      monitoring_widget_padding:
+        value: "spacing.scale.5"
+        justification: "Compact padding for monitoring widgets to maximize information density"
+        usage_count: 5
+        elements: ["status-widget", "metric-widget", "alert-item", "connection-status", "performance-summary"]
+
+  effects:
+    semantic:
+      real_time_glow:
+        value: "0 0 8px rgba(59, 130, 246, 0.3)"
+        justification: "Subtle glow effect for active real-time elements to indicate live data"
+        usage_count: 2
+        elements: ["live-chart-border", "active-strategy-indicator"]
+
+documented_exceptions:
+  websocket_connection_indicator:
+    value: "radial-gradient(circle, #22c55e 0%, #16a34a 70%)"
+    justification: "WebSocket connection status requires gradient for visual distinction from other status indicators, no gradient tokens in current system"
+    usage: "Connection status indicator only"
+    mitigation: "Will standardize when gradient token category added to design system"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Real-time monitoring interfaces require specialized visual patterns for live data indication and dashboard organization not covered by standard component tokens"

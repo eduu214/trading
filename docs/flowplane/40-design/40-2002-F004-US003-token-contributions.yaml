@@ -1,0 +1,52 @@
+version: 2.0
+story: F004-US003
+feature: F004
+
+contributed_tokens:
+  colors:
+    semantic:
+      performance_deviation_critical:
+        value: "red.700"
+        justification: "Stronger red for critical performance deviations that require immediate attention"
+        usage_count: 3
+        elements: ["deviation-indicator", "critical-alert-border", "variance-highlight"]
+        
+      monitoring_status_active:
+        value: "green.500"
+        justification: "Distinct color for active monitoring status indicators"
+        usage_count: 2
+        elements: ["monitoring-badge", "status-indicator"]
+
+  spacing:
+    semantic:
+      performance_metric_gap:
+        value: "spacing.scale.3"
+        justification: "Tight spacing between related performance metrics in monitoring cards"
+        usage_count: 4
+        elements: ["metric-group", "performance-row", "variance-display", "status-cluster"]
+
+  effects:
+    semantic:
+      alert_pulse:
+        value: "animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+        justification: "Subtle pulse animation for critical performance alerts to draw attention"
+        usage_count: 2
+        elements: ["critical-alert", "deviation-indicator"]
+
+documented_exceptions:
+  variance_confidence_bands:
+    value: "stroke-dasharray: 5,5"
+    justification: "SVG stroke pattern for confidence bands in performance charts, no design token support for SVG stroke patterns"
+    usage: "Performance chart variance visualization only"
+    mitigation: "Will add SVG pattern tokens when chart visualization system is expanded"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 9   # percentage
+  documented_exceptions: 3   # percentage
+  
+  existing_breakdown:
+    p25_original: 72
+    p40_10_contributions: 16
+    
+pattern_rationale: "Performance monitoring requires specialized visual indicators for deviation severity and monitoring status that extend beyond standard alert patterns"

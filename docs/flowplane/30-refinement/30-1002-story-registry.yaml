@@ -1,0 +1,139 @@
+stories:
+  # F001: AI Strategy Discovery Engine
+  F001-US001:
+    title: Multi-Market Inefficiency Scanner
+    feature: F001
+    description: Scan US equities, futures, and FX simultaneously to discover uncorrelated opportunities across asset classes
+    dependencies: [market_data_pipeline, async_task_processor]
+    
+  F001-US002:
+    title: Strategy Complexity Optimizer
+    feature: F001
+    description: Automatically determine optimal strategy sophistication level for best risk-adjusted returns
+    dependencies: [validation_framework, async_task_processor]
+    
+  F001-US003:
+    title: Diversification-Focused Discovery
+    feature: F001
+    description: Prioritize finding uncorrelated strategies to maintain portfolio robustness across market conditions
+    dependencies: [strategy_execution_engine, validation_framework]
+    
+  F001-US004:
+    title: Cross-Asset Correlation Engine
+    feature: F001
+    description: Identify relationships between different asset classes within available instruments
+    dependencies: [market_data_pipeline, real_time_notifications]
+    
+  F001-US005:
+    title: Pattern Recognition System
+    feature: F001
+    description: Detect market patterns and inefficiencies using institutional-grade analysis techniques
+    dependencies: [market_data_pipeline, async_task_processor]
+
+  # F002: Code Generation & Execution Bridge
+  F002-US001:
+    title: Multi-Platform Code Generator
+    feature: F002
+    description: Convert strategies to platform-specific code without manual translation errors
+    dependencies: [strategy_execution_engine, validation_framework]
+    
+  F002-US002:
+    title: Execution Safeguard System
+    feature: F002
+    description: Embed comprehensive safety checks to prevent catastrophic losses from execution errors
+    dependencies: [strategy_execution_engine, real_time_notifications]
+    
+  F002-US003:
+    title: Backtesting-to-Live Bridge
+    feature: F002
+    description: Ensure live performance matches backtested results through careful transition management
+    dependencies: [strategy_execution_engine, validation_framework, real_time_notifications]
+
+  # F003: Strategy Portfolio Management
+  F003-US001:
+    title: Correlation-Based Portfolio Constructor
+    feature: F003
+    description: Optimally allocate capital based on correlation dynamics for maximum risk-adjusted returns
+    dependencies: [strategy_execution_engine, real_time_notifications]
+    
+  F003-US002:
+    title: Strategy Lifecycle Manager
+    feature: F003
+    description: Automated strategy rotation based on performance to maintain fresh portfolio of working strategies
+    dependencies: [strategy_execution_engine, async_task_processor]
+    
+  F003-US003:
+    title: Risk Management Dashboard
+    feature: F003
+    description: Monitor and control portfolio risk across all active strategies with real-time alerts
+    dependencies: [strategy_execution_engine, real_time_notifications]
+
+  # F004: Intelligent Validation Framework
+  F004-US001:
+    title: Asset-Specific Validation Rules
+    feature: F004
+    description: Apply market-appropriate validation for each asset class's unique characteristics
+    dependencies: [validation_framework, market_data_pipeline]
+    
+  F004-US002:
+    title: Complexity-Adjusted Testing
+    feature: F004
+    description: Apply more rigorous testing for complex strategies to prevent overfitting
+    dependencies: [validation_framework, async_task_processor]
+    
+  F004-US003:
+    title: Performance Verification System
+    feature: F004
+    description: Continuously monitor strategy performance against validation expectations
+    dependencies: [validation_framework, strategy_execution_engine, real_time_notifications]
+
+  # F005: Strategy Insight & Research Integration
+  F005-US001:
+    title: Strategy Explanation Engine
+    feature: F005
+    description: Generate plain-English explanations for why each strategy works and its risk factors
+    dependencies: [async_task_processor]
+    
+  F005-US002:
+    title: Market Research Aggregator
+    feature: F005
+    description: Automatically gather insights from reputable sources to provide strategy context
+    dependencies: [async_task_processor, real_time_notifications]
+    
+  F005-US003:
+    title: Performance Context Provider
+    feature: F005
+    description: Show strategy performance compared to simple benchmarks with clear explanations
+    dependencies: [strategy_execution_engine, market_data_pipeline]
+
+  # F006: Web-Based Command Center
+  F006-US001:
+    title: Strategy Discovery Dashboard
+    feature: F006
+    description: Clean overview of new opportunities with clear explanations for quick decision-making
+    dependencies: [authentication_service, real_time_notifications, strategy_execution_engine]
+    
+  F006-US002:
+    title: Configuration Studio
+    feature: F006
+    description: Easily configure system parameters through clean UI without editing config files
+    dependencies: [authentication_service, validation_framework]
+    
+  F006-US003:
+    title: Operational Monitoring Dashboard
+    feature: F006
+    description: Monitor system health and performance metrics to ensure smooth operations
+    dependencies: [authentication_service, real_time_notifications, performance_monitoring]
+
+story_dependencies:
+  prerequisites:
+    - F006-US002: [F004-US001] # Configuration needs validation rules
+    - F003-US001: [F001-US004] # Portfolio construction needs correlation engine
+    - F002-US003: [F004-US002] # Live bridge needs validation framework
+    - F005-US003: [F003-US001] # Performance context needs portfolio management
+  
+  parallel_development:
+    - group_1: [F001-US001, F004-US001, F006-US002] # Core data and validation
+    - group_2: [F001-US002, F001-US005, F005-US001] # Strategy discovery and explanation
+    - group_3: [F002-US001, F002-US002, F006-US001] # Code generation and UI
+    - group_4: [F003-US002, F004-US003, F006-US003] # Lifecycle and monitoring

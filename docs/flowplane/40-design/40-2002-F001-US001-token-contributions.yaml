@@ -1,0 +1,38 @@
+version: 2.0
+story: F001-US001
+feature: F001
+
+contributed_tokens:
+  spacing:
+    semantic:
+      scan_progress_gap:
+        value: "spacing.scale.5"
+        justification: "Consistent spacing between progress indicators for different asset classes in scan monitoring"
+        usage_count: 3
+        elements: ["progress-section", "asset-progress-group", "scan-status-row"]
+        
+  colors:
+    semantic:
+      scan_active:
+        value: "blue.500"
+        justification: "Active scanning state indicator distinct from primary blue, used across progress bars and status indicators"
+        usage_count: 4
+        elements: ["progress-fill", "scan-status-dot", "active-asset-indicator", "scan-button-active"]
+
+documented_exceptions:
+  asset_class_icons:
+    value: "url('/icons/equity.svg'), url('/icons/fx.svg'), url('/icons/futures.svg')"
+    justification: "Asset class icons require SVG URLs for visual distinction, no icon token system in current design system"
+    usage: "Asset class selection dropdown and progress indicators only"
+    mitigation: "Will migrate to icon token system when design system adds icon category"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 8   # percentage
+  documented_exceptions: 4   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Scan progress patterns and active state indicators are reusable across other discovery workflows in F001 and validation processes in F004"

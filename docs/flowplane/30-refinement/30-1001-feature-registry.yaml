@@ -1,0 +1,52 @@
+features:
+  F001:
+    name: AI Strategy Discovery Engine
+    description: Core intelligence system that continuously analyzes market inefficiencies across US equities, available futures, and FX markets to discover uncorrelated trading opportunities
+    priority: P0
+    stories: [F001-US001, F001-US002, F001-US003, F001-US004, F001-US005]
+    
+  F002:
+    name: Code Generation & Execution Bridge
+    description: Transforms validated strategies into executable code for multiple trading platforms with comprehensive safety checks
+    priority: P0
+    stories: [F002-US001, F002-US002, F002-US003]
+    
+  F003:
+    name: Strategy Portfolio Management
+    description: Manages full strategy lifecycle from discovery through retirement with focus on correlation-based diversification
+    priority: P0
+    stories: [F003-US001, F003-US002, F003-US003]
+    
+  F004:
+    name: Intelligent Validation Framework
+    description: Ensures only robust strategies reach production through asset-specific validation rules and complexity-adjusted testing
+    priority: P0
+    stories: [F004-US001, F004-US002, F004-US003]
+    
+  F005:
+    name: Strategy Insight & Research Integration
+    description: Provides clear explanations and market context for discovered strategies without assuming trading expertise
+    priority: P1
+    stories: [F005-US001, F005-US002, F005-US003]
+    
+  F006:
+    name: Web-Based Command Center
+    description: Clean, intuitive interface for strategy discovery review and portfolio management with real-time monitoring
+    priority: P0
+    stories: [F006-US001, F006-US002, F006-US003]
+
+infrastructure_dependencies:
+  shared_services:
+    - authentication_service
+    - market_data_pipeline
+    - async_task_processor
+    - real_time_notifications
+    - strategy_execution_engine
+    - validation_framework
+  
+  cross_cutting_concerns:
+    - multi_asset_data_management
+    - timezone_synchronization
+    - error_handling_system
+    - performance_monitoring
+    - security_layer

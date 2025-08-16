@@ -1,0 +1,52 @@
+version: 2.0
+story: F002-US003
+feature: F002
+
+contributed_tokens:
+  colors:
+    semantic:
+      deployment_warning:
+        value: "yellow.200"
+        justification: "Specific warning background for deployment safety checks and risk warnings"
+        usage_count: 3
+        elements: ["safety-checklist", "deployment-modal", "risk-warning-banner"]
+        
+      live_trading_active:
+        value: "green.700"
+        justification: "Distinct color for live trading status indicators, stronger than standard success"
+        usage_count: 2
+        elements: ["live-status-badge", "active-trading-indicator"]
+
+  spacing:
+    semantic:
+      deployment_checklist_gap:
+        value: "spacing.scale.3"
+        justification: "Tight spacing for safety checklist items to maintain visual grouping"
+        usage_count: 2
+        elements: ["checklist-items", "safety-requirements"]
+
+  effects:
+    semantic:
+      realtime_pulse:
+        value: "0 0 0 4px rgba(34, 197, 94, 0.3)"
+        justification: "Subtle pulse effect for live trading indicators to show active status"
+        usage_count: 2
+        elements: ["live-indicator", "realtime-chart-border"]
+
+documented_exceptions:
+  performance_variance_gradient:
+    value: "linear-gradient(90deg, #22c55e 0%, #fbbf24 50%, #ef4444 100%)"
+    justification: "Performance comparison requires gradient visualization not supported by current token system"
+    usage: "Performance variance indicator background only"
+    mitigation: "Will create gradient token category when design system supports complex gradients"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 8   # percentage
+  documented_exceptions: 4   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Deployment and live trading patterns specific to execution bridge workflows, reusable across F002 stories and similar deployment features"

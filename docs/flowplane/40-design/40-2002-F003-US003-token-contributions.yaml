@@ -1,0 +1,58 @@
+version: 2.0
+story: F003-US003
+feature: F003
+
+contributed_tokens:
+  colors:
+    semantic:
+      risk_critical_bg:
+        value: "red.50"
+        justification: "Critical risk alert background for portfolio-wide risk warnings"
+        usage_count: 3
+        elements: ["risk-alert-banner", "critical-threshold-card", "emergency-stop-modal"]
+        
+      risk_warning_border:
+        value: "yellow.400"
+        justification: "Warning border color for risk threshold indicators and alerts"
+        usage_count: 4
+        elements: ["risk-meter-warning", "var-threshold-card", "drawdown-alert", "correlation-warning"]
+
+  spacing:
+    semantic:
+      dashboard_section_gap:
+        value: "spacing.scale.8"
+        justification: "Consistent spacing between major dashboard sections for visual hierarchy"
+        usage_count: 5
+        elements: ["portfolio-overview", "risk-metrics", "strategy-performance", "sidebar-sections", "modal-sections"]
+        
+      risk_metric_spacing:
+        value: "spacing.scale.4"
+        justification: "Tight spacing for related risk metrics to show relationships"
+        usage_count: 3
+        elements: ["var-metrics-group", "drawdown-indicators", "correlation-matrix"]
+
+  effects:
+    semantic:
+      risk_pulse_animation:
+        value: "2s ease-in-out infinite alternate"
+        justification: "Subtle pulsing animation for critical risk alerts to draw attention"
+        usage_count: 2
+        elements: ["critical-risk-indicator", "emergency-alert-badge"]
+
+documented_exceptions:
+  real_time_websocket_indicator:
+    value: "radial-gradient(circle, #22c55e 0%, #16a34a 70%)"
+    justification: "Real-time connection indicator requires gradient for live status visualization, no design token support for radial gradients"
+    usage: "WebSocket connection status indicator only"
+    mitigation: "Will parameterize when design system adds gradient token support"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Risk management dashboard requires specialized visual patterns for critical alerts and real-time status indicators not covered by base design system but reusable across risk monitoring features"

@@ -1,0 +1,52 @@
+version: 2.0
+story: F005-US002
+feature: F005
+
+contributed_tokens:
+  colors:
+    semantic:
+      research_relevance_high:
+        value: "green.100"
+        justification: "Background for high-relevance research indicators, distinct from general success states"
+        usage_count: 3
+        elements: ["relevance-badge", "filter-indicator", "card-accent"]
+        
+      research_relevance_medium:
+        value: "yellow.100"
+        justification: "Background for medium-relevance research indicators, softer than warning states"
+        usage_count: 3
+        elements: ["relevance-badge", "filter-indicator", "card-accent"]
+        
+  spacing:
+    semantic:
+      research_card_stack:
+        value: "spacing.scale.5"
+        justification: "Consistent spacing between stacked research cards for optimal scanning"
+        usage_count: 2
+        elements: ["card-container", "content-list"]
+        
+  typography:
+    semantic:
+      research_headline:
+        value: "lg"
+        justification: "Specific typography for research article headlines, between h5 and h4"
+        usage_count: 4
+        elements: ["article-title", "card-headline", "modal-title", "featured-content"]
+
+documented_exceptions:
+  external_source_favicon:
+    value: "url(https://api.faviconkit.com/[domain]/16)"
+    justification: "External favicon service for research source identification, no internal equivalent"
+    usage: "Research source indicators only"
+    mitigation: "Will implement internal icon system when design resources available"
+    
+token_usage_summary:
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
+  
+  existing_breakdown:
+    p25_original: 75
+    p40_10_contributions: 13
+    
+pattern_rationale: "Research content requires specialized relevance indicators and content hierarchy not covered by base design system but reusable across research features F005-US001, F005-US003"
