@@ -5,6 +5,7 @@ import ScannerConfig from '@/components/scanner/ScannerConfig';
 import ScanProgress from '@/components/scanner/ScanProgress';
 import OpportunityTable from '@/components/scanner/OpportunityTable';
 import OpportunityDetail from '@/components/scanner/OpportunityDetail';
+import ScanHistory from '@/components/scanner/ScanHistory';
 import { Opportunity, ScanConfig } from '@/types/scanner';
 
 export default function ScannerPage() {
@@ -148,6 +149,9 @@ export default function ScannerPage() {
                 </p>
               </div>
             )}
+
+            {/* Scan History */}
+            <ScanHistory />
           </div>
         </div>
 

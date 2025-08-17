@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ScanConfig } from '@/types/scanner';
+import AdvancedConfig from './AdvancedConfig';
 
 interface ScannerConfigProps {
   onStartScan: (config: ScanConfig) => void;
@@ -138,6 +139,9 @@ export default function ScannerConfig({ onStartScan, isScanning }: ScannerConfig
             <option value={100}>100</option>
           </select>
         </div>
+
+        {/* Advanced Configuration */}
+        <AdvancedConfig config={config} onChange={setConfig} />
 
         {/* Submit Button */}
         <button
