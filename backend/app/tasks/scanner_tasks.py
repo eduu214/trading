@@ -3,7 +3,7 @@ from typing import List, Dict, Optional
 import logging
 import asyncio
 from datetime import datetime, timedelta
-from app.services.polygon_service import polygon_service
+from app.services.polygon_service_enhanced import polygon_service_enhanced
 from app.services.inefficiency_detector import inefficiency_detector
 from app.models.opportunity import Opportunity
 from app.models.scan_result import ScanResult
@@ -30,20 +30,15 @@ def scan_all_markets(
     
     results = {}
     
+    # Call functions directly instead of using apply_async().get() within a task
     if config.get("equities", {}).get("enabled", True):
-        results["equities"] = scan_equities.apply_async(
-            kwargs={"config": config.get("equities", {})}
-        ).get(timeout=60)
+        results["equities"] = scan_equities(config.get("equities", {}))
     
     if config.get("futures", {}).get("enabled", True):
-        results["futures"] = scan_futures.apply_async(
-            kwargs={"config": config.get("futures", {})}
-        ).get(timeout=60)
+        results["futures"] = scan_futures(config.get("futures", {}))
     
     if config.get("fx", {}).get("enabled", True):
-        results["fx"] = scan_forex.apply_async(
-            kwargs={"config": config.get("fx", {})}
-        ).get(timeout=60)
+        results["fx"] = scan_forex(config.get("fx", {}))
     
     # Store scan results in database
     store_scan_results(results)
@@ -56,8 +51,8 @@ def scan_all_markets(
 
 @shared_task
 def scan_equities(config: Optional[Dict] = None) -> List[Dict]:
-    """Scan US equity markets for inefficiencies"""
-    logger.info("Scanning US equities...")
+    """Scan US equity markets for inefficiencies - enhanced version with free tier support"""
+    logger.info("Scanning US equities with enhanced service...")
     
     config = config or {}
     min_volume = config.get("min_volume", 1000000)
@@ -68,14 +63,9 @@ def scan_equities(config: Optional[Dict] = None) -> List[Dict]:
     asyncio.set_event_loop(loop)
     
     try:
-        # Get most active stocks
-        tickers = loop.run_until_complete(
-            polygon_service.get_tickers(market="stocks", active=True, limit=500)
-        )
-        
-        # Get today's data and scan for opportunities
+        # Use enhanced service with rate limiting and free tier support
         opportunities = loop.run_until_complete(
-            polygon_service.scan_for_opportunities(
+            polygon_service_enhanced.scan_for_opportunities_limited(
                 asset_classes=["stocks"],
                 min_volume=min_volume,
                 min_price_change=min_price_change
@@ -87,7 +77,7 @@ def scan_equities(config: Optional[Dict] = None) -> List[Dict]:
         for opp in opportunities[:20]:  # Limit to top 20
             # Get last quote for bid/ask spread
             quote = loop.run_until_complete(
-                polygon_service.get_last_quote(opp["ticker"])
+                polygon_service_enhanced.get_last_quote(opp["ticker"])
             )
             
             if quote:
@@ -100,7 +90,7 @@ def scan_equities(config: Optional[Dict] = None) -> List[Dict]:
             start_date = end_date - timedelta(days=30)
             
             historical_data = loop.run_until_complete(
-                polygon_service.get_aggregates(
+                polygon_service_enhanced.get_aggregates(
                     ticker=opp["ticker"],
                     multiplier=1,
                     timespan="day",

@@ -9,19 +9,30 @@ export interface ScanConfig {
 
 export interface Opportunity {
   id: string;
-  ticker: string;
-  assetClass: string;
-  opportunityType: string;
-  signalStrength: number;
-  entryPrice: number;
-  priceChange?: number;
-  volume?: number;
-  inefficiencyScore?: number;
-  discoveredAt: string;
-  metadata?: {
+  symbol: string;  // Changed from ticker
+  asset_class: string;  // Changed from assetClass
+  strategy_type: string;  // Changed from opportunityType
+  opportunity_score: number;  // Changed from signalStrength
+  expected_return: number;
+  risk_level: string;
+  discovered_at: string;  // Changed from discoveredAt
+  entry_conditions?: {
+    price?: number;
+    volume?: number;
+  };
+  technical_indicators?: {
+    ticker?: string;
+    volume?: number;
+    price_change?: number;
+    open?: number;
+    close?: number;
+    high?: number;
+    low?: number;
+    opportunity_type?: string;
     spread?: number;
     inefficiencies?: any[];
-    correlation?: number;
+    inefficiency_score?: number;
+    [key: string]: any;
   };
 }
 

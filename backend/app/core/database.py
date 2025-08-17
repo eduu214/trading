@@ -57,6 +57,16 @@ async def get_db():
             await session.close()
 
 
+def get_db_sync():
+    """Get synchronous database session for Celery tasks"""
+    session = SessionLocal()
+    try:
+        return session
+    except Exception:
+        session.close()
+        raise
+
+
 async def init_db():
     try:
         async with engine.begin() as conn:

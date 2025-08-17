@@ -8,10 +8,10 @@ interface OpportunityTableProps {
   onSelectOpportunity: (opportunity: Opportunity) => void;
 }
 
-type SortKey = 'ticker' | 'signalStrength' | 'priceChange' | 'volume' | 'assetClass';
+type SortKey = 'symbol' | 'opportunity_score' | 'expected_return' | 'volume' | 'asset_class';
 
 export default function OpportunityTable({ opportunities, onSelectOpportunity }: OpportunityTableProps) {
-  const [sortKey, setSortKey] = useState<SortKey>('signalStrength');
+  const [sortKey, setSortKey] = useState<SortKey>('opportunity_score');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const handleSort = (key: SortKey) => {
@@ -25,17 +25,17 @@ export default function OpportunityTable({ opportunities, onSelectOpportunity }:
 
   const sortedOpportunities = useMemo(() => {
     return [...opportunities].sort((a, b) => {
-      let aVal: any = a[sortKey];
-      let bVal: any = b[sortKey];
+      let aVal: any = a[sortKey as keyof Opportunity];
+      let bVal: any = b[sortKey as keyof Opportunity];
 
-      if (sortKey === 'priceChange') {
-        aVal = a.priceChange || 0;
-        bVal = b.priceChange || 0;
+      if (sortKey === 'expected_return') {
+        aVal = a.expected_return || 0;
+        bVal = b.expected_return || 0;
       }
 
       if (sortKey === 'volume') {
-        aVal = a.volume || 0;
-        bVal = b.volume || 0;
+        aVal = a.entry_conditions?.volume || 0;
+        bVal = b.entry_conditions?.volume || 0;
       }
 
       if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
@@ -84,23 +84,23 @@ export default function OpportunityTable({ opportunities, onSelectOpportunity }:
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
               <th 
-                onClick={() => handleSort('ticker')}
+                onClick={() => handleSort('symbol')}
                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 w-24"
               >
                 <div className="flex items-center">
-                  Ticker
-                  {sortKey === 'ticker' && (
+                  Symbol
+                  {sortKey === 'symbol' && (
                     <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </div>
               </th>
               <th 
-                onClick={() => handleSort('assetClass')}
+                onClick={() => handleSort('asset_class')}
                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 w-32"
               >
                 <div className="flex items-center">
                   Asset Class
-                  {sortKey === 'assetClass' && (
+                  {sortKey === 'asset_class' && (
                     <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </div>
@@ -109,23 +109,23 @@ export default function OpportunityTable({ opportunities, onSelectOpportunity }:
                 Type
               </th>
               <th 
-                onClick={() => handleSort('signalStrength')}
+                onClick={() => handleSort('opportunity_score')}
                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 w-40"
               >
                 <div className="flex items-center">
-                  Signal
-                  {sortKey === 'signalStrength' && (
+                  Score
+                  {sortKey === 'opportunity_score' && (
                     <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </div>
               </th>
               <th 
-                onClick={() => handleSort('priceChange')}
+                onClick={() => handleSort('expected_return')}
                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 w-28"
               >
                 <div className="flex items-center">
-                  Change %
-                  {sortKey === 'priceChange' && (
+                  Return %
+                  {sortKey === 'expected_return' && (
                     <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </div>
@@ -158,17 +158,17 @@ export default function OpportunityTable({ opportunities, onSelectOpportunity }:
               >
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {opportunity.ticker}
+                    {opportunity.symbol}
                   </div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAssetClassBadge(opportunity.assetClass)}`}>
-                    {opportunity.assetClass}
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAssetClassBadge(opportunity.asset_class)}`}>
+                    {opportunity.asset_class}
                   </span>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getOpportunityTypeBadge(opportunity.opportunityType)}`}>
-                    {opportunity.opportunityType}
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getOpportunityTypeBadge(opportunity.strategy_type)}`}>
+                    {opportunity.strategy_type}
                   </span>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
@@ -176,29 +176,29 @@ export default function OpportunityTable({ opportunities, onSelectOpportunity }:
                     <div className="mr-2 w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div 
                         className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${opportunity.signalStrength}%` }}
+                        style={{ width: `${Math.min(opportunity.opportunity_score, 100)}%` }}
                       />
                     </div>
-                    <span className={`text-sm font-medium ${getSignalStrengthColor(opportunity.signalStrength)}`}>
-                      {opportunity.signalStrength.toFixed(1)}%
+                    <span className={`text-sm font-medium ${getSignalStrengthColor(opportunity.opportunity_score)}`}>
+                      {opportunity.opportunity_score.toFixed(1)}%
                     </span>
                   </div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <span className={`text-sm font-medium ${
-                    (opportunity.priceChange || 0) >= 0 
+                    (opportunity.expected_return || 0) >= 0 
                       ? 'text-green-600 dark:text-green-400' 
                       : 'text-red-600 dark:text-red-400'
                   }`}>
-                    {(opportunity.priceChange || 0) >= 0 ? '+' : ''}
-                    {((opportunity.priceChange || 0) * 100).toFixed(2)}%
+                    {(opportunity.expected_return || 0) >= 0 ? '+' : ''}
+                    {(opportunity.expected_return || 0).toFixed(2)}%
                   </span>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  {opportunity.volume?.toLocaleString() || '-'}
+                  {opportunity.entry_conditions?.volume?.toLocaleString() || '-'}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  ${opportunity.entryPrice.toFixed(2)}
+                  ${(opportunity.entry_conditions?.price || 0).toFixed(2)}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                   <button className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">

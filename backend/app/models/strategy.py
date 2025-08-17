@@ -63,5 +63,9 @@ class Strategy(Base):
     is_active = Column(Boolean, default=False)
     auto_trade = Column(Boolean, default=False)
     
+    # Relationships (F001-US002)
+    constraints = relationship("ComplexityConstraint", back_populates="strategy", cascade="all, delete-orphan")
+    multi_timeframe_analyses = relationship("MultiTimeframeAnalysis", back_populates="strategy", cascade="all, delete-orphan")
+    
     def __repr__(self):
         return f"<Strategy {self.name} - {self.status}>"

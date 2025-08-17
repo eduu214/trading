@@ -80,20 +80,23 @@ export default function ScannerPage() {
       const response = await fetch('http://localhost:8000/api/v1/scanner/test-mock');
       const data = await response.json();
       
-      // Transform mock data to match Opportunity type
+      // Transform mock data to match new Opportunity type
       const mockOpportunities: Opportunity[] = data.opportunities.map((opp: any) => ({
         id: Math.random().toString(36).substr(2, 9),
-        ticker: opp.ticker,
-        assetClass: opp.asset_class,
-        opportunityType: opp.opportunity_type,
-        signalStrength: opp.signal_strength,
-        entryPrice: opp.entry_price,
-        priceChange: opp.price_change,
-        volume: opp.volume,
-        inefficiencyScore: opp.inefficiency_score,
-        discoveredAt: opp.discovered_at,
-        metadata: {
+        symbol: opp.ticker,
+        asset_class: opp.asset_class,
+        strategy_type: opp.opportunity_type,
+        opportunity_score: opp.signal_strength,
+        expected_return: opp.price_change ? opp.price_change * 100 : 0,
+        risk_level: 'medium',
+        discovered_at: opp.discovered_at,
+        entry_conditions: {
+          price: opp.entry_price,
+          volume: opp.volume,
+        },
+        technical_indicators: {
           spread: opp.spread,
+          inefficiency_score: opp.inefficiency_score,
         }
       }));
       

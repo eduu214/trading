@@ -13,6 +13,13 @@ from app.services.complexity_optimization_service import ComplexityOptimizationS
 from app.models.strategy import Strategy
 from app.core.dependencies import get_current_user
 from app.tasks.celery_app import celery_app
+from app.tasks.complexity_tasks import optimize_complexity_with_timeout
+from app.services.complexity_validation import (
+    DataSufficiencyValidator,
+    ConstraintValidator,
+    OptimizationErrorHandler,
+    ErrorCode
+)
 
 logger = logging.getLogger(__name__)
 
@@ -90,15 +97,15 @@ async def optimize_complexity(
         if not strategy:
             raise HTTPException(status_code=404, detail="Strategy not found")
         
-        # Start async optimization task
-        task = celery_app.send_task(
-            'optimize_strategy_complexity',
+        # Start async optimization task with error handling
+        task = optimize_complexity_with_timeout.apply_async(
             args=[
                 request.strategy_id,
                 request.timeframe,
                 request.lookback_days,
                 request.risk_preference
-            ]
+            ],
+            kwargs={"constraints": None}
         )
         
         # Estimate completion time based on lookback period

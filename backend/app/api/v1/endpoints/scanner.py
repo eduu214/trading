@@ -3,10 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import List, Optional, Dict
-from pydantic import BaseModel
+from uuid import UUID
+from pydantic import BaseModel, field_validator
 from datetime import datetime, timedelta
 from app.core.database import get_db, SessionLocal
-from app.tasks.scanner_tasks import scan_all_markets
+from app.tasks.scanner_tasks_enhanced import scan_all_markets
 from app.tasks.analysis_tasks import find_uncorrelated_opportunities
 from app.models.opportunity import Opportunity
 from app.models.scan_result import ScanResult
@@ -25,17 +26,22 @@ class ScanRequest(BaseModel):
 
 
 class OpportunityResponse(BaseModel):
-    id: int
+    id: str  # UUID as string
     asset_class: str
-    ticker: str
-    opportunity_type: str
-    signal_strength: float
-    entry_price: float
+    symbol: str  # Changed from ticker
+    strategy_type: str  # Changed from opportunity_type
+    opportunity_score: float  # Changed from signal_strength
+    expected_return: float
+    risk_level: str
     discovered_at: datetime
-    metadata: Optional[Dict] = None
+    entry_conditions: Optional[Dict] = None
+    technical_indicators: Optional[Dict] = None
 
     class Config:
         orm_mode = True
+        json_encoders = {
+            UUID: str  # Convert UUID to string for JSON
+        }
 
 
 class ScanStatusResponse(BaseModel):
@@ -136,9 +142,17 @@ async def get_scanner_status():
     """
     Get current scanner status and statistics
     """
+    from app.core.config import settings
     db: Session = SessionLocal()
     
     try:
+        # Check API key configuration
+        api_key_status = {
+            "polygon": bool(settings.POLYGON_API_KEY),
+            "alpaca": bool(settings.ALPACA_API_KEY and settings.ALPACA_SECRET_KEY),
+            "openai": bool(settings.OPENAI_API_KEY)
+        }
+        
         # Get recent scan statistics
         cutoff = datetime.utcnow() - timedelta(hours=24)
         
@@ -154,11 +168,29 @@ async def get_scanner_status():
             desc(ScanResult.started_at)
         ).first()
         
+        # Determine scanner status
+        if not api_key_status["polygon"]:
+            status = "missing_api_key"
+            message = "Polygon.io API key not configured. Running in demo mode with limited functionality."
+        else:
+            status = "ready"
+            message = "Scanner ready to scan markets"
+        
         return {
-            "status": "ready",
+            "status": status,
+            "message": message,
+            "api_keys_configured": api_key_status,
             "last_scan": last_scan.started_at if last_scan else None,
             "opportunities_found_today": opportunities_today,
-            "scans_today": recent_scans
+            "scans_today": recent_scans,
+            "free_tier_mode": not api_key_status["polygon"],
+            "available_features": {
+                "equities": True,  # Works with mock data
+                "futures": api_key_status["polygon"],
+                "fx": api_key_status["polygon"],
+                "real_time": api_key_status["polygon"],
+                "historical_data": True  # Limited historical data available
+            }
         }
     finally:
         db.close()
@@ -287,7 +319,7 @@ async def test_scan():
 async def get_opportunities(
     limit: int = 20,
     asset_class: Optional[str] = None,
-    min_signal_strength: Optional[float] = None
+    min_opportunity_score: Optional[float] = None
 ):
     """
     Get recent opportunities from scans
@@ -300,12 +332,29 @@ async def get_opportunities(
         if asset_class:
             query = query.filter(Opportunity.asset_class == asset_class)
             
-        if min_signal_strength:
-            query = query.filter(Opportunity.signal_strength >= min_signal_strength)
+        if min_opportunity_score:
+            query = query.filter(Opportunity.opportunity_score >= min_opportunity_score)
             
         opportunities = query.limit(limit).all()
         
-        return opportunities
+        # Convert UUIDs to strings in the response
+        result = []
+        for opp in opportunities:
+            opp_dict = {
+                "id": str(opp.id),
+                "asset_class": opp.asset_class,
+                "symbol": opp.symbol,
+                "strategy_type": opp.strategy_type,
+                "opportunity_score": opp.opportunity_score,
+                "expected_return": opp.expected_return,
+                "risk_level": opp.risk_level,
+                "discovered_at": opp.discovered_at,
+                "entry_conditions": opp.entry_conditions,
+                "technical_indicators": opp.technical_indicators
+            }
+            result.append(opp_dict)
+        
+        return result
     finally:
         db.close()
 

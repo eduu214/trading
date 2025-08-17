@@ -24,7 +24,7 @@ export default function OpportunityDetail({ opportunity, onClose }: OpportunityD
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {opportunity.ticker}
+                  {opportunity.symbol}
                 </h3>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Opportunity Details
@@ -48,27 +48,27 @@ export default function OpportunityDetail({ opportunity, onClose }: OpportunityD
               <div>
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Asset Class</dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white capitalize">
-                  {opportunity.assetClass}
+                  {opportunity.asset_class}
                 </dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Opportunity Type</dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white capitalize">
-                  {opportunity.opportunityType}
+                  {opportunity.strategy_type}
                 </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Signal Strength</dt>
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Opportunity Score</dt>
                 <dd className="mt-1">
                   <div className="flex items-center">
                     <div className="flex-1 mr-2 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div 
                         className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${opportunity.signalStrength}%` }}
+                        style={{ width: `${Math.min(opportunity.opportunity_score, 100)}%` }}
                       />
                     </div>
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      {opportunity.signalStrength.toFixed(1)}%
+                      {opportunity.opportunity_score.toFixed(1)}%
                     </span>
                   </div>
                 </dd>
@@ -76,7 +76,7 @@ export default function OpportunityDetail({ opportunity, onClose }: OpportunityD
               <div>
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Entry Price</dt>
                 <dd className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
-                  ${opportunity.entryPrice.toFixed(2)}
+                  ${(opportunity.entry_conditions?.price || 0).toFixed(2)}
                 </dd>
               </div>
             </div>
@@ -88,39 +88,39 @@ export default function OpportunityDetail({ opportunity, onClose }: OpportunityD
               </h4>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <dt className="text-xs text-gray-500 dark:text-gray-400">Price Change</dt>
+                  <dt className="text-xs text-gray-500 dark:text-gray-400">Expected Return</dt>
                   <dd className={`mt-1 text-sm font-medium ${
-                    (opportunity.priceChange || 0) >= 0 
+                    (opportunity.expected_return || 0) >= 0 
                       ? 'text-green-600 dark:text-green-400' 
                       : 'text-red-600 dark:text-red-400'
                   }`}>
-                    {(opportunity.priceChange || 0) >= 0 ? '+' : ''}
-                    {((opportunity.priceChange || 0) * 100).toFixed(2)}%
+                    {(opportunity.expected_return || 0) >= 0 ? '+' : ''}
+                    {(opportunity.expected_return || 0).toFixed(2)}%
                   </dd>
                 </div>
                 <div>
                   <dt className="text-xs text-gray-500 dark:text-gray-400">Volume</dt>
                   <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {opportunity.volume?.toLocaleString() || 'N/A'}
+                    {opportunity.entry_conditions?.volume?.toLocaleString() || 'N/A'}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-xs text-gray-500 dark:text-gray-400">Inefficiency Score</dt>
                   <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {opportunity.inefficiencyScore?.toFixed(1) || 'N/A'}
+                    {opportunity.technical_indicators?.inefficiency_score?.toFixed(1) || 'N/A'}
                   </dd>
                 </div>
               </div>
             </div>
 
             {/* Inefficiency Analysis */}
-            {opportunity.metadata?.inefficiencies && opportunity.metadata.inefficiencies.length > 0 && (
+            {opportunity.technical_indicators?.inefficiencies && opportunity.technical_indicators.inefficiencies.length > 0 && (
               <div className="mb-6">
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                   Detected Inefficiencies
                 </h4>
                 <div className="space-y-2">
-                  {opportunity.metadata.inefficiencies.slice(0, 3).map((inefficiency: any, index: number) => (
+                  {opportunity.technical_indicators.inefficiencies.slice(0, 3).map((inefficiency: any, index: number) => (
                     <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded">
                       <span className="text-sm text-gray-700 dark:text-gray-300">
                         {inefficiency.type}
