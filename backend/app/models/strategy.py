@@ -39,6 +39,13 @@ class Strategy(Base):
     take_profit = Column(Float)
     max_positions = Column(Integer, default=1)
     
+    # Complexity fields (F001-US002)
+    complexity_level = Column(Integer, default=5)  # 1-10 scale
+    complexity_score = Column(Float)  # Overall complexity score
+    optimal_complexity = Column(Integer)  # Recommended complexity level
+    last_optimized = Column(DateTime)
+    optimization_metrics = Column(JSON)  # Store detailed optimization results
+    
     # Configuration
     parameters = Column(JSON)
     entry_rules = Column(JSON)
