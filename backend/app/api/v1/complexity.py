@@ -8,16 +8,15 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 import logging
 
-from ...database import get_db
-from ...services.complexity_optimization_service import ComplexityOptimizationService
-from ...models.strategy import Strategy
-from ...auth.dependencies import get_current_user
-from ...tasks.celery_app import celery_app
+from app.core.database import get_db
+from app.services.complexity_optimization_service import ComplexityOptimizationService
+from app.models.strategy import Strategy
+from app.core.dependencies import get_current_user
+from app.tasks.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
-    prefix="/complexity",
     tags=["complexity"]
 )
 

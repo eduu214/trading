@@ -12,16 +12,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 import logging
 
-from ..core.complexity_analyzer import (
+from app.core.complexity_analyzer import (
     ComplexityAnalyzer, 
     ComplexityScore,
     ComplexityMetrics
 )
-from ..models.strategy import Strategy
-from ..models.scan_result import ScanResult
-from ..tasks.celery_app import celery_app
-from ..services.polygon_service import PolygonService
-from ..database import get_db
+from app.models.strategy import Strategy
+from app.models.scan_result import ScanResult
+from app.tasks.celery_app import celery_app
+from app.services.polygon_service import PolygonService
+from app.core.database import get_db
 
 logger = logging.getLogger(__name__)
 
