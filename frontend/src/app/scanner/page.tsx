@@ -6,6 +6,9 @@ import ScanProgress from '@/components/scanner/ScanProgress';
 import OpportunityTable from '@/components/scanner/OpportunityTable';
 import OpportunityDetail from '@/components/scanner/OpportunityDetail';
 import ScanHistory from '@/components/scanner/ScanHistory';
+import ConfigPresets from '@/components/scanner/ConfigPresets';
+import ScanScheduler from '@/components/scanner/ScanScheduler';
+import ExportResults from '@/components/scanner/ExportResults';
 import { Opportunity, ScanConfig } from '@/types/scanner';
 
 export default function ScannerPage() {
@@ -13,6 +16,14 @@ export default function ScannerPage() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
   const [scanTaskId, setScanTaskId] = useState<string | null>(null);
+  const [scanConfig, setScanConfig] = useState<ScanConfig>({
+    asset_classes: ['equities'],
+    min_volume: 1000000,
+    min_price_change: 0.02,
+    correlation_threshold: 0.3,
+    min_opportunity_score: 0.7,
+    max_results: 20,
+  });
 
   const handleStartScan = async (config: ScanConfig) => {
     setScanning(true);
@@ -117,9 +128,14 @@ export default function ScannerPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Scanner Configuration */}
-          <div className="lg:col-span-1">
+          {/* Left Column - Configuration */}
+          <div className="lg:col-span-1 space-y-6">
             <ScannerConfig onStartScan={handleStartScan} isScanning={scanning} />
+            <ConfigPresets 
+              currentConfig={scanConfig}
+              onLoadPreset={(preset) => setScanConfig(preset)}
+            />
+            <ScanScheduler currentConfig={scanConfig} />
           </div>
 
           {/* Main Content Area */}
@@ -129,12 +145,20 @@ export default function ScannerPage() {
               <ScanProgress taskId={scanTaskId} />
             )}
 
-            {/* Opportunities Table */}
+            {/* Opportunities Table with Export */}
             {opportunities.length > 0 && (
-              <OpportunityTable 
-                opportunities={opportunities}
-                onSelectOpportunity={setSelectedOpportunity}
-              />
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Scan Results
+                  </h3>
+                  <ExportResults opportunities={opportunities} />
+                </div>
+                <OpportunityTable 
+                  opportunities={opportunities}
+                  onSelectOpportunity={setSelectedOpportunity}
+                />
+              </>
             )}
 
             {/* No opportunities message */}
