@@ -15,6 +15,14 @@
 - **Postman** or similar for API testing
 - **pgAdmin** or similar for database management
 
+### Technical Analysis Libraries
+- **TA-Lib 0.4.28**: Technical indicators (requires C library installation)
+- **Vectorbt 0.26.2**: Backtesting and portfolio analysis framework
+- **PyPortfolioOpt 1.5.5**: Portfolio optimization algorithms
+- **Empyrical 0.5.5**: Performance and risk metrics
+- **yfinance 0.2.28**: Backup market data source
+- **quantlib 1.32**: Quantitative finance computations
+
 ### Local Environment Configuration
 ```bash
 # Required environment variables for development
@@ -58,10 +66,16 @@ CLERK_SECRET_KEY=your_clerk_secret
 - **Persistence**: Redis for temporary storage, PostgreSQL for audit
 
 ### Strategy Execution Engine (First Use: F002-US001)
-- **Technology**: Alpaca API with paper trading support
-- **Capabilities**: Order management, position tracking, risk controls
+- **Technology**: Python-based strategy engine with technical analysis libraries
+- **Core Components**:
+  - Technical indicators (TA-Lib): RSI, MACD, Bollinger Bands, ATR
+  - Backtesting framework (Vectorbt): Historical performance validation
+  - Portfolio optimization (PyPortfolioOpt): Modern Portfolio Theory implementation
+  - Performance metrics (Empyrical): Sharpe ratio, drawdown, Calmar ratio
+- **Strategy Types**: Mean reversion, momentum, breakout patterns
+- **Execution Bridge**: Alpaca API for paper and live trading
 - **Safety Features**: Position limits, daily loss limits, correlation checks
-- **Transition Path**: Paper → Small live → Full live deployment
+- **Transition Path**: Backtest → Paper → Small live → Full live deployment
 
 ### Validation Framework (First Use: F004-US001)
 - **Technology**: Custom validation engine with Pytest integration

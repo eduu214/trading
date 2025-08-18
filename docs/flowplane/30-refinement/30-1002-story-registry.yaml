@@ -15,8 +15,18 @@ stories:
   F001-US003:
     title: Diversification-Focused Discovery
     feature: F001
-    description: Prioritize finding uncorrelated strategies to maintain portfolio robustness across market conditions
-    dependencies: [strategy_execution_engine, validation_framework]
+    description: Analyze correlation between actual strategy returns (not price movements) to prioritize uncorrelated strategies, displaying correlation matrix heatmap, diversification scores, and strategy selection interface for building robust portfolios
+    dependencies: [F002-US001, validation_framework]
+    ui_components:
+      - Correlation matrix heatmap (red=high >0.7, yellow=moderate, green=low <0.3)
+      - Diversification score display (0-100 scale)
+      - Strategy selection table with correlation coefficients
+      - Portfolio impact preview when adding/removing strategies
+    acceptance_criteria:
+      - Correlation calculated from actual strategy returns
+      - Matrix displays relationships between all validated strategies
+      - Diversification score updates in real-time with selection
+      - System warns when correlation exceeds 0.6 threshold
     
   F001-US004:
     title: Cross-Asset Correlation Engine
@@ -32,10 +42,21 @@ stories:
 
   # F002: Code Generation & Execution Bridge
   F002-US001:
-    title: Multi-Platform Code Generator
+    title: Real Strategy Engine with Backtesting
     feature: F002
-    description: Convert strategies to platform-specific code without manual translation errors
-    dependencies: [strategy_execution_engine, validation_framework]
+    description: Implement proven trading strategies using technical indicators (RSI, MACD, Bollinger Bands), with comprehensive backtesting that displays key performance metrics (Sharpe ratio >1.0, max drawdown, win rate, total return) through strategy configuration interface, backtesting results dashboard, and real-time performance comparison charts
+    dependencies: [market_data_pipeline, validation_framework, async_task_processor]
+    ui_components:
+      - Strategy selection and parameter configuration form
+      - Backtesting progress indicator with time estimates
+      - Performance metrics dashboard showing Sharpe ratio, drawdown, win rate
+      - Strategy comparison table with sortable metrics
+      - Interactive performance charts (returns, drawdown over time)
+    acceptance_criteria:
+      - System calculates technical indicators from historical data
+      - Backtesting completes 6 months of data in <30 seconds
+      - Strategies achieve Sharpe ratio >1.0 for validation
+      - Performance dashboard updates in real-time during paper trading
     
   F002-US002:
     title: Execution Safeguard System
@@ -51,10 +72,22 @@ stories:
 
   # F003: Strategy Portfolio Management
   F003-US001:
-    title: Correlation-Based Portfolio Constructor
+    title: Strategy-Based Portfolio Constructor
     feature: F003
-    description: Optimally allocate capital based on correlation dynamics for maximum risk-adjusted returns
-    dependencies: [strategy_execution_engine, real_time_notifications]
+    description: Optimize capital allocation across proven strategies using Modern Portfolio Theory, displaying efficient frontier visualization, risk budgeting controls, allocation breakdown, and real-time portfolio performance tracking against targets
+    dependencies: [F002-US001, F001-US003, real_time_notifications]
+    ui_components:
+      - Efficient frontier chart with optimal portfolio point
+      - Strategy allocation table with percentage sliders
+      - Risk budgeting interface (max 30% per strategy)
+      - Portfolio metrics display (expected return, volatility, Sharpe)
+      - Real-time P&L tracking with comparison to backtest
+      - Rebalancing alerts when drift exceeds 5%
+    acceptance_criteria:
+      - Portfolio optimization using mean-variance optimization
+      - Allocation respects risk limits and constraints
+      - Real-time performance tracking against targets
+      - Automated rebalancing recommendations based on drift
     
   F003-US002:
     title: Strategy Lifecycle Manager

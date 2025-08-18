@@ -5,60 +5,54 @@ feature: F001
 contributed_tokens:
   colors:
     semantic:
-      correlation_low:
-        value: "green.600"
-        justification: "Visual indicator for low correlation values (<0.3) in correlation matrix and strategy cards"
-        usage_count: 4
-        elements: ["correlation-cell", "correlation-badge", "matrix-legend", "threshold-indicator"]
-        
-      correlation_medium:
-        value: "yellow.600"
-        justification: "Visual indicator for medium correlation values (0.3-0.5) requiring user attention"
-        usage_count: 3
-        elements: ["correlation-cell", "correlation-badge", "threshold-warning"]
-        
-      correlation_high:
+      correlation_high_risk:
         value: "red.600"
-        justification: "Visual indicator for high correlation values (>0.5) that should be avoided"
+        justification: "Distinct color for high correlation risk (>0.7) in matrix visualization"
         usage_count: 3
-        elements: ["correlation-cell", "correlation-badge", "rejection-indicator"]
+        elements: ["correlation-matrix-cell", "risk-indicator", "warning-badge"]
+        
+      correlation_medium_risk:
+        value: "yellow.600"
+        justification: "Medium correlation risk (0.3-0.7) needs distinct visual treatment"
+        usage_count: 3
+        elements: ["correlation-matrix-cell", "risk-indicator", "caution-badge"]
+        
+      correlation_low_risk:
+        value: "green.600"
+        justification: "Low correlation (<0.3) positive indicator for diversification"
+        usage_count: 3
+        elements: ["correlation-matrix-cell", "risk-indicator", "success-badge"]
 
   spacing:
     semantic:
-      correlation_matrix_cell:
-        value: "spacing.scale.8"
-        justification: "Consistent cell size for correlation matrix ensuring readability and touch targets"
+      matrix_cell_size:
+        value: "spacing.scale.12"
+        justification: "Optimal cell size for correlation matrix readability and interaction"
         usage_count: 2
-        elements: ["matrix-cell", "matrix-header"]
-        
-      strategy_selection_gap:
-        value: "spacing.scale.5"
-        justification: "Optimal spacing between selectable strategy cards for visual separation"
-        usage_count: 2
-        elements: ["strategy-grid", "selection-container"]
+        elements: ["correlation-matrix-cell", "matrix-grid-item"]
 
   typography:
     semantic:
       correlation_value:
-        value: "sm"
-        justification: "Specific typography for correlation coefficient display with tabular formatting"
-        usage_count: 3
-        elements: ["correlation-cell", "correlation-tooltip", "summary-metrics"]
+        value: "typography.scale.sm"
+        justification: "Specific typography for correlation coefficient display in matrix"
+        usage_count: 2
+        elements: ["matrix-cell-text", "correlation-tooltip"]
 
 documented_exceptions:
-  correlation_heatmap_gradient:
-    value: "linear-gradient(90deg, #22c55e 0%, #fbbf24 50%, #ef4444 100%)"
-    justification: "Correlation matrix requires continuous color gradient for heatmap visualization, not supported by discrete color tokens"
-    usage: "Correlation matrix background gradient only"
-    mitigation: "Will evaluate gradient token system for data visualization in design system v2.0"
-    
+  correlation_gradient_interpolation:
+    value: "linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #ef4444 100%)"
+    justification: "Correlation matrix requires smooth color gradient that cannot be achieved with discrete tokens"
+    usage: "correlation-matrix background gradient only"
+    mitigation: "Will implement token-based gradient system when design system supports gradient arrays"
+
 token_usage_summary:
-  existing_tokens_used: 88
-  new_patterns_proposed: 10
-  documented_exceptions: 2
+  existing_tokens_used: 88  # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
   
   existing_breakdown:
     p25_original: 75
     p40_10_contributions: 13
     
-pattern_rationale: "Correlation analysis requires specific color coding system for financial risk visualization that extends beyond basic semantic colors. These patterns will be reusable across portfolio management features F003 and validation framework F004."
+pattern_rationale: "Correlation analysis requires specialized risk-based color coding and matrix-specific sizing that extends beyond general financial status indicators. These patterns are reusable across correlation features in F003 and F004."

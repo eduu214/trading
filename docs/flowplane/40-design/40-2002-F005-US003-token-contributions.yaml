@@ -5,48 +5,52 @@ feature: F005
 contributed_tokens:
   colors:
     semantic:
-      market_regime_background:
-        value: "gray.50"
-        justification: "Subtle background for market regime indicators in performance context"
+      regime_bull:
+        value: "green.600"
+        justification: "Distinct color for bull market regime indicators in performance context"
         usage_count: 3
-        elements: ["regime-indicator", "context-panel", "regime-filter"]
+        elements: ["regime-indicator", "performance-badge", "chart-highlight"]
         
-      benchmark_highlight:
-        value: "blue.100"
-        justification: "Highlight color for benchmark comparison sections"
+      regime_bear:
+        value: "red.600"
+        justification: "Distinct color for bear market regime indicators in performance context"
+        usage_count: 3
+        elements: ["regime-indicator", "performance-badge", "chart-highlight"]
+        
+      regime_sideways:
+        value: "gray.500"
+        justification: "Neutral color for sideways market regime indicators"
+        usage_count: 3
+        elements: ["regime-indicator", "performance-badge", "chart-highlight"]
+        
+      performance_highlight:
+        value: "blue.50"
+        justification: "Subtle highlight background for performance comparison sections"
         usage_count: 2
-        elements: ["benchmark-card", "comparison-row"]
+        elements: ["comparison-row", "metric-highlight"]
 
   spacing:
     semantic:
-      context_section_gap:
-        value: "spacing.scale.8"
-        justification: "Consistent spacing between context sections in performance analysis"
-        usage_count: 4
-        elements: ["context-sections", "benchmark-groups", "regime-panels", "explanation-blocks"]
-
-  typography:
-    semantic:
-      market_explanation:
-        value: "base"
-        justification: "Readable typography for market context explanations"
-        usage_count: 3
-        elements: ["context-text", "regime-explanation", "benchmark-description"]
+      chart_grid_gap:
+        value: "spacing.scale.6"
+        justification: "Consistent spacing between performance comparison charts"
+        usage_count: 2
+        elements: ["chart-container", "grid-layout"]
 
 documented_exceptions:
-  market_regime_gradient:
-    value: "linear-gradient(90deg, rgba(34, 197, 94, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%)"
-    justification: "Visual gradient representing market regime transition from bull to bear, required for intuitive market context visualization"
-    usage: "Market regime timeline background only"
-    mitigation: "Will parameterize when design system adds gradient token support"
-    
+  benchmark_comparison_gradients:
+    value: "linear-gradient(180deg, rgba(34, 197, 94, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%)"
+    justification: "Performance comparison charts require gradient overlays for outperformance/underperformance visualization that chart library cannot generate from individual tokens"
+    usage: "Benchmark comparison chart backgrounds only"
+    mitigation: "Will parameterize when chart library supports CSS custom property gradients"
+
 token_usage_summary:
   existing_tokens_used: 88  # percentage
-  new_patterns_proposed: 9   # percentage
-  documented_exceptions: 3   # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
   
   existing_breakdown:
     p25_original: 75
     p40_10_contributions: 13
     
-pattern_rationale: "Market context visualization patterns specific to performance analysis but reusable across other strategy insight features F005-US001, F005-US002"
+pattern_rationale: "Market regime visualization patterns needed for performance context across multiple strategy analysis features, reusable for F001 correlation analysis and F003 portfolio performance"

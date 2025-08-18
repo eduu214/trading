@@ -3,136 +3,139 @@
 ## 1. Architecture Overview
 
 ### 1.1 Technical Strategy
-F003 leverages PostgreSQL with TimescaleDB for time-series portfolio data, Redis for real-time correlation caching, and FastAPI with Celery for portfolio optimization processing. The architecture centers on PyPortfolioOpt for modern portfolio theory calculations while maintaining real-time synchronization with Alpaca's portfolio API for live position tracking.
+F003 leverages PostgreSQL with TimescaleDB for time-series portfolio data, Redis for real-time state management, and PyPortfolioOpt for Modern Portfolio Theory calculations. The feature coordinates with the strategy execution engine (SVC-002) to access individual strategy performance data and uses Celery for background portfolio optimization tasks. Real-time portfolio updates flow through WebSocket connections managed by the notification service (SVC-005).
 
 ### 1.2 Key Decisions
-- **Decision**: Use PyPortfolioOpt for portfolio optimization over custom algorithms
-- **Rationale**: Proven implementation of modern portfolio theory with efficient frontier calculations, extensive backtesting in academic literature
-- **Trade-offs**: Gain mathematical rigor and performance, sacrifice custom optimization flexibility
 
-- **Decision**: Cache correlation matrices in Redis with 15-minute refresh cycles
-- **Rationale**: Correlation calculations are computationally expensive but don't require second-by-second updates for portfolio decisions
-- **Trade-offs**: Gain sub-second portfolio queries, sacrifice real-time correlation precision
+- **Decision**: Use Modern Portfolio Theory (Markowitz optimization) for allocation decisions
+- **Rationale**: Mathematically proven approach for risk-adjusted returns, industry standard for institutional portfolio management
+- **Trade-offs**: Requires historical correlation data vs simpler equal-weight approaches, but provides superior risk management
 
-- **Decision**: Implement strategy lifecycle as finite state machine in PostgreSQL
-- **Rationale**: Clear state transitions prevent invalid operations and provide audit trail for regulatory compliance
-- **Trade-offs**: Gain operational safety and compliance, sacrifice implementation simplicity
+- **Decision**: Implement correlation-based diversification at strategy level rather than asset level
+- **Rationale**: Strategies can be uncorrelated even when trading same assets due to different logic and timing
+- **Trade-offs**: More complex correlation calculations vs asset-only correlation, but enables better diversification
+
+- **Decision**: Automated rebalancing with manual override capabilities
+- **Rationale**: Reduces emotional decision-making while maintaining user control for market regime changes
+- **Trade-offs**: Potential for suboptimal timing vs human judgment, but ensures disciplined execution
+
+- **Decision**: Real-time portfolio monitoring with sub-30 second update latency
+- **Rationale**: Enables rapid response to portfolio drift and risk limit breaches
+- **Trade-offs**: Higher system resource usage vs delayed updates, but critical for risk management
 
 ## 2. Shared Component Architecture
 
 ### 2.1 Portfolio Optimization Engine
-- **Purpose**: Calculates optimal strategy allocations using modern portfolio theory
+- **Purpose**: Calculates optimal strategy allocations using Modern Portfolio Theory
 - **Used By**: F003-US001 (portfolio construction), F003-US002 (rebalancing decisions)
 - **Behaviors**: 
-  - Maintains correlation matrices for all active strategies
-  - Coordinates with PyPortfolioOpt for efficient frontier calculations
-  - Validates allocation constraints against account buying power
-  - Enables risk-adjusted return optimization with customizable objectives
-- **Constraints**: Complete optimization within 30 seconds for 50+ strategy portfolio
-- **Technology**: PyPortfolioOpt + NumPy for mathematical operations
+  - Maintains efficient frontier calculations across active strategies
+  - Coordinates with PyPortfolioOpt library for mean-variance optimization
+  - Validates allocation constraints (max 30% single strategy, min 5% included strategies)
+  - Processes correlation matrices from strategy returns data
+- **Constraints**: Complete optimization within 30 seconds for 50+ strategies, handle correlation matrix updates without recalculation delays
+- **Technology**: PyPortfolioOpt with custom constraint handling, PostgreSQL for historical returns
 
-### 2.2 Strategy Lifecycle Manager
-- **Purpose**: Tracks and manages strategy states from discovery through retirement
-- **Used By**: F003-US002 (rotation decisions), F003-US003 (risk monitoring)
+### 2.2 Strategy Performance Aggregator
+- **Purpose**: Consolidates individual strategy performance data for portfolio-level analysis
+- **Used By**: F003-US001 (allocation inputs), F003-US003 (risk monitoring)
 - **Behaviors**:
-  - Maintains finite state machine for strategy lifecycle (Discovery → Validation → Paper → Live → Retired)
-  - Coordinates state transitions with validation requirements
-  - Tracks performance metrics and triggers for each lifecycle stage
-  - Enables automated retirement based on performance thresholds
-- **Constraints**: State transitions must be atomic and logged for audit compliance
-- **Technology**: PostgreSQL with custom state machine implementation
+  - Tracks real-time P&L from Alpaca API across all active strategies
+  - Maintains rolling performance windows (daily, weekly, monthly returns)
+  - Calculates strategy-level Sharpe ratios and maximum drawdowns
+  - Enables correlation analysis between strategy returns
+- **Constraints**: Sub-second latency for real-time updates, handle 50+ concurrent strategy feeds
+- **Technology**: Alpaca WebSocket integration, Redis for real-time state, TimescaleDB for historical aggregation
 
-### 2.3 Real-Time Position Tracker
-- **Purpose**: Synchronizes portfolio state with live broker positions
-- **Used By**: F003-US001 (current allocations), F003-US003 (risk calculations)
+### 2.3 Rebalancing Decision Engine
+- **Purpose**: Determines when portfolio rebalancing is required and executes allocation changes
+- **Used By**: F003-US002 (automated rotation), F003-US003 (risk-triggered rebalancing)
 - **Behaviors**:
-  - Maintains real-time synchronization with Alpaca portfolio API
-  - Tracks position changes and cash flows across all strategies
-  - Validates position consistency between internal state and broker
-  - Enables fractional share position management
-- **Constraints**: Position updates within 30 seconds of broker changes
-- **Technology**: Alpaca WebSocket API + Redis for position caching
+  - Monitors allocation drift against target weights (>5% triggers rebalancing)
+  - Evaluates strategy performance decay (Sharpe <80% of target)
+  - Coordinates strategy retirement after 60+ days underperformance
+  - Manages new strategy introduction based on correlation requirements
+- **Constraints**: Process rebalancing decisions within 1 minute, maintain audit trail of all allocation changes
+- **Technology**: Celery for background processing, PostgreSQL for decision logging
 
-### 2.4 Correlation Analysis Service
-- **Purpose**: Calculates and monitors strategy correlations for diversification
-- **Used By**: F003-US001 (allocation decisions), F003-US002 (rotation triggers)
+### 2.4 Risk Monitoring System
+- **Purpose**: Provides real-time portfolio risk assessment and limit enforcement
+- **Used By**: F003-US003 (risk dashboard), F003-US002 (risk-based rotation triggers)
 - **Behaviors**:
-  - Maintains rolling correlation matrices across multiple timeframes
-  - Monitors correlation regime changes and threshold breaches
-  - Calculates portfolio-level correlation metrics and diversification ratios
-  - Enables correlation-based strategy filtering and selection
-- **Constraints**: Update correlations every 15 minutes during market hours
-- **Technology**: Pandas/NumPy for correlation calculations + Redis caching
+  - Calculates portfolio Value-at-Risk using historical simulation method
+  - Tracks individual strategy drawdowns against predefined limits
+  - Monitors aggregate position exposure across correlated strategies
+  - Enables real-time risk alerts through notification system
+- **Constraints**: Risk calculations update within 30 seconds of market data changes, support configurable risk limits
+- **Technology**: Custom VaR calculations with pandas/numpy, SVC-005 for alert delivery
 
 ## 3. Data Architecture
 
 ### 3.1 Portfolio State Management
-Portfolio data persists in PostgreSQL with TimescaleDB optimization for time-series performance tracking. Core entities include Strategy (parameters and metadata), Position (current allocations), and PerformanceHistory (time-series returns). Strategy-to-Position relationships support many-to-many allocation tracking, while PerformanceHistory enables correlation analysis across multiple timeframes.
+Portfolio allocation data persists in PostgreSQL with current weights, target weights, and rebalancing history. Strategy performance aggregations utilize TimescaleDB for efficient time-series queries across multiple strategies. Redis maintains real-time portfolio state including current P&L, active positions, and pending rebalancing decisions.
 
-### 3.2 Strategy Lifecycle Data
-Strategy lifecycle states persist as enumerated values with transition timestamps and triggering conditions. Each state change creates immutable audit records for regulatory compliance. Performance thresholds and rotation rules store as JSON configurations enabling flexible strategy management without schema changes.
+### 3.2 Strategy Return Correlation Matrix
+Historical strategy returns stored in TimescaleDB enable rolling correlation calculations across multiple time windows (30-day, 90-day, 1-year). Correlation matrices cached in Redis for rapid portfolio optimization access. Strategy return data sourced from individual strategy execution results rather than underlying asset prices.
 
-### 3.3 Correlation Data Structures
-Correlation matrices store as compressed arrays in Redis with timestamp metadata for cache invalidation. Historical correlation data persists in PostgreSQL TimescaleDB for regime analysis and backtesting. Portfolio-level correlation metrics calculate on-demand from cached strategy correlations.
+### 3.3 Risk Metrics Storage
+Portfolio risk metrics including VaR, drawdown statistics, and exposure limits stored in PostgreSQL with daily snapshots. Real-time risk calculations maintained in Redis for immediate dashboard updates. Historical risk evolution tracked for regime change detection and model validation.
 
 ## 4. Service Layer
 
 ### 4.1 Portfolio Construction Service
-- **Technology**: FastAPI + PyPortfolioOpt + PostgreSQL
-- **Responsibility**: Manages optimal allocation calculations and constraint validation
-- **Performance**: Complete 50-strategy optimization within 30 seconds using efficient frontier algorithms
+- **Technology**: FastAPI with PyPortfolioOpt integration
+- **Responsibility**: Manages optimal allocation calculations using Modern Portfolio Theory
+- **Performance**: Complete optimization within 30 seconds for 50+ strategies, handle constraint modifications without full recalculation
 
-### 4.2 Strategy Rotation Service  
-- **Technology**: Celery + PostgreSQL + Redis
-- **Responsibility**: Monitors strategy performance and executes automated rotation decisions
-- **Performance**: Process rotation decisions within 5 minutes of trigger conditions
+### 4.2 Strategy Lifecycle Management Service
+- **Technology**: Celery workers with PostgreSQL state management
+- **Responsibility**: Coordinates strategy introduction, performance monitoring, and retirement decisions
+- **Performance**: Process lifecycle transitions within 1 minute, maintain complete audit trail of strategy status changes
 
-### 4.3 Risk Management Service
-- **Technology**: FastAPI + NumPy + Alpaca API
-- **Responsibility**: Calculates portfolio risk metrics and enforces position limits
-- **Performance**: Real-time risk calculations with sub-second response for dashboard updates
+### 4.3 Real-time Portfolio Monitoring Service
+- **Technology**: WebSocket connections with Alpaca API integration
+- **Responsibility**: Provides continuous portfolio state updates and risk monitoring
+- **Performance**: Sub-30 second latency for portfolio updates, handle 50+ concurrent strategy feeds without degradation
 
-### 4.4 Rebalancing Execution Service
-- **Technology**: Alpaca SDK + PostgreSQL + Redis
-- **Responsibility**: Executes portfolio rebalancing through fractional share orders
-- **Performance**: Complete rebalancing execution within 2 minutes of approval
+### 4.4 Risk Management Service
+- **Technology**: Custom risk calculations with pandas/numpy, Redis caching
+- **Responsibility**: Maintains portfolio risk metrics and enforces risk limits
+- **Performance**: Risk calculations complete within 30 seconds, support real-time limit monitoring
 
 ## 5. Integration Architecture
 
-### 5.1 Market Data Integration
-Integrates with SVC-001 (market_data_pipeline) for strategy performance data and correlation inputs. Receives real-time price updates for portfolio valuation and risk calculations. Handles market hours coordination for rebalancing timing.
+### 5.1 Strategy Execution Engine Integration
+F003 integrates with SVC-002 (strategy execution engine) to access individual strategy performance data, execution status, and position information. This integration enables portfolio-level aggregation of strategy returns for correlation analysis and risk monitoring.
 
-### 5.2 Strategy Execution Integration
-Coordinates with SVC-002 (strategy_execution_engine) for individual strategy performance tracking and position updates. Receives strategy signals for portfolio impact analysis and correlation monitoring.
+### 5.2 Market Data Pipeline Integration
+Portfolio monitoring requires real-time market data from SVC-001 for mark-to-market calculations and risk assessment. Integration handles multiple asset classes (equities, FX, futures) with proper timezone coordination.
 
-### 5.3 Validation Framework Integration
-Integrates with SVC-003 (validation_framework) for strategy lifecycle transitions. Validates portfolio constraints and risk limits before rebalancing execution. Coordinates paper trading requirements for new strategy deployment.
+### 5.3 Notification System Integration
+Risk alerts, rebalancing notifications, and portfolio status updates flow through SVC-005 (real-time notifications) to provide immediate user feedback on portfolio changes and risk limit breaches.
 
-### 5.4 Notification Integration
-Uses SVC-005 (real_time_notifications) for portfolio change alerts and rebalancing notifications. Sends correlation threshold breach alerts and strategy rotation notifications to dashboard.
-
-### 5.5 External Broker Integration
-Direct integration with EXT-002 (alpaca_trading_api) for position synchronization and rebalancing execution. Maintains separate paper and live trading contexts with identical portfolio logic.
+### 5.4 Validation Framework Integration
+New strategy introduction requires validation through SVC-003 to ensure strategies meet correlation and performance requirements before portfolio inclusion.
 
 ## 6. Architecture Validation
 
 | Story | Components | Services | Requirements |
 |-------|-----------|----------|--------------|
-| F003-US001 | Portfolio Optimization Engine, Correlation Analysis Service, Real-Time Position Tracker | Portfolio Construction Service, Risk Management Service | FR-009: Correlation-based construction with 50% max allocation and 5-strategy minimum |
-| F003-US002 | Strategy Lifecycle Manager, Portfolio Optimization Engine | Strategy Rotation Service, Rebalancing Execution Service | FR-010: Automated rotation with 60-day underperformance threshold |
-| F003-US003 | Real-Time Position Tracker, Correlation Analysis Service | Risk Management Service | FR-011: Real-time VaR calculation and drawdown monitoring |
+| F003-US001 | Portfolio Optimization Engine, Strategy Performance Aggregator | Portfolio Construction Service, Strategy Execution Engine (SVC-002) | FR-009: MPT-based construction with allocation constraints |
+| F003-US002 | Rebalancing Decision Engine, Strategy Performance Aggregator | Strategy Lifecycle Management Service, Async Task Processor (SVC-004) | FR-010: Automated rotation based on performance decay |
+| F003-US003 | Risk Monitoring System, Portfolio Optimization Engine | Real-time Portfolio Monitoring Service, Real-time Notifications (SVC-005) | FR-011: Comprehensive risk dashboard with real-time updates |
 
-### 6.1 Performance Validation
-- Portfolio optimization completes within 30 seconds for 50+ strategies using PyPortfolioOpt's efficient algorithms
-- Correlation updates every 15 minutes provide sufficient precision for portfolio decisions while maintaining performance
-- Real-time position tracking synchronizes with Alpaca within 30 seconds of broker changes
+### 6.1 Cross-Story Validation
+- **Shared Data Flow**: Strategy performance data flows from SVC-002 through Strategy Performance Aggregator to all portfolio management components
+- **Consistent Risk Framework**: Risk Monitoring System provides unified risk assessment across construction, rebalancing, and monitoring functions
+- **Real-time Coordination**: All components utilize Redis for consistent real-time state management and WebSocket updates through SVC-005
 
-### 6.2 Scalability Validation  
-- PostgreSQL with TimescaleDB handles time-series performance data for 100+ strategies
-- Redis correlation caching supports sub-second portfolio queries at scale
-- Celery task processing enables parallel strategy analysis and rotation decisions
+### 6.2 Performance Validation
+- Portfolio optimization completes within 30-second requirement using PyPortfolioOpt efficient algorithms
+- Real-time monitoring achieves sub-30 second update latency through Redis caching and WebSocket architecture
+- Strategy correlation calculations leverage TimescaleDB time-series optimizations for rapid matrix updates
 
 ### 6.3 Integration Validation
-- All shared services from infrastructure registry properly integrated with defined interfaces
-- External API integration follows rate limits and error handling patterns
-- Cross-feature coordination maintains data consistency and audit trails
+- PostgreSQL with TimescaleDB provides required time-series performance for historical strategy returns
+- Redis enables real-time portfolio state management across all components
+- Celery background processing handles computationally intensive optimization tasks without blocking user interface
+- Alpaca API integration provides real-time position and P&L data for accurate portfolio monitoring

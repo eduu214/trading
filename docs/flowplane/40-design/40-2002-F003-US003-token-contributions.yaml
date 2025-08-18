@@ -5,47 +5,47 @@ feature: F003
 contributed_tokens:
   colors:
     semantic:
-      risk_critical_bg:
-        value: "red.50"
-        justification: "Critical risk alert background for portfolio-wide risk warnings"
-        usage_count: 3
-        elements: ["risk-alert-banner", "critical-threshold-card", "emergency-stop-modal"]
-        
-      risk_warning_border:
-        value: "yellow.400"
-        justification: "Warning border color for risk threshold indicators and alerts"
+      risk_low:
+        value: "green.600"
+        justification: "Visual indicator for low risk levels in risk management dashboard"
         usage_count: 4
-        elements: ["risk-meter-warning", "var-threshold-card", "drawdown-alert", "correlation-warning"]
+        elements: ["risk-metric-card", "utilization-bar-safe", "status-indicator", "chart-safe-zone"]
+        
+      risk_medium:
+        value: "yellow.600"
+        justification: "Visual indicator for medium risk levels requiring attention"
+        usage_count: 3
+        elements: ["risk-metric-card", "utilization-bar-warning", "status-indicator"]
+        
+      risk_high:
+        value: "red.600"
+        justification: "Visual indicator for high risk levels requiring immediate action"
+        usage_count: 4
+        elements: ["risk-metric-card", "utilization-bar-critical", "alert-background", "chart-danger-zone"]
 
   spacing:
-    semantic:
-      dashboard_section_gap:
-        value: "spacing.scale.8"
-        justification: "Consistent spacing between major dashboard sections for visual hierarchy"
-        usage_count: 5
-        elements: ["portfolio-overview", "risk-metrics", "strategy-performance", "sidebar-sections", "modal-sections"]
-        
-      risk_metric_spacing:
-        value: "spacing.scale.4"
-        justification: "Tight spacing for related risk metrics to show relationships"
-        usage_count: 3
-        elements: ["var-metrics-group", "drawdown-indicators", "correlation-matrix"]
+    scale:
+      80:
+        value: "320px"
+        justification: "Chart height for risk visualization components"
+        usage_count: 2
+        elements: ["performance-chart", "drawdown-chart"]
 
   effects:
-    semantic:
-      risk_pulse_animation:
-        value: "2s ease-in-out infinite alternate"
-        justification: "Subtle pulsing animation for critical risk alerts to draw attention"
+    transitions:
+      alert_pulse:
+        value: "1s ease-in-out infinite alternate"
+        justification: "Attention-grabbing animation for critical risk alerts"
         usage_count: 2
-        elements: ["critical-risk-indicator", "emergency-alert-badge"]
+        elements: ["critical-alert-banner", "limit-exceeded-indicator"]
 
 documented_exceptions:
-  real_time_websocket_indicator:
-    value: "radial-gradient(circle, #22c55e 0%, #16a34a 70%)"
-    justification: "Real-time connection indicator requires gradient for live status visualization, no design token support for radial gradients"
-    usage: "WebSocket connection status indicator only"
-    mitigation: "Will parameterize when design system adds gradient token support"
-    
+  var_calculation_precision:
+    value: "rgba(239, 68, 68, 0.15)"
+    justification: "VaR calculation visualization requires specific alpha transparency for statistical confidence intervals"
+    usage: "Risk calculation overlay in charts only"
+    mitigation: "Will parameterize when design system supports alpha channel tokens"
+
 token_usage_summary:
   existing_tokens_used: 88  # percentage
   new_patterns_proposed: 10  # percentage
@@ -55,4 +55,4 @@ token_usage_summary:
     p25_original: 75
     p40_10_contributions: 13
     
-pattern_rationale: "Risk management dashboard requires specialized visual patterns for critical alerts and real-time status indicators not covered by base design system but reusable across risk monitoring features"
+pattern_rationale: "Risk management requires consistent visual language for risk levels (low/medium/high) that will be reused across portfolio management features F003-US001, F003-US002, and validation framework F004"

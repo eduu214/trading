@@ -27,20 +27,27 @@ shared_services:
   - id: "SVC-002"
     name: "strategy_execution_engine"
     type: "computation_service"
-    purpose: "Execute and manage trading strategies across platforms"
+    purpose: "Implement real trading strategies with technical indicators, backtesting, and execution management"
     created_by: "F002-US001"
     used_by:
       - "F002-US001"
       - "F002-US002"
       - "F003-US001"
       - "F004-US003"
-    technology: "FastAPI + Alpaca SDK + Vectorbt"
+    technology: "TA-Lib + Vectorbt + PyPortfolioOpt + FastAPI + Alpaca SDK"
     dependencies: 
       - "EXT-002"  # Alpaca Trading API
       - "SVC-001"  # Market Data Pipeline
+    components:
+      - "Technical Indicator Service (RSI, MACD, Bollinger Bands)"
+      - "Strategy Implementation Engine (mean reversion, momentum)"
+      - "Backtesting Framework with performance metrics"
+      - "Portfolio Optimization with Modern Portfolio Theory"
     performance_targets:
       - "Support 50+ concurrent strategies"
-      - "Sub-second strategy validation"
+      - "Backtest 6 months of data in <30 seconds"
+      - "Calculate indicators for 1000+ symbols per scan"
+      - "Generate Sharpe ratio > 1.0 for validated strategies"
 
   - id: "SVC-003"
     name: "validation_framework"

@@ -5,54 +5,54 @@ feature: F001
 contributed_tokens:
   colors:
     semantic:
-      priority_indicator_high:
+      priority_high:
         value: "green.600"
-        justification: "High priority strategy indicator distinct from general success color"
+        justification: "High-priority opportunity indicator distinct from general success state"
         usage_count: 3
-        elements: ["priority-badge", "ranking-number", "card-accent"]
+        elements: ["priority-badge", "rank-indicator", "table-row-highlight"]
         
-      priority_indicator_medium:
+      priority_medium:
         value: "yellow.600"
-        justification: "Medium priority strategy indicator for ranking system"
+        justification: "Medium-priority opportunity indicator for ranking system"
         usage_count: 3
-        elements: ["priority-badge", "ranking-number", "card-accent"]
+        elements: ["priority-badge", "rank-indicator", "filter-highlight"]
         
-      priority_indicator_low:
+      priority_low:
         value: "gray.500"
-        justification: "Low priority strategy indicator for complete ranking system"
-        usage_count: 3
-        elements: ["priority-badge", "ranking-number", "card-accent"]
+        justification: "Low-priority opportunity indicator for complete ranking scale"
+        usage_count: 2
+        elements: ["priority-badge", "rank-indicator"]
 
   spacing:
     semantic:
-      strategy_ranking_gap:
-        value: "spacing.scale.4"
-        justification: "Consistent spacing between ranking elements in priority display"
-        usage_count: 4
-        elements: ["rank-number", "priority-badge", "metric-group", "card-header"]
+      ranking_row_gap:
+        value: "spacing.scale.2"
+        justification: "Tight spacing between ranking rows for data density in opportunity table"
+        usage_count: 2
+        elements: ["table-row-spacing", "metric-grid-gap"]
 
   typography:
     semantic:
-      priority_rank:
-        value: "xl"
-        justification: "Prominent display for strategy priority ranking numbers"
+      ranking_number:
+        value: "typography.scale.lg"
+        justification: "Prominent ranking numbers need distinct size for quick scanning"
         usage_count: 2
-        elements: ["rank-display", "priority-number"]
+        elements: ["rank-column", "priority-indicator"]
 
 documented_exceptions:
-  sharpe_ratio_precision:
-    value: "toFixed(3)"
-    justification: "Financial industry standard requires 3 decimal places for Sharpe ratio display, not configurable via design tokens"
-    usage: "Sharpe ratio metric display only"
-    mitigation: "Consider adding number formatting tokens in future design system update"
-
+  sharpe_ratio_color_gradient:
+    value: "linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #22c55e 100%)"
+    justification: "Sharpe ratio visualization requires smooth color gradient that cannot be achieved with discrete tokens"
+    usage: "Sharpe ratio bar chart background only"
+    mitigation: "Will implement with CSS custom properties when gradient token specification is available"
+    
 token_usage_summary:
   existing_tokens_used: 88  # percentage
-  new_patterns_proposed: 8   # percentage
-  documented_exceptions: 4   # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
   
   existing_breakdown:
     p25_original: 75
     p40_10_contributions: 13
     
-pattern_rationale: "Priority ranking system requires consistent visual hierarchy not covered by base status tokens but reusable across discovery features F001-US002, F001-US003, F001-US005"
+pattern_rationale: "Priority ranking system requires consistent visual hierarchy across opportunity discovery, strategy comparison, and portfolio management features (F001, F003, F006)"

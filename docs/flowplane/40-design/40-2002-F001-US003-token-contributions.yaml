@@ -5,66 +5,54 @@ feature: F001
 contributed_tokens:
   colors:
     semantic:
-      complexity_low:
-        value: "green.500"
-        justification: "Visual indicator for low complexity strategies in optimization interface"
+      correlation_threshold_high:
+        value: "red.600"
+        justification: "Distinct color for high correlation warnings in matrix visualization"
         usage_count: 3
-        elements: ["complexity-meter", "parameter-indicator", "optimization-badge"]
+        elements: ["matrix-cell-high", "threshold-indicator", "warning-badge"]
         
-      complexity_medium:
-        value: "yellow.500"
-        justification: "Visual indicator for medium complexity strategies requiring attention"
-        usage_count: 3
-        elements: ["complexity-meter", "parameter-indicator", "optimization-badge"]
+      correlation_threshold_medium:
+        value: "yellow.600"
+        justification: "Medium correlation caution state in correlation analysis"
+        usage_count: 2
+        elements: ["matrix-cell-medium", "caution-indicator"]
         
-      complexity_high:
-        value: "red.500"
-        justification: "Visual indicator for high complexity strategies needing optimization"
-        usage_count: 3
-        elements: ["complexity-meter", "parameter-indicator", "optimization-badge"]
+      diversification_excellent:
+        value: "green.700"
+        justification: "Strong positive indicator for excellent diversification scores"
+        usage_count: 2
+        elements: ["score-indicator", "status-badge"]
 
   spacing:
     semantic:
-      parameter_group_gap:
-        value: "spacing.scale.8"
-        justification: "Consistent spacing between parameter groups in configuration forms"
-        usage_count: 4
-        elements: ["parameter-section", "optimization-controls", "results-groups", "metric-clusters"]
-        
-      complexity_meter_height:
-        value: "spacing.scale.4"
-        justification: "Standard height for complexity visualization meters and progress indicators"
+      matrix_cell_gap:
+        value: "spacing.scale.1"
+        justification: "Tight spacing between correlation matrix cells for data density"
         usage_count: 2
-        elements: ["complexity-meter", "robustness-indicator"]
+        elements: ["correlation-matrix", "cell-grid"]
 
   typography:
     semantic:
-      parameter_value:
-        value: "lg"
-        justification: "Emphasized typography for parameter values and optimization results"
+      correlation_value:
+        value: "typography.scale.sm"
+        justification: "Compact text for correlation values in matrix cells"
         usage_count: 3
-        elements: ["parameter-display", "optimization-result", "complexity-score"]
+        elements: ["matrix-cell-text", "correlation-tooltip", "threshold-label"]
 
 documented_exceptions:
-  complexity_gradient_background:
-    value: "linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #ef4444 100%)"
-    justification: "Complexity meter requires CSS gradient for smooth color transition from low to high complexity"
-    usage: "Complexity meter background only"
-    mitigation: "Will parameterize when design system adds gradient token support"
-    
-  parameter_range_thumb:
-    value: "box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2)"
-    justification: "Range slider thumb requires specific box-shadow for focus state, not covered by existing shadow tokens"
-    usage: "Parameter range slider focus state"
-    mitigation: "Consider adding focus ring tokens to design system effects category"
-    
+  correlation_color_interpolation:
+    value: "linear-gradient between correlation_threshold_low and correlation_threshold_high"
+    justification: "Correlation matrix requires smooth color interpolation that cannot be achieved with discrete tokens"
+    usage: "correlation_matrix component background gradients only"
+    mitigation: "Will implement token-based interpolation when design system supports gradient token arrays"
+
 token_usage_summary:
-  existing_tokens_used: 88  # percentage
-  new_patterns_proposed: 10  # percentage
-  documented_exceptions: 2   # percentage
+  existing_tokens_used: 85
+  new_patterns_proposed: 12
+  documented_exceptions: 3
   
   existing_breakdown:
-    p25_original: 75
-    p40_10_contributions: 13
+    p25_original: 70
+    p40_10_contributions: 15
     
-pattern_rationale: "Complexity visualization patterns essential for strategy optimization interface, reusable across validation and portfolio management features that deal with strategy complexity scoring"
+pattern_rationale: "Correlation analysis requires specialized color coding and data density patterns not covered by base financial tokens but reusable across portfolio analysis features F001, F003, F004"

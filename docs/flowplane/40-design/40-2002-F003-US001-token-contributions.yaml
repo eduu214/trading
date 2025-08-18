@@ -3,48 +3,36 @@ story: F003-US001
 feature: F003
 
 contributed_tokens:
+  spacing:
+    scale:
+      80:
+        value: "320px"
+        justification: "Chart height for efficient frontier visualization requires specific dimension"
+        usage_count: 2
+        elements: ["efficient-frontier-chart", "performance-visualization"]
+        
   colors:
     semantic:
-      correlation_high:
-        value: "red.200"
-        justification: "Background color for high correlation cells in correlation matrix (>0.5)"
+      constraint_error:
+        value: "red.100"
+        justification: "Light error background for constraint violation feedback in portfolio optimization"
         usage_count: 3
-        elements: ["correlation-cell", "warning-indicator", "risk-highlight"]
+        elements: ["constraint-input-error", "validation-message-bg", "error-panel-highlight"]
         
-      correlation_medium:
-        value: "yellow.200"
-        justification: "Background color for medium correlation cells in correlation matrix (0.3-0.5)"
+  effects:
+    opacity:
+      medium:
+        value: "0.6"
+        justification: "Loading overlay opacity during portfolio optimization calculations"
         usage_count: 2
-        elements: ["correlation-cell", "caution-indicator"]
-        
-      correlation_low:
-        value: "green.200"
-        justification: "Background color for low correlation cells in correlation matrix (<0.3)"
-        usage_count: 2
-        elements: ["correlation-cell", "safe-indicator"]
-        
-  spacing:
-    semantic:
-      correlation_matrix_gap:
-        value: "spacing.scale.1"
-        justification: "Tight spacing between correlation matrix cells for dense data display"
-        usage_count: 2
-        elements: ["matrix-cell", "table-border"]
-        
-  typography:
-    semantic:
-      correlation_value:
-        value: "xs"
-        justification: "Small typography for correlation coefficient values in matrix cells"
-        usage_count: 2
-        elements: ["correlation-number", "matrix-label"]
+        elements: ["optimization-overlay", "loading-backdrop"]
 
 documented_exceptions:
-  correlation_matrix_heatmap:
-    value: "background: linear-gradient(90deg, var(--color-correlation-low) 0%, var(--color-correlation-medium) 50%, var(--color-correlation-high) 100%)"
-    justification: "CSS gradient required for correlation heatmap visualization, design token system doesn't support gradient generation"
-    usage: "Correlation matrix background visualization only"
-    mitigation: "Will parameterize when design system adds gradient token support"
+  efficient_frontier_gradient:
+    value: "linear-gradient(135deg, #3b82f6 0%, #22c55e 100%)"
+    justification: "Chart library requires CSS gradient for efficient frontier area fill, no token API support"
+    usage: "Efficient frontier chart background only"
+    mitigation: "Will migrate when chart library v3.0 supports design token gradients"
     
 token_usage_summary:
   existing_tokens_used: 88  # percentage
@@ -55,4 +43,4 @@ token_usage_summary:
     p25_original: 75
     p40_10_contributions: 13
     
-pattern_rationale: "Correlation visualization patterns specific to portfolio management but reusable across other correlation-based features like F001 strategy discovery and F004 validation framework"
+pattern_rationale: "Portfolio optimization requires specific chart dimensions and constraint validation feedback patterns that extend beyond base component needs but are reusable across portfolio management features"

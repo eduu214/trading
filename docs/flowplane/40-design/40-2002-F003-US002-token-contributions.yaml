@@ -5,47 +5,41 @@ feature: F003
 contributed_tokens:
   colors:
     semantic:
-      rotation_pending:
-        value: "blue.100"
-        justification: "Light background for strategies pending rotation decision"
+      rotation_warning:
+        value: "yellow.100"
+        justification: "Light warning background for strategy rotation alerts distinct from standard warning"
         usage_count: 3
-        elements: ["strategy-card-pending", "table-row-pending", "status-indicator"]
+        elements: ["rotation-alert-banner", "performance-warning-card", "threshold-indicator"]
         
-      audit_neutral:
-        value: "gray.100"
-        justification: "Neutral background for audit log entries with no performance impact"
+      rotation_success:
+        value: "green.100"
+        justification: "Light success background for completed rotation confirmations"
         usage_count: 2
-        elements: ["audit-row-background", "history-card-neutral"]
+        elements: ["rotation-complete-banner", "success-confirmation-card"]
 
   spacing:
     semantic:
-      rotation_timeline_gap:
-        value: "spacing.scale.8"
-        justification: "Consistent spacing between timeline elements in rotation history"
-        usage_count: 4
-        elements: ["timeline-item", "audit-entry", "history-step", "rotation-phase"]
-        
-      performance_metric_spacing:
+      rotation_panel_gap:
         value: "spacing.scale.5"
-        justification: "Optimal spacing between performance metrics in analysis grid"
-        usage_count: 3
-        elements: ["metric-grid-gap", "performance-row", "analysis-section"]
+        justification: "Specific gap between rotation recommendation items for optimal scanning"
+        usage_count: 4
+        elements: ["recommendation-list", "action-button-group", "metric-row-gap", "timeline-section-gap"]
 
   effects:
     transitions:
       rotation_fade:
-        value: "400ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-        justification: "Smooth fade transition for strategy rotation state changes"
+        value: "500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+        justification: "Smooth fade transition for retiring strategies to indicate lifecycle change"
         usage_count: 2
-        elements: ["strategy-state-change", "rotation-animation"]
+        elements: ["strategy-retirement-animation", "allocation-reduction-fade"]
 
 documented_exceptions:
-  performance_impact_gradient:
-    value: "linear-gradient(90deg, rgba(34, 197, 94, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%)"
-    justification: "Performance impact visualization requires CSS gradient for smooth color transition from profit to loss"
-    usage: "Performance analysis chart background only"
-    mitigation: "Will parameterize when design system adds gradient token support"
-    
+  performance_threshold_gradient:
+    value: "linear-gradient(90deg, rgba(239, 68, 68, 0.1) 0%, rgba(245, 158, 11, 0.1) 50%, rgba(34, 197, 94, 0.1) 100%)"
+    justification: "Performance timeline requires gradient overlay for threshold visualization, chart library limitation"
+    usage: "Performance chart threshold indicator background only"
+    mitigation: "Will migrate to design token gradient system when chart library supports CSS custom properties"
+
 token_usage_summary:
   existing_tokens_used: 88  # percentage
   new_patterns_proposed: 10  # percentage
@@ -55,4 +49,4 @@ token_usage_summary:
     p25_original: 75
     p40_10_contributions: 13
     
-pattern_rationale: "Automated rotation workflows require specific visual states for pending decisions and audit trails, reusable across portfolio management features F003-US001 and F003-US003"
+pattern_rationale: "Strategy rotation patterns provide visual feedback for automated portfolio management actions, reusable across portfolio management features F003-US001 and F003-US003"

@@ -5,39 +5,53 @@ feature: F004
 contributed_tokens:
   colors:
     semantic:
-      validation_pass_light:
-        value: "green.50"
-        justification: "Light background for validation success indicators in preview panels"
-        usage_count: 3
-        elements: ["validation-status-card", "rule-preview-success", "confirmation-banner"]
+      validation_pass:
+        value: "green.600"
+        justification: "Distinct color for validation success states, different from general success"
+        usage_count: 4
+        elements: ["validation-indicator", "rule-status", "metric-badge", "summary-card"]
         
-      validation_warning_border:
-        value: "yellow.400"
-        justification: "Border color for validation warnings that need attention but aren't errors"
-        usage_count: 2
-        elements: ["warning-validation-card", "impact-alert-border"]
+      validation_fail:
+        value: "red.600"
+        justification: "Distinct color for validation failure states, different from general error"
+        usage_count: 4
+        elements: ["validation-indicator", "rule-status", "metric-badge", "summary-card"]
+        
+      validation_warning:
+        value: "yellow.600"
+        justification: "Validation warning state for rules requiring attention but not blocking"
+        usage_count: 3
+        elements: ["validation-indicator", "rule-status", "metric-badge"]
 
   spacing:
     semantic:
-      validation_panel_gap:
-        value: "spacing.scale.5"
-        justification: "Consistent spacing between validation preview elements"
-        usage_count: 4
-        elements: ["preview-card-stack", "metric-group-spacing", "requirement-list-gap", "confirmation-section-gap"]
-        
-      rule_configuration_section:
-        value: "spacing.scale.8"
-        justification: "Larger spacing between major configuration sections for better visual hierarchy"
+      validation_section_gap:
+        value: "spacing.scale.6"
+        justification: "Consistent spacing between asset-specific validation rule sections"
         usage_count: 3
-        elements: ["asset-class-sections", "parameter-groups", "form-major-divisions"]
+        elements: ["equity-section", "fx-section", "futures-section"]
+        
+      rule_group_padding:
+        value: "spacing.scale.5"
+        justification: "Internal padding for validation rule groups to maintain readability"
+        usage_count: 6
+        elements: ["rule-container", "metric-group", "threshold-display", "criteria-list", "result-summary", "action-panel"]
+
+  borders:
+    semantic:
+      asset_class_indicator:
+        value: "borders.width.thick"
+        justification: "Thicker border to distinguish asset class sections visually"
+        usage_count: 3
+        elements: ["equity-section", "fx-section", "futures-section"]
 
 documented_exceptions:
-  validation_timeline_gradient:
-    value: "linear-gradient(90deg, #22c55e 0%, #fbbf24 50%, #ef4444 100%)"
-    justification: "Progress bar requires CSS gradient for validation timeline visualization showing pass/warning/fail states"
-    usage: "Validation timeline progress bar background only"
-    mitigation: "Will parameterize when design system adds gradient token support"
-    
+  validation_progress_gradient:
+    value: "linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #ef4444 100%)"
+    justification: "Validation progress bar requires gradient from pass to warning to fail states"
+    usage: "Validation progress indicator only"
+    mitigation: "Will parameterize when CSS custom property gradients are supported"
+
 token_usage_summary:
   existing_tokens_used: 88  # percentage
   new_patterns_proposed: 10  # percentage
@@ -47,4 +61,4 @@ token_usage_summary:
     p25_original: 75
     p40_10_contributions: 13
     
-pattern_rationale: "Validation-specific visual patterns for success/warning states and specialized spacing for configuration interfaces, reusable across validation features F004-US002 and F004-US003"
+pattern_rationale: "Asset-specific validation requires distinct visual states and spacing patterns not covered by general status tokens, reusable across validation features F004-US002 and F004-US003"

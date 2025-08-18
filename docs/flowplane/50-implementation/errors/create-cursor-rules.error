@@ -1,0 +1,11 @@
+Context: Create Cursor Rules
+Error Type: UNKNOWN_ERROR
+Message: Prompt requires ${TECHNOLOGY} but no technology identifier provided for item: Create Cursor Rules
+Retryable: false
+Stack Trace:
+Error: Prompt requires ${TECHNOLOGY} but no technology identifier provided for item: Create Cursor Rules
+    at InferenceRequestProcessor.processRequest (file:///Users/andywillis/dev/workspace/flowplane/packages/shared/dist/core/processors/InferenceRequestProcessor.js:88:35)
+    at async InferenceJobProcessorInt.processStreaming (file:///Users/andywillis/dev/workspace/flowplane/packages/shared/dist/core/processors/InferenceJobProcessorInt.js:190:13)
+    at async InferenceJobProcessorInt.process (file:///Users/andywillis/dev/workspace/flowplane/packages/shared/dist/core/processors/InferenceJobProcessorInt.js:103:9)
+    at async InferenceJobProcessor.process (file:///Users/andywillis/dev/workspace/flowplane/packages/shared/dist/core/processors/InferenceJobProcessor.js:73:9)
+    at async runProcessing (file:///Users/andywillis/dev/workspace/flowplane/packages/cli/dist/hooks/useBatchProcessor.js:185:17)

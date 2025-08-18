@@ -5,48 +5,48 @@ feature: F004
 contributed_tokens:
   colors:
     semantic:
-      performance_deviation_critical:
-        value: "red.700"
-        justification: "Stronger red for critical performance deviations that require immediate attention"
-        usage_count: 3
-        elements: ["deviation-indicator", "critical-alert-border", "variance-highlight"]
+      performance_baseline:
+        value: "gray.400"
+        justification: "Distinct color for baseline performance lines in comparison charts"
+        usage_count: 4
+        elements: ["baseline-chart-line", "expected-performance-bar", "reference-line", "benchmark-indicator"]
         
-      monitoring_status_active:
-        value: "green.500"
-        justification: "Distinct color for active monitoring status indicators"
-        usage_count: 2
-        elements: ["monitoring-badge", "status-indicator"]
-
+      alert_critical_bg:
+        value: "red.50"
+        justification: "Light background for critical performance alerts requiring immediate attention"
+        usage_count: 3
+        elements: ["critical-alert-banner", "urgent-notification-bg", "error-state-overlay"]
+        
   spacing:
     semantic:
-      performance_metric_gap:
+      alert_stack_gap:
         value: "spacing.scale.3"
-        justification: "Tight spacing between related performance metrics in monitoring cards"
-        usage_count: 4
-        elements: ["metric-group", "performance-row", "variance-display", "status-cluster"]
-
-  effects:
-    semantic:
-      alert_pulse:
-        value: "animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-        justification: "Subtle pulse animation for critical performance alerts to draw attention"
+        justification: "Tight spacing between stacked alert items for compact alert center display"
         usage_count: 2
-        elements: ["critical-alert", "deviation-indicator"]
+        elements: ["alert-list-gap", "notification-stack-spacing"]
+        
+  effects:
+    animations:
+      alert_pulse:
+        value: "1s ease-in-out infinite alternate"
+        justification: "Subtle pulsing animation for critical performance alerts to draw attention"
+        usage_count: 2
+        elements: ["critical-alert-indicator", "urgent-status-badge"]
 
 documented_exceptions:
-  variance_confidence_bands:
-    value: "stroke-dasharray: 5,5"
-    justification: "SVG stroke pattern for confidence bands in performance charts, no design token support for SVG stroke patterns"
-    usage: "Performance chart variance visualization only"
-    mitigation: "Will add SVG pattern tokens when chart visualization system is expanded"
+  statistical_significance_threshold:
+    value: "rgba(34, 197, 94, 0.15)"
+    justification: "Statistical significance visualization requires precise alpha transparency for p-value confidence intervals"
+    usage: "Performance chart confidence bands only"
+    mitigation: "Will parameterize when chart library supports CSS custom property alpha channels"
     
 token_usage_summary:
   existing_tokens_used: 88  # percentage
-  new_patterns_proposed: 9   # percentage
-  documented_exceptions: 3   # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
   
   existing_breakdown:
-    p25_original: 72
-    p40_10_contributions: 16
+    p25_original: 75
+    p40_10_contributions: 13
     
-pattern_rationale: "Performance monitoring requires specialized visual indicators for deviation severity and monitoring status that extend beyond standard alert patterns"
+pattern_rationale: "Performance monitoring requires specialized alert states and statistical visualization patterns not covered by base design system but reusable across validation features F004-US001, F004-US002"

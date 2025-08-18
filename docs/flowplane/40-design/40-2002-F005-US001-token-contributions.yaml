@@ -3,36 +3,44 @@ story: F005-US001
 feature: F005
 
 contributed_tokens:
+  colors:
+    semantic:
+      explanation_highlight:
+        value: "blue.100"
+        justification: "Subtle background highlight for key explanation concepts and terms"
+        usage_count: 3
+        elements: ["concept-highlight", "key-term-bg", "important-section"]
+        
   spacing:
     semantic:
       explanation_section_gap:
-        value: "spacing.scale.12"
-        justification: "Consistent large gap between explanation sections for better content separation and readability"
+        value: "spacing.scale.10"
+        justification: "Specific gap between explanation sections for optimal readability flow"
         usage_count: 4
-        elements: ["strategy-overview", "market-context", "performance-rationale", "risk-explanation"]
+        elements: ["section-divider", "explanation-blocks", "context-panels", "metric-groups"]
         
   typography:
     semantic:
       explanation_body:
         value: "lg"
-        justification: "Larger body text for explanation content to improve readability for non-technical users"
-        usage_count: 3
-        elements: ["strategy-description", "market-context-text", "performance-explanation"]
+        justification: "Larger body text for explanation content to improve readability for non-experts"
+        usage_count: 2
+        elements: ["main-explanation", "context-description"]
 
 documented_exceptions:
-  research_citation_opacity:
-    value: "rgba(100, 116, 139, 0.7)"
-    justification: "Research citations require specific opacity for visual hierarchy without semantic token for citation styling"
-    usage: "Market research source citations only"
-    mitigation: "Will create citation semantic tokens if pattern extends to other features"
+  market_context_icons:
+    value: "url('/icons/market-trend.svg')"
+    justification: "Market context requires specific iconography not available in design system"
+    usage: "Market context panel icons only"
+    mitigation: "Will add icon tokens to design system in next iteration"
     
 token_usage_summary:
   existing_tokens_used: 88  # percentage
-  new_patterns_proposed: 8   # percentage
-  documented_exceptions: 4   # percentage
+  new_patterns_proposed: 10  # percentage
+  documented_exceptions: 2   # percentage
   
   existing_breakdown:
     p25_original: 75
     p40_10_contributions: 13
     
-pattern_rationale: "Explanation-specific spacing and typography patterns needed for content-heavy educational interfaces, reusable across F005 stories and potentially F006 help content"
+pattern_rationale: "Explanation-focused patterns needed for educational content display across strategy insight features F005-US002 and F005-US003"
