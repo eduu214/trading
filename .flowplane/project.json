@@ -1,0 +1,15 @@
+{
+  "name": "jack-trading",
+  "description": "A FlowPlane project",
+  "version": "0.1.0",
+  "created": "2025-08-18T05:58:05.312Z",
+  "lastModified": "2025-08-18T05:58:05.312Z",
+  "requirementsProfile": {
+    "userBase": "personal",
+    "environment": "local",
+    "criticality": "experimental",
+    "performance": "balanced",
+    "security": "standard",
+    "accessibility": "basic"
+  }
+}

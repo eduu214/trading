@@ -5,54 +5,46 @@ feature: F004
 contributed_tokens:
   colors:
     semantic:
-      validation_pending:
-        value: "blue.100"
-        justification: "Light background for pending validation states, distinct from primary_light"
+      complexity_score_low:
+        value: "green.600"
+        justification: "Visual indicator for low complexity strategies requiring standard validation"
         usage_count: 3
-        elements: ["validation-card", "status-indicator", "progress-section"]
+        elements: ["complexity-indicator", "score-badge", "progress-bar"]
         
-      complexity_indicator_bg:
-        value: "gray.100"
-        justification: "Neutral background for complexity metric displays"
-        usage_count: 4
-        elements: ["complexity-card", "metric-background", "analysis-section", "summary-panel"]
+      complexity_score_medium:
+        value: "yellow.600"
+        justification: "Visual indicator for medium complexity strategies requiring extended validation"
+        usage_count: 3
+        elements: ["complexity-indicator", "score-badge", "progress-bar"]
+        
+      complexity_score_high:
+        value: "red.600"
+        justification: "Visual indicator for high complexity strategies requiring rigorous validation"
+        usage_count: 3
+        elements: ["complexity-indicator", "score-badge", "progress-bar"]
 
   spacing:
     semantic:
-      validation_progress_gap:
-        value: "spacing.scale.5"
-        justification: "Specific spacing between validation progress elements for optimal readability"
-        usage_count: 3
-        elements: ["progress-steps", "status-indicators", "timeline-items"]
-        
-      results_summary_padding:
-        value: "spacing.scale.8"
-        justification: "Enhanced padding for validation results cards to emphasize importance"
-        usage_count: 2
-        elements: ["result-card", "summary-container"]
-
-  typography:
-    semantic:
-      validation_metric:
-        value: "lg"
-        justification: "Prominent display for key validation metrics like Sharpe ratio and drawdown"
+      validation_section_gap:
+        value: "spacing.scale.6"
+        justification: "Consistent spacing between validation result sections for optimal readability"
         usage_count: 4
-        elements: ["metric-value", "performance-number", "risk-score", "complexity-score"]
+        elements: ["results-grid", "metrics-section", "table-section", "action-section"]
 
   effects:
-    semantic:
-      validation_pulse:
-        value: "2s ease-in-out infinite alternate"
-        justification: "Subtle pulse animation for active validation indicators"
+    transitions:
+      complexity_analysis:
+        value: "400ms cubic-bezier(0.4, 0, 0.2, 1)"
+        justification: "Smooth transition for complexity score changes and validation requirement updates"
         usage_count: 2
-        elements: ["running-indicator", "progress-pulse"]
+        elements: ["complexity-score-animation", "validation-requirements-update"]
 
 documented_exceptions:
-  complexity_heatmap_gradient:
-    value: "linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #ef4444 100%)"
-    justification: "Complexity visualization requires gradient from low (green) to high (red) risk"
-    usage: "Complexity analysis heatmap background only"
-    mitigation: "Will create gradient token category when design system supports multi-stop gradients"
+  validation_progress_gradient:
+    value: "linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%)"
+    justification: "Progress bar requires gradient for visual depth, current design system doesn't support gradient tokens"
+    usage: "Validation execution progress indicator only"
+    mitigation: "Will implement gradient token support in design system v2.0"
     
 token_usage_summary:
   existing_tokens_used: 88  # percentage
@@ -63,4 +55,4 @@ token_usage_summary:
     p25_original: 75
     p40_10_contributions: 13
     
-pattern_rationale: "Validation-specific patterns for progress tracking and complexity visualization, reusable across validation features F004 and testing workflows in F001, F003"
+pattern_rationale: "Complexity-based validation requires visual differentiation of complexity levels and specialized transitions for analysis workflows, reusable across validation features F004-US001 and F004-US003"

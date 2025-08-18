@@ -22,24 +22,29 @@
 #### FR-002: Pattern Recognition and Inefficiency Detection
 - **Priority**: MUST
 - **Stories**: [F001-US002]
-- **Description**: Identify exploitable market inefficiencies using AI-powered pattern recognition
+- **Description**: Identify exploitable market inefficiencies using AI-powered pattern recognition with complexity optimization
 - **Business Rules**:
   - Detect patterns across multiple timeframes (1min to daily)
   - Focus on statistical arbitrage and mean reversion opportunities
   - Filter patterns by minimum expected Sharpe ratio >1.0
+  - Optimize strategy complexity: prefer simpler strategies with fewer parameters
+  - Maximum 5 input parameters per strategy to prevent overfitting
 - **Validation**: Generate 20+ validated strategies monthly with documented patterns
 - **Infrastructure**: Uses SVC-004, SVC-001 (from registry)
 
-#### FR-003: Strategy Complexity Optimization
+#### FR-003: Strategy Correlation and Diversification Analysis
 - **Priority**: MUST
 - **Stories**: [F001-US003]
-- **Description**: Optimize strategy complexity to balance performance with robustness
+- **Description**: Analyze correlation between actual strategy returns to ensure portfolio diversification
 - **Business Rules**:
-  - Prefer simpler strategies with fewer parameters
-  - Maximum 5 input parameters per strategy
-  - Penalize overfitting through complexity scoring
-- **Validation**: Strategies maintain performance across out-of-sample periods
-- **Infrastructure**: Uses DB-001 (from registry)
+  - Calculate correlation from strategy returns, NOT price movements
+  - Target correlation <0.3 between active strategies (low correlation)
+  - Warning threshold at correlation >0.6 (high correlation)
+  - Diversification score: 0-100 scale based on average correlation
+  - Minimum 30 days of returns required for correlation calculation
+  - Correlation matrix visualization: Red (>0.7), Yellow (0.3-0.7), Green (<0.3)
+- **Validation**: Portfolio maintains 5+ strategies with average correlation <0.3
+- **Infrastructure**: Uses F002-US001 strategy returns, DB-001
 
 #### FR-004: Correlation Analysis and Diversification
 - **Priority**: MUST
@@ -65,16 +70,20 @@
 
 ### Feature: F002 - Code Generation & Execution Bridge
 
-#### FR-006: Multi-Platform Code Generation
+#### FR-006: Real Strategy Implementation with Backtesting
 - **Priority**: MUST
 - **Stories**: [F002-US001]
-- **Description**: Generate executable trading code for multiple platforms from strategy specifications
+- **Description**: Implement proven trading strategies using technical indicators with comprehensive backtesting validation
 - **Business Rules**:
-  - Support Alpaca API format as primary target
-  - Generate both paper trading and live trading versions
-  - Include comprehensive error handling and logging
-- **Validation**: Generated code executes without modification, <1% execution error rate
-- **Infrastructure**: Uses SVC-002 (from registry)
+  - Technical indicators: RSI (14-period), MACD (12/26/9), Bollinger Bands (20-period, 2 std dev), ATR
+  - RSI Mean Reversion: Entry at RSI <30 or >70, exit at RSI=50
+  - MACD Momentum: Entry on MACD/signal crossover with trend filter
+  - Bollinger Breakout: Entry on band break with volume confirmation
+  - Backtesting requirements: Minimum 6 months historical data
+  - Performance thresholds: Sharpe ratio >1.0, max drawdown <15%, win rate >45%
+  - Walk-forward analysis: 70% in-sample, 30% out-of-sample validation
+- **Validation**: Strategies achieve target Sharpe >1.0 in backtesting, performance metrics displayed clearly
+- **Infrastructure**: Uses SVC-002 (strategy_execution_engine with TA-Lib, Vectorbt)
 
 #### FR-007: Execution Safety Checks
 - **Priority**: MUST
@@ -101,16 +110,20 @@
 
 ### Feature: F003 - Strategy Portfolio Management
 
-#### FR-009: Correlation-Based Portfolio Construction
+#### FR-009: Strategy-Based Portfolio Construction with MPT
 - **Priority**: MUST
 - **Stories**: [F003-US001]
-- **Description**: Construct and maintain portfolio of strategies based on correlation analysis
+- **Description**: Construct optimal portfolio using Modern Portfolio Theory across proven strategies
 - **Business Rules**:
-  - Maximum 50% allocation to any single strategy
-  - Rebalance when correlation exceeds 0.5 threshold
-  - Maintain minimum 5 active strategies for diversification
-- **Validation**: Portfolio correlation matrix stays within defined bounds
-- **Infrastructure**: Uses SVC-002, DB-001 (from registry)
+  - Mean-Variance Optimization (Markowitz) for allocation
+  - Maximum 30% allocation to any single strategy
+  - Minimum 5% allocation for included strategies
+  - Efficient frontier visualization required
+  - Risk budgeting: Equal risk contribution option
+  - Rebalancing triggers: >5% allocation drift, Sharpe <80% of target
+  - Correlated strategies (>0.6): Combined maximum 50% allocation
+- **Validation**: Portfolio achieves maximum Sharpe ratio within constraints
+- **Infrastructure**: Uses SVC-002 (PyPortfolioOpt), F002-US001, F001-US003
 
 #### FR-010: Automated Strategy Rotation
 - **Priority**: MUST
@@ -266,19 +279,19 @@
 - **Rationale**: Intraday strategies require near real-time data processing
 - **Infrastructure**: References SVC-001 (from registry)
 
-#### TR-002: Strategy Code Compilation and Validation
+#### TR-002: Technical Analysis Libraries
 - **Feature**: F002
 - **Stories**: [F002-US001]
-- **Requirement**: Compile and validate generated trading code before execution
-- **Rationale**: Prevent runtime errors in live trading environment
-- **Infrastructure**: References SVC-002 (from registry)
+- **Requirement**: Integrate TA-Lib for technical indicators, Vectorbt for backtesting, PyPortfolioOpt for optimization
+- **Rationale**: Industry-standard libraries provide reliable, optimized implementations
+- **Infrastructure**: References SVC-002 (strategy_execution_engine)
 
 #### TR-003: Portfolio Optimization Algorithms
 - **Feature**: F003
 - **Stories**: [F003-US001]
-- **Requirement**: Implement efficient portfolio optimization using modern portfolio theory
-- **Rationale**: Optimal allocation requires sophisticated mathematical optimization
-- **Infrastructure**: References SVC-002 (from registry)
+- **Requirement**: Implement Mean-Variance Optimization (Markowitz) with efficient frontier calculation
+- **Rationale**: Modern Portfolio Theory provides mathematically optimal allocation
+- **Infrastructure**: References SVC-002 (PyPortfolioOpt), requires correlation matrix from F001-US003
 
 #### TR-004: Statistical Testing Framework
 - **Feature**: F004
@@ -323,7 +336,26 @@
 
 ## Non-Functional Requirements
 
-### Performance
+#### NFR-P-006: Backtesting Performance
+- **Metric**: Complete strategy backtesting within defined time limits
+- **Applies To**: F002-US001
+- **Measurement**: Time to complete backtesting with historical data
+- **Threshold**: 
+  - 6 months daily data: <30 seconds
+  - 1 year hourly data: <60 seconds
+  - 3 months minute data: <120 seconds
+
+#### NFR-P-007: Technical Indicator Calculation
+- **Metric**: Calculate technical indicators for multiple symbols efficiently
+- **Applies To**: F002-US001
+- **Measurement**: Time to calculate RSI, MACD, Bollinger Bands
+- **Threshold**: <1 second per symbol, <5 seconds for 100 symbols
+
+#### NFR-P-008: Strategy Signal Generation
+- **Metric**: Generate trading signals with minimal latency
+- **Applies To**: F002-US001, F003
+- **Measurement**: Time from data update to signal generation
+- **Threshold**: <5 seconds for all active strategies
 
 #### NFR-P-001: Strategy Discovery Throughput
 - **Metric**: Generate 20+ validated strategies monthly across all asset classes

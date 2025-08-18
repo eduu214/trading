@@ -5,46 +5,46 @@ feature: F006
 contributed_tokens:
   colors:
     semantic:
-      dashboard_panel_border:
-        value: "gray.200"
-        justification: "Subtle border for dashboard panels to separate monitoring sections without visual noise"
-        usage_count: 4
-        elements: ["system-health-panel", "strategy-panel", "alert-panel", "performance-panel"]
-        
-      real_time_pulse:
-        value: "blue.400"
-        justification: "Animated pulse indicator for real-time data updates across monitoring interface"
+      dashboard_background:
+        value: "colors.semantic.background"
+        justification: "Specific background color for dashboard layouts to ensure consistency across monitoring interfaces"
         usage_count: 3
-        elements: ["live-indicator", "chart-update-dot", "status-pulse"]
+        elements: ["dashboard-container", "monitoring-panel", "main-content-area"]
+        
+      critical_alert_text:
+        value: "colors.semantic.text.inverse"
+        justification: "High contrast text for critical system alerts that require immediate attention"
+        usage_count: 2
+        elements: ["emergency-alert", "system-critical-banner"]
 
   spacing:
     semantic:
       dashboard_section_gap:
-        value: "spacing.scale.8"
-        justification: "Consistent spacing between major dashboard sections for clear visual hierarchy"
-        usage_count: 3
-        elements: ["panel-separator", "section-divider", "widget-gap"]
+        value: "spacing.semantic.xl"
+        justification: "Consistent spacing between major dashboard sections for visual hierarchy"
+        usage_count: 4
+        elements: ["section-divider", "panel-separator", "card-group-gap", "content-sections"]
         
-      monitoring_widget_padding:
-        value: "spacing.scale.5"
-        justification: "Compact padding for monitoring widgets to maximize information density"
-        usage_count: 5
-        elements: ["status-widget", "metric-widget", "alert-item", "connection-status", "performance-summary"]
+      metric_grid_gap:
+        value: "spacing.semantic.md"
+        justification: "Optimal spacing for metric displays in grid layouts for readability without wasted space"
+        usage_count: 3
+        elements: ["health-metrics-grid", "performance-metrics", "status-indicators"]
 
   effects:
-    semantic:
-      real_time_glow:
-        value: "0 0 8px rgba(59, 130, 246, 0.3)"
-        justification: "Subtle glow effect for active real-time elements to indicate live data"
-        usage_count: 2
-        elements: ["live-chart-border", "active-strategy-indicator"]
+    transitions:
+      real_time_update:
+        value: "150ms cubic-bezier(0.4, 0, 0.2, 1)"
+        justification: "Fast transition for real-time data updates to provide immediate visual feedback"
+        usage_count: 5
+        elements: ["price-update", "status-change", "metric-refresh", "chart-update", "trade-highlight"]
 
 documented_exceptions:
   websocket_connection_indicator:
-    value: "radial-gradient(circle, #22c55e 0%, #16a34a 70%)"
-    justification: "WebSocket connection status requires gradient for visual distinction from other status indicators, no gradient tokens in current system"
-    usage: "Connection status indicator only"
-    mitigation: "Will standardize when gradient token category added to design system"
+    value: "rgba(34, 197, 94, 0.8)"
+    justification: "WebSocket connection status requires specific opacity for overlay visibility that cannot be achieved with current token system"
+    usage: "Real-time connection status indicator only"
+    mitigation: "Will parameterize when opacity tokens are added to design system"
     
 token_usage_summary:
   existing_tokens_used: 88  # percentage
@@ -55,4 +55,4 @@ token_usage_summary:
     p25_original: 75
     p40_10_contributions: 13
     
-pattern_rationale: "Real-time monitoring interfaces require specialized visual patterns for live data indication and dashboard organization not covered by standard component tokens"
+pattern_rationale: "Real-time monitoring interfaces require specific spacing and transition patterns for optimal user experience during live data updates, reusable across F006 monitoring features"

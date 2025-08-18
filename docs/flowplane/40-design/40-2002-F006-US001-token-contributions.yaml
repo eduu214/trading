@@ -3,36 +3,50 @@ story: F006-US001
 feature: F006
 
 contributed_tokens:
+  colors:
+    semantic:
+      approval_pending:
+        value: "yellow.100"
+        justification: "Background color for strategies awaiting approval decision"
+        usage_count: 3
+        elements: ["strategy-card-pending", "approval-badge", "status-indicator"]
+        
+      approval_success:
+        value: "green.50"
+        justification: "Success state background for approved strategies"
+        usage_count: 2
+        elements: ["success-toast", "approved-card-highlight"]
+
   spacing:
     semantic:
-      discovery_grid_gap:
-        value: "spacing.scale.8"
-        justification: "Optimal spacing between strategy cards in discovery grid for scanning efficiency"
-        usage_count: 3
-        elements: ["strategy-grid", "card-container", "responsive-layout"]
-        
-  effects:
-    semantic:
-      strategy_approval_transition:
-        value: "500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-        justification: "Smooth transition for strategy approval state changes to provide clear feedback"
+      dashboard_grid_gap:
+        value: "spacing.scale.6"
+        justification: "Optimal spacing between strategy cards for scanning efficiency"
         usage_count: 2
-        elements: ["strategy-card-approval", "status-change-animation"]
+        elements: ["grid-layout", "card-container"]
+
+  effects:
+    opacity:
+      medium:
+        value: "0.6"
+        justification: "Loading overlay opacity for modal and dashboard states"
+        usage_count: 2
+        elements: ["loading-overlay", "disabled-state"]
 
 documented_exceptions:
-  strategy_grid_masonry:
-    value: "display: grid; grid-template-rows: masonry"
-    justification: "CSS Grid masonry layout needed for optimal card arrangement with varying content heights"
-    usage: "Strategy discovery grid layout only"
-    mitigation: "Will use flexbox fallback until masonry support improves, then parameterize"
-    
+  strategy_correlation_gradient:
+    value: "linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #ef4444 100%)"
+    justification: "Strategy correlation visualization requires CSS gradient not supported by current token system"
+    usage: "Correlation score indicator bar in strategy cards"
+    mitigation: "Will implement as token array when design system supports gradient tokens"
+
 token_usage_summary:
   existing_tokens_used: 88  # percentage
   new_patterns_proposed: 8   # percentage
   documented_exceptions: 4   # percentage
   
   existing_breakdown:
-    p25_original: 75
-    p40_10_contributions: 13
+    p25_original: 72
+    p40_10_contributions: 16
     
-pattern_rationale: "Discovery interface patterns specific to strategy review workflows, reusable for other discovery features in F001 and F005"
+pattern_rationale: "Strategy approval workflow requires specific visual states for pending/approved status that will be reused across F006-US002 and F006-US003 for consistent user experience"

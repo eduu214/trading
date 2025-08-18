@@ -3,48 +3,34 @@ story: F002-US001
 feature: F002
 
 contributed_tokens:
+  spacing:
+    scale:
+      80:
+        value: "320px"
+        justification: "Chart container height for backtesting results visualization"
+        usage_count: 2
+        elements: ["performance-chart", "chart-container"]
+        
+      96:
+        value: "384px"
+        justification: "Maximum height for scrollable trade details table"
+        usage_count: 2
+        elements: ["data-table-container", "results-table"]
+
   colors:
     semantic:
-      code_syntax_highlight:
-        value: "blue.700"
-        justification: "Syntax highlighting for generated code requires distinct color from primary blue"
+      validation_border:
+        value: "green.200"
+        justification: "Subtle border color for successful validation states"
         usage_count: 3
-        elements: ["code-keywords", "code-functions", "code-variables"]
-        
-      deployment_success:
-        value: "green.700"
-        justification: "Stronger success color needed for deployment confirmation states"
-        usage_count: 2
-        elements: ["deploy-button-active", "success-status-strong"]
-
-  spacing:
-    semantic:
-      code_preview_padding:
-        value: "spacing.scale.5"
-        justification: "Specific padding for code preview containers to ensure readability"
-        usage_count: 2
-        elements: ["code-container", "syntax-block"]
-        
-      safety_check_gap:
-        value: "spacing.scale.4"
-        justification: "Consistent gap between safety check items in validation summary"
-        usage_count: 3
-        elements: ["safety-item-gap", "validation-list-gap", "check-result-spacing"]
-
-  effects:
-    transitions:
-      code_generation_progress:
-        value: "500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-        justification: "Smooth progress animation for multi-step code generation process"
-        usage_count: 2
-        elements: ["progress-step-transition", "status-change-animation"]
+        elements: ["validation-card", "success-panel", "approved-strategy"]
 
 documented_exceptions:
-  syntax_highlighter_theme:
-    value: "{ background: '#f8fafc', color: '#334155', keyword: '#1d4ed8' }"
-    justification: "Code syntax highlighter requires object configuration, not individual CSS properties"
-    usage: "Code preview component only"
-    mitigation: "Will create semantic token mapping when syntax highlighter supports CSS custom properties"
+  technical_indicator_colors:
+    value: ["#3b82f6", "#ef4444", "#f59e0b", "#22c55e"]
+    justification: "TA-Lib charting library requires specific hex color array for RSI, MACD, Bollinger Bands, ATR indicators"
+    usage: "Technical indicator chart overlays only"
+    mitigation: "Will migrate to CSS custom properties when TA-Lib v2.0 supports design tokens"
     
 token_usage_summary:
   existing_tokens_used: 88  # percentage
@@ -55,4 +41,4 @@ token_usage_summary:
     p25_original: 75
     p40_10_contributions: 13
     
-pattern_rationale: "Code generation workflows require specialized visual patterns for syntax highlighting and multi-step progress indication, reusable across code generation features F002 and validation features F004"
+pattern_rationale: "Chart sizing and validation state patterns specific to financial backtesting workflows, reusable across strategy validation features F002, F003, F004"

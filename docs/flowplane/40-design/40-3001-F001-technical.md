@@ -3,132 +3,129 @@
 ## 1. Architecture Overview
 
 ### 1.1 Technical Strategy
-The AI Strategy Discovery Engine leverages PostgreSQL with TimescaleDB extension for efficient time-series data storage and retrieval, enabling rapid analysis of multi-asset market inefficiencies. Redis provides high-performance caching for real-time market data streams from Polygon.io, while Celery orchestrates distributed processing across multiple worker nodes. This architecture enables the system to process 1000+ symbols simultaneously while maintaining sub-minute latency for intraday opportunity detection.
+F001 leverages PostgreSQL with TimescaleDB extension for time-series optimization, Redis for high-speed caching, and Celery for distributed processing. The Polygon.io WebSocket API provides real-time market data across US equities, major FX pairs, and CME micro futures. This architecture enables continuous market scanning with sub-minute latency while maintaining 5+ years of historical data for pattern recognition.
 
 ### 1.2 Key Decisions
-- **Decision**: Use Vectorbt for backtesting and hypothesis testing
-- **Rationale**: Vectorized operations provide 100x performance improvement over loop-based alternatives, enabling rapid testing of multiple strategy variations
-- **Trade-offs**: Gain massive performance improvements but sacrifice some flexibility in custom indicator development
+- **Decision**: Use Polygon.io as primary data source with Redis caching layer
+- **Rationale**: Polygon.io provides unified API across all asset classes with excellent free tier for development and reasonable production costs
+- **Trade-offs**: Single vendor dependency vs simplified integration and cost control
 
-- **Decision**: Implement Polygon.io WebSocket for real-time data ingestion
-- **Rationale**: Sub-minute latency requirements demand streaming data rather than polling APIs
-- **Trade-offs**: Achieve real-time processing but increase system complexity and connection management overhead
+- **Decision**: Implement correlation analysis on strategy returns rather than price movements
+- **Rationale**: Strategy return correlation provides true diversification insight for portfolio construction
+- **Trade-offs**: Requires 30+ days of strategy execution data vs immediate correlation from price data
 
-- **Decision**: Separate discovery workers by asset class specialization
-- **Rationale**: Different asset classes require specialized analysis patterns and market structure knowledge
-- **Trade-offs**: Enable optimized processing per asset type but increase worker management complexity
+- **Decision**: Celery workers specialized by pattern type and asset class
+- **Rationale**: Enables parallel processing of different inefficiency detection algorithms
+- **Trade-offs**: Higher complexity vs significantly improved throughput for 1000+ symbol scanning
 
 ## 2. Shared Component Architecture
 
-### 2.1 Market Data Pipeline Service (SVC-001)
-- **Purpose**: Aggregates and normalizes market data from Polygon.io across all asset classes
-- **Used By**: F001-US001, F001-US004
+### 2.1 Market Data Pipeline (SVC-001)
+- **Purpose**: Aggregates and processes real-time market data from Polygon.io across all asset classes
+- **Used By**: F001-US001, F001-US004, F004-US001, F005-US003
 - **Behaviors**: 
-  - Maintains persistent WebSocket connections to Polygon.io
-  - Transforms raw market data into standardized format using pytz for timezone normalization
-  - Buffers real-time data in Redis with 1-hour sliding window
-  - Coordinates data synchronization across US equities, FX pairs, and CME micro futures
-- **Constraints**: Process 1000+ symbols with sub-minute latency, handle market hours across multiple timezones
+  - Maintains persistent WebSocket connections to Polygon.io for real-time feeds
+  - Coordinates data synchronization across US equities, FX pairs, and futures markets
+  - Transforms raw market data into normalized format with UTC timestamps using pytz
+  - Buffers high-frequency data in Redis for sub-second access
+- **Constraints**: Process 1000+ symbols per scan cycle, maintain sub-minute latency for intraday opportunities
 
-### 2.2 Pattern Recognition Engine
-- **Purpose**: Identifies exploitable market inefficiencies using statistical analysis
-- **Used By**: F001-US002, F001-US003
+### 2.2 Async Task Processor (SVC-004)
+- **Purpose**: Manages computationally intensive background tasks for pattern recognition and analysis
+- **Used By**: F001-US002, F003-US002, F004-US002, F005-US001
 - **Behaviors**:
-  - Analyzes price patterns across multiple timeframes using pandas vectorized operations
-  - Detects mean reversion and momentum opportunities through rolling correlation analysis
-  - Validates pattern significance using statistical hypothesis testing
-  - Filters patterns by minimum Sharpe ratio threshold of 1.0
-- **Constraints**: Complete pattern analysis within 5-minute windows, maintain 95% statistical confidence
+  - Orchestrates distributed processing across specialized Celery workers
+  - Manages task queues for different analysis types (momentum, mean reversion, arbitrage)
+  - Coordinates scheduled scanning tasks via Celery Beat
+  - Tracks task progress and provides status updates for long-running operations
+- **Constraints**: Support 10+ simultaneous complex analysis tasks, sub-minute task scheduling
 
-### 2.3 Strategy Complexity Optimizer
-- **Purpose**: Determines optimal parameter count and complexity for discovered strategies
-- **Used By**: F001-US003, F001-US005
+### 2.3 Strategy Correlation Engine
+- **Purpose**: Calculates and monitors correlation between strategy returns for diversification analysis
+- **Used By**: F001-US003, F003-US001
 - **Behaviors**:
-  - Evaluates strategy performance across complexity spectrum using Optuna optimization
-  - Penalizes overfitting through cross-validation scoring
-  - Maintains complexity-to-performance curves for decision support
-  - Enforces maximum 5-parameter limit per strategy
-- **Constraints**: Complete optimization within 1 hour, test 10+ complexity variations per strategy
+  - Maintains rolling correlation matrices from actual strategy performance data
+  - Generates diversification scores on 0-100 scale based on average correlation
+  - Triggers alerts when strategy correlation exceeds 0.6 threshold
+  - Provides correlation visualization with color-coded matrix (Red >0.7, Yellow 0.3-0.7, Green <0.3)
+- **Constraints**: Requires minimum 30 days of strategy returns, updates correlation calculations every 15 minutes during market hours
 
-### 2.4 Cross-Asset Correlation Engine
-- **Purpose**: Analyzes relationships between different asset classes for diversification
-- **Used By**: F001-US004, F001-US005
+### 2.4 Pattern Recognition Framework
+- **Purpose**: Identifies exploitable market inefficiencies using statistical analysis and complexity optimization
+- **Used By**: F001-US002, F001-US005
 - **Behaviors**:
-  - Calculates rolling correlation matrices across all available instruments
-  - Generates currency strength indices from Alpaca FX pairs
-  - Tracks sector rotation signals using equity ETFs
-  - Maintains correlation history in PostgreSQL for regime analysis
-- **Constraints**: Update correlations every 15 minutes, handle 50+ asset relationships simultaneously
-
-### 2.5 Async Task Processor (SVC-004)
-- **Purpose**: Manages computationally intensive discovery tasks across distributed workers
-- **Used By**: F001-US002, F001-US003
-- **Behaviors**:
-  - Orchestrates parallel processing of market scans using Celery
-  - Coordinates task scheduling based on market hours and data availability
-  - Manages worker specialization by asset class and analysis type
-  - Provides task progress tracking and failure recovery
-- **Constraints**: Support 10+ concurrent complex tasks, maintain task queue under 100 items
+  - Detects patterns across multiple timeframes from 1-minute to daily intervals
+  - Validates statistical significance of discovered patterns
+  - Optimizes strategy complexity by preferring simpler approaches with fewer parameters
+  - Filters opportunities by minimum Sharpe ratio threshold of 1.0
+- **Constraints**: Maximum 5 input parameters per strategy, focus on statistical arbitrage and mean reversion
 
 ## 3. Data Architecture
 
-### 3.1 Time-Series Data Model
-Market data persists in PostgreSQL with TimescaleDB extension, optimized for time-series queries across multiple asset classes. The system maintains 5 years of historical minute-bar data with automatic partitioning by time and symbol. Real-time data flows through Redis buffers before PostgreSQL persistence, enabling both immediate analysis and historical backtesting.
+### 3.1 Time-Series Data Management
+PostgreSQL with TimescaleDB extension stores market data with automatic partitioning by time and symbol. Historical data spans 5+ years with minute-level granularity for backtesting. All timestamps stored in UTC with timezone conversion handled by pytz for market hours across different regions.
 
-### 3.2 Strategy Discovery State
-Discovery processes maintain state through PostgreSQL tables tracking pattern analysis progress, validation results, and optimization history. Each discovered strategy includes metadata about market conditions, statistical significance, and complexity scores. The system preserves complete audit trails for regulatory compliance and performance analysis.
+### 3.2 Real-Time Data Flow
+Polygon.io WebSocket streams feed Redis buffers for immediate access. Market data flows through validation and normalization before persistence in PostgreSQL. Corporate actions and reference data from Polygon.io API maintain data integrity across stock splits and dividend adjustments.
 
-### 3.3 Correlation Matrices
-Cross-asset correlation data stores in specialized PostgreSQL tables with TimescaleDB compression for efficient historical analysis. Rolling correlation calculations update incrementally, maintaining multiple timeframe perspectives (daily, weekly, monthly) for regime change detection.
+### 3.3 Strategy Metadata Storage
+Strategy parameters, correlation matrices, and performance metrics persist in PostgreSQL with versioning for audit trails. Pattern recognition results link to underlying market data for validation and explanation generation.
 
 ## 4. Service Layer
 
-### 4.1 Discovery Orchestration Service
-- **Technology**: FastAPI with Celery integration
-- **Responsibility**: Coordinates discovery workflows across asset classes and timeframes
-- **Performance**: Initiate 20+ discovery tasks per hour during market sessions
+### 4.1 Multi-Asset Scanner Service
+- **Technology**: Celery workers with pandas/numpy for data analysis
+- **Responsibility**: Coordinates scanning across US equities, FX pairs, and CME micro futures
+- **Performance**: Process 1000+ symbols per scan cycle with sub-minute latency
 
-### 4.2 Pattern Analysis Service
-- **Technology**: Python with pandas, numpy, and Vectorbt
-- **Responsibility**: Executes statistical analysis and pattern recognition algorithms
-- **Performance**: Process 1000+ symbols within 5-minute analysis windows
+### 4.2 Inefficiency Detection Service
+- **Technology**: Vectorbt for rapid hypothesis testing with statistical validation
+- **Responsibility**: Identifies and validates market inefficiencies using pattern recognition
+- **Performance**: Generate 20+ validated strategies monthly with Sharpe ratio >1.0
 
-### 4.3 Validation Service
-- **Technology**: Custom validation framework with Pydantic schemas
-- **Responsibility**: Validates discovered patterns against statistical significance thresholds
-- **Performance**: Complete validation within 30 seconds per strategy candidate
+### 4.3 Correlation Analysis Service
+- **Technology**: pandas correlation calculations with custom algorithms
+- **Responsibility**: Maintains strategy return correlation matrices for diversification
+- **Performance**: Update correlations every 15 minutes, support 50+ concurrent strategies
 
-### 4.4 Data Synchronization Service
-- **Technology**: Polygon.io WebSocket with Redis buffering
-- **Responsibility**: Maintains synchronized market data across all asset classes
-- **Performance**: Sub-second data synchronization with timezone normalization using pytz
+### 4.4 Opportunity Prioritization Service
+- **Technology**: Custom scoring algorithms with PostgreSQL storage
+- **Responsibility**: Ranks discovered opportunities by risk-adjusted return potential
+- **Performance**: Real-time scoring updates as new opportunities discovered
 
 ## 5. Integration Architecture
 
 ### 5.1 External Data Integration
-The system integrates with Polygon.io through WebSocket connections for real-time data and REST API for historical data retrieval. All timestamps convert to UTC using pytz for consistent analysis across global markets. Corporate actions data from Polygon.io reference API ensures strategy validation accounts for stock splits and dividends.
+Polygon.io WebSocket API provides unified market data across all asset classes. Rate limiting managed through connection pooling and request queuing. API key rotation and error handling ensure continuous data availability.
 
-### 5.2 Infrastructure Services
-Discovery processes utilize shared infrastructure services including the async task processor for distributed computation and the validation framework for strategy verification. Real-time notifications service provides updates on discovery progress and newly identified opportunities.
+### 5.2 Infrastructure Services Integration
+- **SVC-001**: Market Data Pipeline coordinates with all discovery components
+- **SVC-004**: Async Task Processor handles computationally intensive analysis
+- **DB-001**: PostgreSQL with TimescaleDB stores all time-series and metadata
 
-### 5.3 Event Patterns
-The system publishes discovery events through Redis pub/sub channels, enabling real-time updates to the web interface and triggering downstream validation processes. Event payloads include strategy metadata, performance metrics, and correlation analysis results.
+### 5.3 Cross-Feature Integration
+Strategy correlation data flows to F003 for portfolio construction. Discovered opportunities integrate with F004 validation framework before deployment. Pattern explanations connect to F005 insight generation.
 
 ## 6. Architecture Validation
 
 | Story | Components | Services | Requirements |
 |-------|-----------|----------|--------------|
-| F001-US001 | Market Data Pipeline, Cross-Asset Correlation Engine | Discovery Orchestration, Data Synchronization | Multi-asset scanning with 1000+ symbols |
-| F001-US002 | Pattern Recognition Engine, Async Task Processor | Pattern Analysis, Validation | AI-powered inefficiency detection with statistical significance |
-| F001-US003 | Strategy Complexity Optimizer, Pattern Recognition Engine | Discovery Orchestration, Pattern Analysis | Complexity optimization with 5-parameter maximum |
-| F001-US004 | Cross-Asset Correlation Engine, Market Data Pipeline | Data Synchronization, Pattern Analysis | Correlation analysis with 15-minute updates |
-| F001-US005 | Strategy Complexity Optimizer, Cross-Asset Correlation Engine | Discovery Orchestration, Validation | Opportunity prioritization by risk-adjusted returns |
+| F001-US001 | Market Data Pipeline, Multi-Asset Scanner | SVC-001, Polygon.io API | FR-001: Multi-asset scanning with 1000+ symbols |
+| F001-US002 | Pattern Recognition Framework, Async Task Processor | SVC-004, Vectorbt analysis | FR-002: AI pattern recognition with complexity optimization |
+| F001-US003 | Strategy Correlation Engine | PostgreSQL, correlation algorithms | FR-003: Strategy return correlation analysis |
+| F001-US004 | Market Data Pipeline, Correlation Engine | SVC-001, correlation analysis | FR-004: Diversification analysis across asset classes |
+| F001-US005 | Opportunity Prioritization Service | Custom scoring, PostgreSQL | FR-005: Risk-adjusted opportunity ranking |
 
-### 6.1 Performance Validation
-The architecture supports processing 1000+ symbols per scan cycle through distributed Celery workers, each specialized for specific asset classes. Vectorbt's vectorized operations enable rapid hypothesis testing, while Redis caching ensures sub-minute latency for real-time opportunities.
+### Performance Validation
+- Market scanning processes 1000+ symbols within scan cycle limits
+- Pattern recognition generates minimum 20 validated strategies monthly
+- Correlation analysis maintains <0.3 average correlation across active strategies
+- System supports 50+ concurrent strategies without performance degradation
+- All data processing maintains sub-minute latency for intraday opportunities
 
-### 6.2 Scalability Validation
-PostgreSQL with TimescaleDB handles 20GB of historical data with sub-second query performance through proper indexing and partitioning. The system scales horizontally by adding Celery workers, with each worker capable of independent operation.
-
-### 6.3 Integration Validation
-All components integrate through well-defined service contracts, with shared infrastructure services providing common functionality across features. The architecture maintains loose coupling while ensuring data consistency through PostgreSQL transactions and Redis atomic operations.
+### Technology Integration Validation
+- PostgreSQL with TimescaleDB handles 20GB+ historical data with sub-second queries
+- Redis caching layer provides millisecond access to real-time market data
+- Celery distributed processing scales across multiple worker types
+- Polygon.io integration covers all required asset classes within rate limits
+- pytz timezone handling ensures accurate market hours coordination across regions

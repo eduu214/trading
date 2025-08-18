@@ -3,128 +3,136 @@
 ## 1. Architecture Overview
 
 ### 1.1 Technical Strategy
-F005 leverages OpenAI API for natural language generation, PostgreSQL for content storage, and Celery for background research aggregation. The feature transforms complex trading strategies into accessible explanations while providing market context through automated research gathering. This approach enables non-expert users to understand sophisticated strategies without requiring deep trading knowledge.
+F005 leverages the established P10 technology stack to transform complex trading strategies into accessible insights. The feature builds upon FastAPI backend services with PostgreSQL persistence, utilizing OpenAI API for natural language generation and Celery for background research processing. This approach ensures strategy explanations integrate seamlessly with the existing system while maintaining the platform's performance standards.
 
 ### 1.2 Key Decisions
 
-- **Decision**: OpenAI API for explanation generation
-- **Rationale**: Provides sophisticated natural language capabilities with consistent output quality for financial content
-- **Trade-offs**: External dependency and API costs vs building custom NLP models
+- **Decision**: OpenAI API for explanation generation over local NLP models
+- **Rationale**: Provides superior natural language quality with lower infrastructure complexity for MVP
+- **Trade-offs**: External dependency and API costs vs. consistent, high-quality explanations
 
-- **Decision**: Web scraping for research aggregation over paid research APIs
-- **Rationale**: Cost-effective access to public financial content during MVP phase
-- **Trade-offs**: Maintenance overhead for scraping vs guaranteed API stability
+- **Decision**: Celery-based research aggregation over real-time scraping
+- **Rationale**: Respects rate limits, reduces system load, enables scheduled updates
+- **Trade-offs**: Slightly delayed research updates vs. system stability and compliance
 
-- **Decision**: PostgreSQL storage for explanations and research content
-- **Rationale**: Leverages existing database infrastructure with full-text search capabilities
-- **Trade-offs**: Single database vs specialized document storage for better search performance
+- **Decision**: PostgreSQL storage for explanations and research over external content management
+- **Rationale**: Maintains data consistency, enables fast retrieval, supports offline access
+- **Trade-offs**: Storage overhead vs. performance and reliability
 
 ## 2. Shared Component Architecture
 
 ### 2.1 Strategy Explanation Engine
-- **Purpose**: Transforms technical strategy specifications into plain-English explanations
-- **Used By**: F005-US001
+- **Purpose**: Transforms technical strategy logic into plain-English explanations
+- **Used By**: F005-US001 (explanation generation), F006-US001 (display interface)
 - **Behaviors**: 
-  - Maintains explanation templates for different strategy types
+  - Maintains explanation templates for common strategy patterns
   - Coordinates with OpenAI API for natural language generation
-  - Validates explanation quality and readability scores
-  - Tracks explanation consistency across similar strategies
-- **Constraints**: 30-second generation time limit, readability score above threshold
+  - Validates explanation quality and readability
+  - Tracks explanation performance and user feedback
+- **Technology**: FastAPI service layer with OpenAI API integration
+- **Constraints**: 30-second generation time limit, readability score >70
 
 ### 2.2 Market Research Aggregator
-- **Purpose**: Gathers and processes relevant market research from public sources
-- **Used By**: F005-US002
+- **Purpose**: Gathers and processes market research from reputable financial sources
+- **Used By**: F005-US002 (research collection), F005-US003 (context provision)
 - **Behaviors**:
-  - Maintains web scraping schedules for financial news sources
-  - Coordinates content filtering and relevance scoring
-  - Tracks source credibility and content freshness
-  - Enables RSS feed aggregation for real-time updates
-- **Constraints**: Respect robots.txt, daily update frequency, credible sources only
+  - Maintains source credibility scoring and validation
+  - Coordinates scheduled content collection via Celery workers
+  - Processes and filters content for strategy relevance
+  - Tracks research freshness and update frequency
+- **Technology**: Celery background tasks with BeautifulSoup and RSS processing
+- **Constraints**: Daily update cycle, respect robots.txt and rate limits
 
 ### 2.3 Performance Context Provider
-- **Purpose**: Generates market context and benchmark comparisons for strategy performance
-- **Used By**: F005-US003
+- **Purpose**: Contextualizes strategy performance against market conditions and benchmarks
+- **Used By**: F005-US003 (context generation), F006-US002 (dashboard display)
 - **Behaviors**:
-  - Maintains benchmark calculation algorithms using Vectorbt
-  - Coordinates performance comparison across market regimes
-  - Tracks strategy behavior during different market conditions
-  - Enables contextual metric explanations for non-experts
-- **Constraints**: Multiple benchmark comparisons, simplified metric presentation
+  - Maintains benchmark performance calculations
+  - Coordinates market regime analysis and classification
+  - Tracks performance attribution across different market conditions
+  - Enables comparative analysis with relevant indices
+- **Technology**: PostgreSQL with TimescaleDB for time-series analysis
+- **Constraints**: Daily context updates, 5-year historical comparison window
 
-### 2.4 Content Management System
-- **Purpose**: Stores and retrieves explanations, research, and performance context
-- **Used By**: All F005 stories
+### 2.4 Content Quality Validator
+- **Purpose**: Ensures all generated content meets accessibility and accuracy standards
+- **Used By**: All F005 stories for content validation
 - **Behaviors**:
-  - Maintains PostgreSQL storage for structured content
-  - Coordinates full-text search across explanations and research
-  - Tracks content versioning and update history
-  - Enables content categorization and tagging
-- **Constraints**: Full-text search performance, content freshness tracking
+  - Validates readability scores using established metrics
+  - Maintains consistency checks across similar content
+  - Tracks user comprehension feedback and success rates
+  - Enables content improvement through iterative refinement
+- **Technology**: Custom validation rules with statistical analysis
+- **Constraints**: >80% user comprehension rate, <12th grade reading level
 
 ## 3. Data Architecture
 
-### 3.1 Content Relationships
-- Strategy explanations link to specific strategy configurations with one-to-one cardinality
-- Research articles associate with multiple strategies through many-to-many relationships
-- Performance context connects to strategy performance history with temporal relationships
-- Content categories organize explanations and research through hierarchical structures
+### 3.1 Strategy Explanation Data
+Strategy explanations persist in PostgreSQL with structured relationships to strategy definitions and performance metrics. Each explanation maintains versioning for iterative improvement and links to source strategies for consistency validation. The system tracks explanation effectiveness through user interaction metrics and feedback scores.
 
-### 3.2 Data Flow Patterns
-Market research flows from external sources through scraping pipelines into PostgreSQL storage. Strategy specifications trigger explanation generation through OpenAI API with results cached in database. Performance data combines with market context to generate comparative analysis stored alongside strategy records.
+### 3.2 Research Content Storage
+Market research aggregates in PostgreSQL with full-text search capabilities and source attribution. Content maintains freshness timestamps, relevance scoring, and strategy associations. The system supports content archival and retrieval patterns optimized for contextual display.
 
-### 3.3 Persistence Requirements
-PostgreSQL stores explanation content with full-text indexing for search capabilities. Research articles persist with source attribution and credibility scores. Performance context maintains historical comparisons across different market periods. All content includes versioning for tracking changes over time.
+### 3.3 Performance Context Data
+Performance context leverages TimescaleDB extensions for efficient time-series operations. The system maintains rolling calculations for benchmark comparisons, market regime classifications, and attribution analysis. Data relationships support multi-dimensional analysis across strategies, time periods, and market conditions.
 
 ## 4. Service Layer
 
-### 4.1 Natural Language Service
-- **Technology**: OpenAI API integration with custom prompt templates
-- **Responsibility**: Manages strategy explanation generation and quality validation
-- **Performance**: Generate explanations within 30 seconds, maintain consistency across similar strategies
+### 4.1 Explanation Generation Service
+- **Technology**: FastAPI with OpenAI API integration
+- **Responsibility**: Manages strategy explanation lifecycle from generation through validation
+- **Performance**: Generate explanations within 30 seconds, maintain 95% success rate
 
-### 4.2 Research Aggregation Service
-- **Technology**: Celery workers with BeautifulSoup and Scrapy for content extraction
-- **Responsibility**: Manages automated research gathering and content filtering
-- **Performance**: Daily research updates, process 100+ articles per day with relevance scoring
+### 4.2 Research Processing Service
+- **Technology**: Celery workers with BeautifulSoup and RSS libraries
+- **Responsibility**: Coordinates research collection, processing, and relevance scoring
+- **Performance**: Process 100+ articles daily, maintain source diversity
 
 ### 4.3 Context Analysis Service
-- **Technology**: Vectorbt for benchmark calculations with custom analysis algorithms
-- **Responsibility**: Manages performance context generation and market regime analysis
-- **Performance**: Calculate multiple benchmarks within 60 seconds, track performance across market conditions
+- **Technology**: PostgreSQL with TimescaleDB and custom analytics
+- **Responsibility**: Enables performance contextualization and benchmark comparison
+- **Performance**: Update context daily, support 5-year historical analysis
 
-### 4.4 Content Search Service
-- **Technology**: PostgreSQL full-text search with custom ranking algorithms
-- **Responsibility**: Manages content discovery and relevance matching
-- **Performance**: Sub-second search response, accurate relevance scoring for content matching
+### 4.4 Content Delivery Service
+- **Technology**: FastAPI with Redis caching
+- **Responsibility**: Manages content retrieval, formatting, and user personalization
+- **Performance**: Sub-second content delivery, support concurrent user access
 
 ## 5. Integration Architecture
 
-### 5.1 Infrastructure Services Used
-- **SVC-004 (Async Task Processor)**: Handles background research aggregation and explanation generation
-- **EXT-003 (OpenAI API)**: Provides natural language generation capabilities
-- **DB-001 (Trading Strategies DB)**: Stores explanations, research content, and performance context
+### 5.1 Strategy System Integration
+F005 integrates with SVC-002 (Strategy Execution Engine) to access strategy definitions, parameters, and performance metrics. This integration enables real-time explanation generation based on current strategy state and historical performance data.
 
-### 5.2 Integration Boundaries
-F005 integrates with strategy discovery results from F001 for explanation triggers. Performance data flows from F003 portfolio management for context generation. Content serves F006 web interface for user presentation.
+### 5.2 External API Integration
+The feature utilizes EXT-003 (OpenAI API) for natural language generation with proper rate limiting and error handling. Integration includes prompt template management, response validation, and cost optimization through caching frequently requested explanations.
 
-### 5.3 Event Patterns
-Strategy validation completion triggers explanation generation. Market research updates broadcast content availability. Performance context changes notify dependent dashboard components.
+### 5.3 Background Processing Integration
+F005 leverages SVC-004 (Async Task Processor) for research aggregation, content processing, and scheduled updates. This integration ensures research collection respects external site limitations while maintaining content freshness.
+
+### 5.4 Notification Integration
+The feature connects with SVC-005 (Real-Time Notifications) to alert users when new explanations are available or when research updates affect active strategies. This integration supports both immediate notifications and digest-style updates.
 
 ## 6. Architecture Validation
 
 | Story | Components | Services | Requirements |
 |-------|-----------|----------|--------------|
-| F005-US001 | Strategy Explanation Engine, Content Management System | Natural Language Service, Content Search Service | FR-015: Generate clear strategy explanations |
-| F005-US002 | Market Research Aggregator, Content Management System | Research Aggregation Service, Content Search Service | FR-016: Aggregate relevant market research |
-| F005-US003 | Performance Context Provider, Content Management System | Context Analysis Service, Content Search Service | FR-017: Provide performance context and benchmarks |
+| F005-US001 | Strategy Explanation Engine, Content Quality Validator | Explanation Generation Service, Content Delivery Service | NFR-U-002 (Non-expert accessibility), TR-005 (NLP processing) |
+| F005-US002 | Market Research Aggregator, Content Quality Validator | Research Processing Service, Content Delivery Service | Daily research updates, source credibility validation |
+| F005-US003 | Performance Context Provider, Content Quality Validator | Context Analysis Service, Content Delivery Service | Benchmark comparison, market regime analysis |
 
-### 6.1 Cross-Feature Dependencies
-- **F001 Integration**: Strategy discovery results trigger explanation generation
-- **F003 Integration**: Portfolio performance data enables context generation
-- **F006 Integration**: Generated content serves web interface presentation
+### 6.1 Cross-Story Dependencies
+- All stories depend on Content Quality Validator for consistent user experience
+- F005-US003 requires F005-US002 research data for comprehensive context
+- Content Delivery Service supports all stories with unified access patterns
 
 ### 6.2 Infrastructure Alignment
-All components leverage shared PostgreSQL infrastructure for content storage. Celery task processing handles background research aggregation. OpenAI API integration provides sophisticated natural language capabilities while maintaining cost control through caching.
+- PostgreSQL with TimescaleDB supports time-series performance analysis
+- Celery enables respectful research aggregation without overwhelming external sources
+- FastAPI provides consistent API patterns matching platform architecture
+- Redis caching optimizes content delivery performance
 
 ### 6.3 Performance Validation
-Explanation generation completes within 30-second target using OpenAI API. Research aggregation processes daily content updates without impacting system performance. Performance context calculations leverage Vectorbt for efficient benchmark comparisons.
+- Explanation generation meets 30-second target through OpenAI API optimization
+- Research processing handles 100+ daily articles through efficient Celery scheduling
+- Context analysis supports 5-year historical comparisons through TimescaleDB optimization
+- Content delivery achieves sub-second response through strategic Redis caching

@@ -1,118 +1,124 @@
-# Feature Technical Architecture - F002: Code Generation & Execution Bridge
+# Feature Technical Architecture - F002: Strategy Engine & Execution Bridge
 
 ## 1. Architecture Overview
 
 ### 1.1 Technical Strategy
-F002 transforms validated trading strategies into executable code across multiple platforms while ensuring safety and reliability. The architecture leverages FastAPI for high-performance API services, PostgreSQL for strategy state management, and Redis for real-time execution monitoring. Alpaca's trading API serves as the primary execution platform with built-in paper trading capabilities, while the code generation system uses Jinja2 templating to produce platform-specific implementations.
+F002 leverages the P10 technology stack to create a robust strategy implementation and execution system. PostgreSQL with TimescaleDB provides optimized storage for backtesting results and strategy parameters, while Redis enables high-performance caching of technical indicators and real-time execution state. The FastAPI backend orchestrates strategy execution using specialized Python libraries (TA-Lib, Vectorbt, PyPortfolioOpt) for financial computations, with Celery managing computationally intensive backtesting tasks. Alpaca's trading API serves as the primary execution venue, providing both paper trading validation and live execution capabilities.
 
 ### 1.2 Key Decisions
 
-- **Decision**: Use Jinja2 templating engine for multi-platform code generation
-- **Rationale**: Provides clean separation between strategy logic and platform-specific syntax, enabling maintainable templates for each target platform
-- **Trade-offs**: Template maintenance overhead vs. type-safe code generation, but gains flexibility for multiple platform support
+- **Decision**: Use TA-Lib for technical indicator calculations
+- **Rationale**: Industry-standard library with optimized C implementations provides reliable, fast calculations for RSI, MACD, Bollinger Bands
+- **Trade-offs**: Gain proven accuracy and performance vs dependency on external C library
 
-- **Decision**: Implement three-layer safety validation (pre-trade, broker-level, post-trade)
-- **Rationale**: Financial systems require redundant safety mechanisms to prevent catastrophic losses from execution errors
-- **Trade-offs**: Increased latency vs. comprehensive risk protection, prioritizing safety over speed
+- **Decision**: Implement Vectorbt for backtesting engine
+- **Rationale**: Vectorized operations provide 100x performance improvement over loop-based alternatives, essential for testing multiple strategies
+- **Trade-offs**: Gain massive performance improvements vs learning curve for vectorized thinking
 
-- **Decision**: Mandatory paper trading validation before live deployment
-- **Rationale**: Ensures generated code performs as expected in realistic market conditions without financial risk
-- **Trade-offs**: Delayed live deployment vs. validated performance, essential for user confidence
+- **Decision**: Alpaca as primary broker integration
+- **Rationale**: Identical API for paper and live trading eliminates transition complexity, commission-free execution reduces costs
+- **Trade-offs**: Gain seamless paper-to-live transition vs limited to Alpaca's available instruments
+
+- **Decision**: PyPortfolioOpt for portfolio optimization
+- **Rationale**: Modern Portfolio Theory implementation with efficient frontier calculation enables mathematically optimal allocations
+- **Trade-offs**: Gain optimal risk-adjusted returns vs computational complexity for large portfolios
 
 ## 2. Shared Component Architecture
 
-### 2.1 Multi-Platform Code Generator
-- **Purpose**: Transforms strategy specifications into executable code for different trading platforms
-- **Used By**: F002-US001, F002-US003
-- **Behaviors**: 
-  - Maintains platform-specific code templates using Jinja2
-  - Validates generated code syntax using Abstract Syntax Tree parsing
-  - Tracks code generation history and version control through Git integration
-  - Enables platform-specific optimizations while preserving strategy logic
-- **Constraints**: Generated code must be syntactically correct and include comprehensive error handling
+### 2.1 Technical Indicator Service
+- **Purpose**: Calculates standardized technical indicators across all strategies
+- **Used By**: F002-US001 (strategy implementation), F003-US001 (portfolio signals)
+- **Behaviors**: Maintains indicator calculations using TA-Lib, caches results in Redis for performance, validates input data quality
+- **Technology**: TA-Lib with Redis caching layer
+- **Constraints**: Sub-second calculation for 100+ symbols, 14-day minimum data requirement for RSI
 
-### 2.2 Execution Safety System
-- **Purpose**: Prevents dangerous trades through comprehensive validation and monitoring
-- **Used By**: F002-US002, F002-US003
-- **Behaviors**:
-  - Validates position sizing against account balance and risk limits using Pydantic schemas
-  - Monitors real-time trading activity through WebSocket connections
-  - Coordinates with Alpaca's built-in risk controls for additional protection
-  - Maintains configurable safety limits with hard-coded maximum boundaries
-- **Constraints**: Sub-second validation latency for time-sensitive trading decisions
+### 2.2 Backtesting Framework
+- **Purpose**: Validates strategy performance using historical data with comprehensive metrics
+- **Used By**: F002-US001 (strategy validation), F004-US002 (complexity testing)
+- **Behaviors**: Executes vectorized backtests using Vectorbt, calculates Sharpe ratio and drawdown metrics, performs walk-forward analysis
+- **Technology**: Vectorbt with PostgreSQL result storage
+- **Constraints**: Complete 6-month backtest in under 30 seconds, maintain 70/30 in-sample/out-of-sample split
 
-### 2.3 Strategy State Manager
-- **Purpose**: Tracks strategy execution state and performance across deployment phases
-- **Used By**: F002-US002, F002-US003
-- **Behaviors**:
-  - Maintains strategy lifecycle states in PostgreSQL (backtest → paper → small live → full live)
-  - Coordinates automated progression through deployment phases
-  - Tracks performance divergence between backtesting and live execution
-  - Enables rollback capabilities when performance degrades beyond thresholds
-- **Constraints**: State transitions must be atomic and auditable for compliance
+### 2.3 Strategy Execution Engine
+- **Purpose**: Manages live strategy execution with comprehensive safety controls
+- **Used By**: F002-US002 (safety checks), F002-US003 (live transition), F003-US002 (portfolio execution)
+- **Behaviors**: Validates trade parameters against risk limits, coordinates with Alpaca API for execution, maintains execution audit trail
+- **Technology**: FastAPI with Alpaca SDK integration
+- **Constraints**: Sub-5-second trade validation, mandatory paper trading validation period
+
+### 2.4 Portfolio Optimization Service
+- **Purpose**: Calculates optimal strategy allocations using Modern Portfolio Theory
+- **Used By**: F003-US001 (portfolio construction), F003-US002 (rebalancing)
+- **Behaviors**: Implements mean-variance optimization using PyPortfolioOpt, generates efficient frontier visualizations, respects allocation constraints
+- **Technology**: PyPortfolioOpt with custom constraint handling
+- **Constraints**: Complete optimization for 50+ strategies within 30 seconds, maximum 30% single strategy allocation
 
 ## 3. Data Architecture
 
-### 3.1 Strategy Code Repository
-Strategy code and templates persist in PostgreSQL with version control integration. Each strategy maintains multiple code variants (Alpaca native, TradingView Pine Script, generic Python) with generation timestamps and validation status. Code templates reference strategy parameters through JSON schema definitions, enabling consistent generation across platforms.
+### 3.1 Strategy Parameter Storage
+Strategy configurations persist in PostgreSQL with versioned parameter sets enabling rollback capabilities. Each strategy maintains parameter history with performance attribution, supporting A/B testing of parameter variations. Relationships track strategy families and parameter inheritance patterns.
 
-### 3.2 Execution Monitoring Data
-Real-time execution data flows through Redis for immediate access, with persistent storage in PostgreSQL using TimescaleDB for time-series optimization. Trade execution records include expected vs. actual fills, timing analysis, and performance attribution. Safety validation results maintain audit trails for regulatory compliance.
+### 3.2 Backtesting Results Schema
+TimescaleDB optimizes storage of time-series backtest results with automatic partitioning by strategy and date ranges. Performance metrics aggregate at multiple timeframes (daily, weekly, monthly) with pre-calculated Sharpe ratios and drawdown statistics. Correlation matrices between strategies update incrementally as new results arrive.
 
-### 3.3 Performance Reconciliation
-Strategy performance data maintains separate tracks for backtesting, paper trading, and live execution phases. PostgreSQL stores comparative metrics enabling automated detection of performance divergence. Correlation analysis between expected and actual performance triggers alerts when variance exceeds configured thresholds.
+### 3.3 Execution State Management
+Real-time execution state maintains in Redis for sub-second access, with PostgreSQL providing persistent audit trail. Position tracking synchronizes with Alpaca's position API, while order status updates flow through WebSocket connections. Risk limit tracking operates in-memory with periodic persistence.
 
 ## 4. Service Layer
 
-### 4.1 Code Generation Service
-- **Technology**: FastAPI with Jinja2 templating engine
-- **Responsibility**: Manages transformation of strategy logic into platform-specific executable code
-- **Performance**: Generate syntactically correct code within 30 seconds for complex strategies
+### 4.1 Strategy Implementation Service
+- **Technology**: FastAPI with TA-Lib integration
+- **Responsibility**: Transforms strategy logic into executable trading rules with technical indicator integration
+- **Performance**: Calculate indicators for 1000+ symbols within 5 seconds, support 50+ concurrent strategies
 
-### 4.2 Safety Validation Service
-- **Technology**: FastAPI with Pydantic validation schemas
-- **Responsibility**: Coordinates multi-layer safety checks before trade execution
-- **Performance**: Complete validation checks within 100 milliseconds for real-time trading
+### 4.2 Backtesting Orchestration Service
+- **Technology**: Celery with Vectorbt computational engine
+- **Responsibility**: Manages distributed backtesting workload with progress tracking and result aggregation
+- **Performance**: Process 6-month backtests in under 30 seconds, handle 10+ concurrent backtesting jobs
 
-### 4.3 Execution Monitoring Service
-- **Technology**: FastAPI with WebSocket connections to Alpaca
-- **Responsibility**: Tracks live strategy performance and manages deployment progression
-- **Performance**: Process execution updates with sub-second latency for immediate alerts
+### 4.3 Risk Management Service
+- **Technology**: FastAPI with Redis state management
+- **Responsibility**: Enforces position limits, validates trade parameters, monitors portfolio exposure
+- **Performance**: Sub-second risk validation, real-time limit monitoring across all strategies
 
-### 4.4 Paper Trading Coordinator
-- **Technology**: Alpaca Paper Trading API integration
-- **Responsibility**: Manages paper trading validation phase with identical execution logic
-- **Performance**: Maintain paper trading environment with same latency as live trading
+### 4.4 Execution Coordination Service
+- **Technology**: FastAPI with Alpaca SDK
+- **Responsibility**: Coordinates trade execution across paper and live environments with state synchronization
+- **Performance**: Sub-5-second trade execution, 99%+ execution success rate
 
 ## 5. Integration Architecture
 
-### 5.1 Strategy Execution Engine Integration
-F002 coordinates with SVC-002 (Strategy Execution Engine) to receive validated strategy specifications and deploy generated code. The integration maintains strategy parameter consistency and execution context across the generation and deployment pipeline.
+### 5.1 Market Data Integration
+Leverages SVC-001 (market_data_pipeline) from infrastructure registry for real-time and historical data feeds. Strategy signals consume standardized data formats with automatic timezone normalization using pytz. Data quality validation ensures indicator calculations receive clean inputs.
 
-### 5.2 Market Data Pipeline Integration
-Real-time market data from SVC-001 (Market Data Pipeline) feeds execution monitoring and safety validation systems. Integration ensures consistent data timing and synchronization for accurate performance measurement and risk assessment.
+### 5.2 External API Integration
+Alpaca trading API (EXT-002) provides unified interface for paper and live trading with identical code paths. WebSocket connections maintain real-time position and order status updates. API rate limiting and retry logic handle temporary connectivity issues.
 
-### 5.3 Validation Framework Integration
-SVC-003 (Validation Framework) provides strategy validation results that trigger code generation workflows. Integration maintains validation status and ensures only approved strategies proceed to code generation and deployment phases.
+### 5.3 Async Task Processing
+Utilizes SVC-004 (async_task_processor) for computationally intensive backtesting operations. Progress tracking enables user interface updates during long-running optimizations. Task prioritization ensures critical live trading operations receive precedence.
 
-### 5.4 External API Integration
-- **Alpaca Trading API**: Primary execution platform providing both paper and live trading capabilities with identical API interfaces
-- **Git Integration**: Version control for generated code and template management
-- **WebSocket Connections**: Real-time monitoring of trade execution and account status
+### 5.4 Real-Time Communication
+Integrates with SVC-005 (real_time_notifications) for execution alerts and performance updates. WebSocket connections deliver trade confirmations and risk limit breaches to user interfaces. Server-sent events provide backtesting progress updates.
 
 ## 6. Architecture Validation
 
 | Story | Components | Services | Requirements |
 |-------|-----------|----------|--------------|
-| F002-US001 | Multi-Platform Code Generator, Strategy State Manager | Code Generation Service, SVC-002 | Multi-platform code generation with syntax validation |
-| F002-US002 | Execution Safety System, Strategy State Manager | Safety Validation Service, Paper Trading Coordinator | Three-layer safety validation with real-time monitoring |
-| F002-US003 | Multi-Platform Code Generator, Execution Safety System, Strategy State Manager | All F002 services, SVC-002, SVC-003 | Seamless transition through deployment phases with performance tracking |
+| F002-US001 | Technical Indicator Service, Backtesting Framework | Strategy Implementation, Backtesting Orchestration | FR-006: Real strategy implementation with comprehensive backtesting |
+| F002-US002 | Strategy Execution Engine, Risk Management Service | Risk Management, Execution Coordination | FR-007: Comprehensive safety mechanisms before execution |
+| F002-US003 | Strategy Execution Engine, Portfolio Optimization Service | Execution Coordination, Risk Management | FR-008: Seamless transition from backtesting to live execution |
 
-### 6.1 Cross-Story Pattern Validation
-All stories share the Strategy State Manager component for consistent lifecycle tracking and the integration with SVC-002 for execution coordination. Safety validation patterns apply across all deployment phases, ensuring consistent risk management throughout the feature.
+### 6.1 Performance Validation
+- Technical indicator calculations achieve sub-second performance for 100+ symbols using TA-Lib's optimized implementations
+- Vectorbt backtesting completes 6-month strategy validation within 30-second target through vectorized operations
+- Portfolio optimization handles 50+ strategies within 30-second constraint using PyPortfolioOpt's efficient algorithms
 
-### 6.2 Performance Requirements Alignment
-The architecture supports sub-second safety validation, 30-second code generation, and real-time execution monitoring as specified in the requirements catalog. PostgreSQL with TimescaleDB provides the time-series performance needed for execution data analysis.
+### 6.2 Integration Validation
+- Alpaca API integration provides identical code paths for paper and live trading, eliminating transition complexity
+- PostgreSQL with TimescaleDB optimizes time-series storage for backtesting results and strategy performance history
+- Redis caching layer reduces indicator calculation latency and maintains real-time execution state
 
-### 6.3 Technology Stack Consistency
-All services use FastAPI for consistent API patterns, PostgreSQL for persistent state management, and Redis for real-time data coordination. Integration with Alpaca's trading API provides the execution capabilities while maintaining the safety-first approach required for financial applications.
+### 6.3 Safety Validation
+- Multi-layer risk management prevents unauthorized trades through pre-trade validation, broker-level controls, and post-trade monitoring
+- Paper trading validation requirement ensures strategies demonstrate expected performance before live deployment
+- Comprehensive audit trail in PostgreSQL enables trade reconstruction and compliance reporting

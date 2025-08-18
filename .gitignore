@@ -96,3 +96,8 @@ Thumbs.db
 
 # Docker volumes
 volumes/
+# FlowPlane
+.flowplane/generation/history/
+.flowplane/validation/
+docs/flowplane/**/debug/
+docs/flowplane/**/*-TRUNCATED.md
