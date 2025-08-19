@@ -1,4 +1,4 @@
-# FlowPlane Trading Platform - Setup Guide
+# AlphaStrat Trading Platform - Setup Guide
 
 ## Prerequisites
 
@@ -69,8 +69,8 @@ pip install -r requirements.txt
 # Follow instructions at https://docs.timescale.com/install/latest/
 
 # Create database
-createdb flowplane
-psql -d flowplane -c "CREATE EXTENSION IF NOT EXISTS timescaledb;"
+createdb alphastrat
+psql -d alphastrat -c "CREATE EXTENSION IF NOT EXISTS timescaledb;"
 ```
 
 4. **Run database migrations**

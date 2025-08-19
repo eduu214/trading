@@ -103,7 +103,7 @@ Estimated costs for this same workload using different Claude models:
 No output files were created.
 
 ### Expected vs Actual Output
-No expected output files defined (not running a FlowPlane step).
+No expected output files defined (not running a AlphaStrat step).
 
 ## Processing Results
 

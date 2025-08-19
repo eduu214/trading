@@ -139,7 +139,7 @@ echo "=========================="
 
 # Test database tables
 echo -n "3.1 Checking complexity_constraints table... "
-TABLE_EXISTS=$(docker-compose exec -T postgres psql -U flowplane -d flowplane -t -c \
+TABLE_EXISTS=$(docker-compose exec -T postgres psql -U alphastrat -d alphastrat -t -c \
     "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'complexity_constraints');" 2>/dev/null | tr -d ' ')
 if [ "$TABLE_EXISTS" = "t" ]; then
     echo -e "${GREEN}✓${NC} Table exists"
@@ -148,13 +148,13 @@ else
 fi
 
 echo -n "3.2 Checking complexity_presets table... "
-TABLE_EXISTS=$(docker-compose exec -T postgres psql -U flowplane -d flowplane -t -c \
+TABLE_EXISTS=$(docker-compose exec -T postgres psql -U alphastrat -d alphastrat -t -c \
     "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'complexity_presets');" 2>/dev/null | tr -d ' ')
 if [ "$TABLE_EXISTS" = "t" ]; then
     echo -e "${GREEN}✓${NC} Table exists"
     
     # Check preset data
-    PRESET_COUNT=$(docker-compose exec -T postgres psql -U flowplane -d flowplane -t -c \
+    PRESET_COUNT=$(docker-compose exec -T postgres psql -U alphastrat -d alphastrat -t -c \
         "SELECT COUNT(*) FROM complexity_presets WHERE is_system = true;" 2>/dev/null | tr -d ' ')
     echo "  System presets in database: $PRESET_COUNT"
 else
@@ -162,7 +162,7 @@ else
 fi
 
 echo -n "3.3 Checking multi_timeframe_analysis table... "
-TABLE_EXISTS=$(docker-compose exec -T postgres psql -U flowplane -d flowplane -t -c \
+TABLE_EXISTS=$(docker-compose exec -T postgres psql -U alphastrat -d alphastrat -t -c \
     "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'multi_timeframe_analysis');" 2>/dev/null | tr -d ' ')
 if [ "$TABLE_EXISTS" = "t" ]; then
     echo -e "${GREEN}✓${NC} Table exists"

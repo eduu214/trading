@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Local development startup script (without Docker)
-echo "Starting FlowPlane Trading Platform locally..."
+echo "Starting AlphaStrat Trading Platform locally..."
 
 # Check if PostgreSQL is installed
 if ! command -v psql &> /dev/null; then
@@ -33,9 +33,9 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Create database if it doesn't exist
-sudo -u postgres psql -c "CREATE DATABASE flowplane;" 2>/dev/null || true
-sudo -u postgres psql -c "CREATE USER flowplane WITH PASSWORD 'flowplane_dev_password';" 2>/dev/null || true
-sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE flowplane TO flowplane;" 2>/dev/null || true
+sudo -u postgres psql -c "CREATE DATABASE alphastrat;" 2>/dev/null || true
+sudo -u postgres psql -c "CREATE USER alphastrat WITH PASSWORD 'alphastrat_dev_password';" 2>/dev/null || true
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE alphastrat TO alphastrat;" 2>/dev/null || true
 
 # Run migrations
 alembic upgrade head
@@ -65,7 +65,7 @@ echo "Starting Next.js frontend..."
 npm run dev
 
 echo ""
-echo "FlowPlane Trading Platform is running!"
+echo "AlphaStrat Trading Platform is running!"
 echo "Frontend: http://localhost:3000"
 echo "Backend API: http://localhost:8000"
 echo "API Docs: http://localhost:8000/docs"

@@ -37,15 +37,15 @@ export default function ExportResults({ opportunities }: ExportResultsProps) {
 
     // Convert opportunities to CSV rows
     const rows = opportunities.map(opp => [
-      opp.ticker,
-      opp.assetClass,
-      opp.opportunityType,
-      opp.signalStrength.toFixed(2),
-      opp.entryPrice.toFixed(2),
-      ((opp.priceChange || 0) * 100).toFixed(2),
-      opp.volume || '',
-      opp.inefficiencyScore?.toFixed(2) || '',
-      new Date(opp.discoveredAt).toLocaleString()
+      opp.symbol,
+      opp.asset_class,
+      opp.strategy_type,
+      opp.opportunity_score.toFixed(2),
+      (opp.entry_conditions?.price || 0).toFixed(2),
+      (opp.expected_return || 0).toFixed(2),
+      opp.entry_conditions?.volume || opp.technical_indicators?.volume || '',
+      (opp.technical_indicators?.inefficiency_score || 0).toFixed(2),
+      new Date(opp.discovered_at).toLocaleString()
     ]);
 
     // Combine headers and rows
@@ -70,7 +70,7 @@ export default function ExportResults({ opportunities }: ExportResultsProps) {
 
   const copyToClipboard = () => {
     const summary = opportunities.map(opp => 
-      `${opp.ticker} (${opp.assetClass}): ${opp.signalStrength.toFixed(1)}% signal, $${opp.entryPrice.toFixed(2)}`
+      `${opp.symbol} (${opp.asset_class}): ${opp.opportunity_score.toFixed(1)}% score, $${(opp.entry_conditions?.price || 0).toFixed(2)}`
     ).join('\n');
 
     navigator.clipboard.writeText(summary).then(() => {

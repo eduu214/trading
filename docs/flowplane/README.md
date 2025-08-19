@@ -1,10 +1,10 @@
-# jack-trading
+# AlphaStrat Trading Intelligence
 
-A FlowPlane project
+A Flowplane project
 
-## FlowPlane Methodology
+## Flowplane Methodology
 
-This project uses FlowPlane to systematically generate documentation from initial ideas to implementation.
+This project uses Flowplane to systematically generate documentation from initial ideas to implementation.
 
 ### Document Structure
 
@@ -23,4 +23,4 @@ This project uses FlowPlane to systematically generate documentation from initia
 
 ## Generated Documents
 
-_Documents will appear here as you run FlowPlane steps_
+_Documents will appear here as you run Flowplane steps_

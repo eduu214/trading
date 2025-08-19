@@ -1,12 +1,12 @@
-# Simplified Docker Compose for FlowPlane Trading Platform
+# Simplified Docker Compose for AlphaStrat Trading Platform
 services:
   postgres:
     image: postgres:16
-    container_name: flowplane-postgres
+    container_name: alphastrat-postgres
     environment:
-      POSTGRES_DB: flowplane
-      POSTGRES_USER: flowplane
-      POSTGRES_PASSWORD: flowplane_dev_password
+      POSTGRES_DB: alphastrat
+      POSTGRES_USER: alphastrat
+      POSTGRES_PASSWORD: alphastrat_dev_password
     ports:
       - "5432:5432"
     volumes:
@@ -14,7 +14,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: flowplane-redis
+    container_name: alphastrat-redis
     ports:
       - "6379:6379"
 
@@ -22,9 +22,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: flowplane-backend
+    container_name: alphastrat-backend
     environment:
-      DATABASE_URL: postgresql://flowplane:flowplane_dev_password@postgres:5432/flowplane
+      DATABASE_URL: postgresql://alphastrat:alphastrat_dev_password@postgres:5432/alphastrat
       REDIS_URL: redis://redis:6379
       POLYGON_API_KEY: ${POLYGON_API_KEY}
       ALPACA_API_KEY: ${ALPACA_API_KEY}
@@ -41,7 +41,7 @@ services:
 
   frontend:
     image: node:20-alpine
-    container_name: flowplane-frontend
+    container_name: alphastrat-frontend
     working_dir: /app
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
