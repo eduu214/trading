@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "=== FlowPlane App Status Check ==="
+echo "=== AlphaStrat App Status Check ==="
 echo ""
 
 # Check if ports are listening
@@ -55,10 +55,10 @@ fi
 echo ""
 echo "Docker commands to check logs (run in a terminal with Docker access):"
 echo "----------------------------------------------------------------------"
-echo "docker logs flowplane-backend       # Check backend logs"
-echo "docker logs flowplane-frontend      # Check frontend logs"
-echo "docker logs flowplane-postgres      # Check database logs"
-echo "docker logs flowplane-redis         # Check Redis logs"
+echo "docker logs alphastrat-backend       # Check backend logs"
+echo "docker logs alphastrat-frontend      # Check frontend logs"
+echo "docker logs alphastrat-postgres      # Check database logs"
+echo "docker logs alphastrat-redis         # Check Redis logs"
 echo ""
 echo "docker-compose logs backend         # Alternative: Check backend logs"
 echo "docker-compose restart backend      # Restart backend if needed"

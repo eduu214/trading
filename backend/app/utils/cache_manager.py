@@ -210,7 +210,7 @@ class RedisCache:
     def __init__(self, redis_url: str = "redis://localhost:6379"):
         self.redis_url = redis_url
         self.redis_client = None
-        self.namespace = "flowplane:cache:"
+        self.namespace = "alphastrat:cache:"
         
     async def connect(self):
         """Connect to Redis"""

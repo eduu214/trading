@@ -1,27 +1,27 @@
-# Docker Compose for FlowPlane Trading Platform
+# Docker Compose for AlphaStrat Trading Platform
 
 services:
   postgres:
     image: timescale/timescaledb-ha:pg16
-    container_name: flowplane-postgres
+    container_name: alphastrat-postgres
     environment:
-      POSTGRES_DB: flowplane
-      POSTGRES_USER: flowplane
-      POSTGRES_PASSWORD: flowplane_dev_password
+      POSTGRES_DB: alphastrat
+      POSTGRES_USER: alphastrat
+      POSTGRES_PASSWORD: alphastrat_dev_password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/db/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U flowplane"]
+      test: ["CMD-SHELL", "pg_isready -U alphastrat"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: flowplane-redis
+    container_name: alphastrat-redis
     ports:
       - "6379:6379"
     volumes:
@@ -37,9 +37,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: flowplane-backend
+    container_name: alphastrat-backend
     environment:
-      DATABASE_URL: postgresql://flowplane:flowplane_dev_password@postgres:5432/flowplane
+      DATABASE_URL: postgresql://alphastrat:alphastrat_dev_password@postgres:5432/alphastrat
       REDIS_URL: redis://redis:6379
       POLYGON_API_KEY: ${POLYGON_API_KEY}
       ALPACA_API_KEY: ${ALPACA_API_KEY}
@@ -61,9 +61,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: flowplane-celery-worker
+    container_name: alphastrat-celery-worker
     environment:
-      DATABASE_URL: postgresql://flowplane:flowplane_dev_password@postgres:5432/flowplane
+      DATABASE_URL: postgresql://alphastrat:alphastrat_dev_password@postgres:5432/alphastrat
       REDIS_URL: redis://redis:6379
       POLYGON_API_KEY: ${POLYGON_API_KEY}
       ALPACA_API_KEY: ${ALPACA_API_KEY}
@@ -82,9 +82,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: flowplane-celery-beat
+    container_name: alphastrat-celery-beat
     environment:
-      DATABASE_URL: postgresql://flowplane:flowplane_dev_password@postgres:5432/flowplane
+      DATABASE_URL: postgresql://alphastrat:alphastrat_dev_password@postgres:5432/alphastrat
       REDIS_URL: redis://redis:6379
       ENVIRONMENT: development
     volumes:
@@ -100,7 +100,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    container_name: flowplane-frontend
+    container_name: alphastrat-frontend
     environment:
       NEXT_PUBLIC_API_URL: http://backend:8000
       NEXT_PUBLIC_WS_URL: ws://backend:8000

@@ -143,14 +143,14 @@ export default function OpportunityDetail({ opportunity, onClose }: OpportunityD
                 <div className="flex justify-between">
                   <dt className="text-sm text-gray-500 dark:text-gray-400">Discovered At</dt>
                   <dd className="text-sm text-gray-900 dark:text-white">
-                    {new Date(opportunity.discoveredAt).toLocaleString()}
+                    {new Date(opportunity.discovered_at).toLocaleString()}
                   </dd>
                 </div>
-                {opportunity.metadata?.spread && (
+                {opportunity.technical_indicators?.spread && (
                   <div className="flex justify-between">
                     <dt className="text-sm text-gray-500 dark:text-gray-400">Bid-Ask Spread</dt>
                     <dd className="text-sm text-gray-900 dark:text-white">
-                      {(opportunity.metadata.spread * 10000).toFixed(2)} bps
+                      {(opportunity.technical_indicators.spread * 10000).toFixed(2)} bps
                     </dd>
                   </div>
                 )}

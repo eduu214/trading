@@ -1,4 +1,4 @@
-# FlowPlane Trading Platform - F001-US002 Slice 2 Test Summary
+# AlphaStrat Trading Platform - F001-US002 Slice 2 Test Summary
 
 ## Test Execution Date: 2025-08-17
 

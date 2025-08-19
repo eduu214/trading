@@ -27,6 +27,15 @@ export default function ScannerPage() {
 
   const handleStartScan = async (config: ScanConfig) => {
     setScanning(true);
+    setScanConfig(config);
+    
+    // Since backend scanning isn't fully implemented, use mock data
+    // Remove this and uncomment the real implementation when backend is ready
+    setTimeout(() => {
+      fetchMockData();
+    }, 5000); // Wait for progress animation to complete
+    
+    /* Real implementation - uncomment when backend is ready:
     try {
       const response = await fetch('http://localhost:8000/api/v1/scanner/scan', {
         method: 'POST',
@@ -35,6 +44,10 @@ export default function ScannerPage() {
         },
         body: JSON.stringify(config),
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
       const data = await response.json();
       setScanTaskId(data.task_id);
@@ -51,6 +64,7 @@ export default function ScannerPage() {
       // Fallback to mock data
       fetchMockData();
     }
+    */
   };
 
   const pollScanStatus = async (taskId: string) => {

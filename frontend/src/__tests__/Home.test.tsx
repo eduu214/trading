@@ -6,7 +6,7 @@ describe('Home', () => {
     render(<Home />)
     
     const heading = screen.getByRole('heading', {
-      name: /FlowPlane Trading Platform/i,
+      name: /AlphaStrat Trading Platform/i,
     })
     
     expect(heading).toBeInTheDocument()

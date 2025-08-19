@@ -5,7 +5,7 @@ import os
 
 class Settings(BaseSettings):
     # Application
-    APP_NAME: str = "FlowPlane Trading Platform"
+    APP_NAME: str = "AlphaStrat Trading Platform"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     DEBUG: bool = ENVIRONMENT == "development"
     
@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "postgresql://flowplane:flowplane_dev_password@postgres:5432/flowplane"  # Use 'postgres' as hostname for Docker
+        "postgresql://alphastrat:alphastrat_dev_password@postgres:5432/alphastrat"  # Use 'postgres' as hostname for Docker
     )
     
     # Redis

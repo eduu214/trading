@@ -178,7 +178,7 @@ class HTTPConnectionPool:
             connector=connector,
             timeout=timeout_config,
             headers={
-                'User-Agent': 'FlowPlane/1.0',
+                'User-Agent': 'AlphaStrat/1.0',
                 'Accept': 'application/json'
             }
         )

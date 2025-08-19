@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "========================================="
-echo "Testing FlowPlane Scanner"
+echo "Testing AlphaStrat Scanner"
 echo "========================================="
 
 # Test 1: Check scanner status
