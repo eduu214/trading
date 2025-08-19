@@ -169,7 +169,10 @@ export default function ScanHistory() {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-right">
                     <button 
-                      onClick={() => setSelectedScan(scan.scan_id)}
+                      onClick={() => {
+                        setSelectedScan(scan.scan_id);
+                        alert('Historical scan viewing is not yet implemented. This feature will be available in a future update.');
+                      }}
                       className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
                     >
                       View
