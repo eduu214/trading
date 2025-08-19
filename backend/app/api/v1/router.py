@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import scanner, strategies, portfolio
+from app.api.v1.endpoints import scanner, portfolio, strategies
 from app.api.v1 import complexity, complexity_constraints
 
 api_router = APIRouter()
