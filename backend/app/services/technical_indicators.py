@@ -19,12 +19,17 @@ class TechnicalIndicatorService:
     
     def __init__(self):
         """Initialize the technical indicator service with Redis caching"""
-        self.redis_client = redis.Redis(
-            host=settings.REDIS_HOST,
-            port=settings.REDIS_PORT,
-            decode_responses=True
-        )
-        self.cache_ttl = 3600  # 1 hour cache
+        try:
+            self.redis_client = redis.Redis(
+                host=getattr(settings, 'REDIS_HOST', 'redis'),
+                port=getattr(settings, 'REDIS_PORT', 6379),
+                decode_responses=True
+            )
+            self.cache_ttl = 3600  # 1 hour cache
+        except:
+            # Redis not available, continue without caching
+            self.redis_client = None
+            self.cache_ttl = 0
         
     def _get_cache_key(self, symbol: str, indicator: str, timeframe: str, period: int = None) -> str:
         """Generate a cache key for indicator results"""
@@ -205,6 +210,9 @@ class TechnicalIndicatorService:
         Returns:
             Cached Series or None if not found
         """
+        if not self.redis_client:
+            return None
+            
         try:
             cache_key = self._get_cache_key(symbol, indicator, timeframe, period)
             cached_data = self.redis_client.get(cache_key)
@@ -237,6 +245,9 @@ class TechnicalIndicatorService:
             data: Indicator values to cache
             period: Indicator period (if applicable)
         """
+        if not self.redis_client:
+            return  # Skip caching if Redis not available
+            
         try:
             cache_key = self._get_cache_key(symbol, indicator, timeframe, period)
             cache_data = {

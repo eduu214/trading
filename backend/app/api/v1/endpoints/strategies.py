@@ -15,7 +15,7 @@ from app.core.database import get_db
 
 router = APIRouter()
 
-@router.get("/strategies/test")
+@router.get("/test")
 async def test_strategy_engine():
     """
     Test endpoint for strategy engine - generates signals from mock data
@@ -149,7 +149,7 @@ async def test_strategy_engine():
         logger.error(f"Error in strategy engine test: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/strategies/available")
+@router.get("/available")
 async def get_available_strategies():
     """Get list of available trading strategies"""
     strategies = [
@@ -201,42 +201,227 @@ async def get_available_strategies():
         "total": len(strategies)
     }
 
-@router.post("/strategies/{strategy_id}/backtest")
+@router.post("/{strategy_id}/backtest")
 async def backtest_strategy(
     strategy_id: str,
-    symbol: str = Query(..., description="Symbol to backtest"),
+    symbol: str = Query("AAPL", description="Symbol to backtest"),
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)")
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    # RSI Parameters
+    rsi_period: int = Query(14, description="RSI period (2-50)"),
+    oversold_level: float = Query(30, description="RSI oversold level (10-40)"),
+    overbought_level: float = Query(70, description="RSI overbought level (60-90)"),
+    # MACD Parameters  
+    macd_fast: int = Query(12, description="MACD fast period"),
+    macd_slow: int = Query(26, description="MACD slow period"),
+    macd_signal: int = Query(9, description="MACD signal period"),
+    # Bollinger Parameters
+    bb_period: int = Query(20, description="Bollinger Band period"),
+    bb_std_dev: float = Query(2.0, description="Bollinger Band standard deviations")
 ):
     """
-    Backtest a strategy (placeholder for full implementation)
+    Backtest a strategy with full performance metrics
+    F002-US001: Real backtesting with Vectorbt
     """
-    # This is a placeholder that will be replaced with Vectorbt implementation
-    return {
-        "status": "pending",
-        "message": "Backtesting engine will be implemented with Vectorbt",
-        "strategy_id": strategy_id,
-        "symbol": symbol,
-        "start_date": start_date,
-        "end_date": end_date,
-        "note": "Full backtesting with performance metrics coming in next iteration"
-    }
+    try:
+        from app.services.backtesting_engine import BacktestingEngine
+        from app.services.historical_data_service import HistoricalDataService
+        from datetime import datetime
+        
+        # Initialize services
+        backtest_engine = BacktestingEngine()
+        data_service = HistoricalDataService()
+        
+        # Parse dates
+        if end_date:
+            end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+        else:
+            end_dt = datetime.now()
+            
+        if start_date:
+            start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        else:
+            start_dt = end_dt - timedelta(days=180)  # 6 months default
+        
+        # Get historical data
+        price_data = await data_service.get_historical_data(
+            symbol=symbol,
+            start_date=start_dt,
+            end_date=end_dt
+        )
+        
+        if price_data.empty:
+            raise HTTPException(status_code=404, detail=f"No data available for {symbol}")
+        
+        # Run backtest based on strategy
+        result = None
+        if strategy_id == "rsi_mean_reversion":
+            result = await backtest_engine.backtest_rsi_strategy(
+                symbol, 
+                price_data,
+                rsi_period=rsi_period,
+                oversold_level=oversold_level,
+                overbought_level=overbought_level
+            )
+        elif strategy_id == "macd_momentum":
+            result = await backtest_engine.backtest_macd_strategy(
+                symbol, 
+                price_data,
+                fast_period=macd_fast,
+                slow_period=macd_slow,
+                signal_period=macd_signal
+            )
+        elif strategy_id == "bollinger_breakout":
+            result = await backtest_engine.backtest_bollinger_strategy(
+                symbol, 
+                price_data,
+                period=bb_period,
+                std_dev=bb_std_dev
+            )
+        else:
+            raise HTTPException(status_code=404, detail=f"Strategy {strategy_id} not found")
+        
+        # Return performance metrics
+        return {
+            "status": "success",
+            "strategy": result.strategy_name,
+            "symbol": result.symbol,
+            "period": {
+                "start": result.start_date.isoformat(),
+                "end": result.end_date.isoformat(),
+                "days": (result.end_date - result.start_date).days
+            },
+            "performance": {
+                "total_return": round(result.total_return_pct, 2),
+                "sharpe_ratio": round(result.sharpe_ratio, 2),
+                "max_drawdown": round(result.max_drawdown_pct, 2),
+                "win_rate": round(result.win_rate * 100, 2),
+                "profit_factor": round(result.profit_factor, 2)
+            },
+            "trades": {
+                "total": result.total_trades,
+                "winning": result.winning_trades,
+                "losing": result.losing_trades,
+                "avg_win": round(result.avg_win, 2),
+                "avg_loss": round(result.avg_loss, 2),
+                "best_trade": round(result.best_trade, 2),
+                "worst_trade": round(result.worst_trade, 2)
+            },
+            "capital": {
+                "initial": result.initial_capital,
+                "final": round(result.final_capital, 2)
+            },
+            "execution_time": round(result.execution_time, 2),
+            "sharpe_validation": "PASS" if result.sharpe_ratio > 1.0 else "FAIL"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in backtesting {strategy_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/strategies/{strategy_id}/performance")
+@router.post("/compare")
+async def compare_strategies(
+    symbol: str = Query("AAPL", description="Symbol to test strategies on"),
+    strategies: Optional[List[str]] = Query(None, description="List of strategy IDs to compare")
+):
+    """
+    Compare multiple strategies on the same data
+    F002-US001: Strategy comparison with sortable metrics
+    """
+    try:
+        from app.services.backtesting_engine import BacktestingEngine
+        from app.services.historical_data_service import HistoricalDataService
+        from datetime import datetime
+        
+        # Initialize services
+        backtest_engine = BacktestingEngine()
+        data_service = HistoricalDataService()
+        
+        # Get 6 months of historical data
+        end_dt = datetime.now()
+        start_dt = end_dt - timedelta(days=180)
+        
+        price_data = await data_service.get_historical_data(
+            symbol=symbol,
+            start_date=start_dt,
+            end_date=end_dt
+        )
+        
+        if price_data.empty:
+            raise HTTPException(status_code=404, detail=f"No data available for {symbol}")
+        
+        # If no strategies specified, test all
+        if not strategies:
+            strategies = ["rsi_mean_reversion", "macd_momentum", "bollinger_breakout"]
+        
+        # Run backtests for all strategies
+        results = []
+        for strategy_id in strategies:
+            try:
+                if strategy_id == "rsi_mean_reversion":
+                    result = await backtest_engine.backtest_rsi_strategy(symbol, price_data)
+                elif strategy_id == "macd_momentum":
+                    result = await backtest_engine.backtest_macd_strategy(symbol, price_data)
+                elif strategy_id == "bollinger_breakout":
+                    result = await backtest_engine.backtest_bollinger_strategy(symbol, price_data)
+                else:
+                    continue
+                
+                results.append({
+                    "strategy": result.strategy_name,
+                    "sharpe_ratio": round(result.sharpe_ratio, 2),
+                    "total_return": round(result.total_return_pct, 2),
+                    "max_drawdown": round(result.max_drawdown_pct, 2),
+                    "win_rate": round(result.win_rate * 100, 2),
+                    "profit_factor": round(result.profit_factor, 2),
+                    "total_trades": result.total_trades,
+                    "sharpe_validation": "PASS" if result.sharpe_ratio > 1.0 else "FAIL"
+                })
+            except Exception as e:
+                logger.error(f"Error backtesting {strategy_id}: {e}")
+                results.append({
+                    "strategy": strategy_id,
+                    "error": str(e)
+                })
+        
+        # Sort by Sharpe ratio (best first)
+        results.sort(key=lambda x: x.get("sharpe_ratio", -999), reverse=True)
+        
+        # Find best strategy
+        best_strategy = results[0] if results else None
+        
+        return {
+            "status": "success",
+            "symbol": symbol,
+            "period": f"6 months ({start_dt.date()} to {end_dt.date()})",
+            "strategies_tested": len(results),
+            "best_strategy": best_strategy["strategy"] if best_strategy else None,
+            "results": results,
+            "recommendation": (
+                f"Use {best_strategy['strategy']} with Sharpe ratio {best_strategy['sharpe_ratio']}"
+                if best_strategy and best_strategy.get("sharpe_ratio", 0) > 1.0
+                else "No strategy meets Sharpe ratio > 1.0 requirement"
+            )
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error comparing strategies: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{strategy_id}/performance")
 async def get_strategy_performance(strategy_id: str):
     """
-    Get strategy performance metrics (placeholder)
+    Get latest strategy performance metrics
     """
-    # Placeholder performance metrics
+    # This would query stored backtest results from database
+    # For now, return instruction to use backtest endpoint
     return {
-        "status": "success",
+        "status": "info",
         "strategy_id": strategy_id,
-        "performance": {
-            "sharpe_ratio": None,
-            "max_drawdown": None,
-            "total_return": None,
-            "win_rate": None,
-            "profit_factor": None,
-            "note": "Performance metrics will be calculated by backtesting engine"
-        }
+        "message": "Use POST /strategies/{strategy_id}/backtest to generate performance metrics",
+        "example": f"/api/v1/strategies/{strategy_id}/backtest?symbol=AAPL"
     }

@@ -1,0 +1,446 @@
+"""
+Backtesting Engine Service
+Comprehensive strategy backtesting using Vectorbt
+Part of F002-US001: Real Strategy Engine with Backtesting
+"""
+
+import pandas as pd
+import numpy as np
+from typing import Dict, List, Optional, Tuple, Any
+from datetime import datetime, timedelta
+from dataclasses import dataclass
+from loguru import logger
+import vectorbt as vbt
+from app.services.technical_indicators import TechnicalIndicatorService
+from app.services.strategy_engine import StrategyEngine, SignalType
+
+@dataclass
+class BacktestResult:
+    """Backtesting results with performance metrics"""
+    strategy_name: str
+    symbol: str
+    start_date: datetime
+    end_date: datetime
+    initial_capital: float
+    final_capital: float
+    total_return: float
+    total_return_pct: float
+    sharpe_ratio: float
+    max_drawdown: float
+    max_drawdown_pct: float
+    win_rate: float
+    profit_factor: float
+    total_trades: int
+    winning_trades: int
+    losing_trades: int
+    avg_win: float
+    avg_loss: float
+    best_trade: float
+    worst_trade: float
+    avg_trade_duration: float
+    equity_curve: pd.Series
+    trades: pd.DataFrame
+    execution_time: float
+
+class BacktestingEngine:
+    """
+    Comprehensive backtesting engine using Vectorbt
+    Implements F002-US001 requirements for strategy validation
+    """
+    
+    def __init__(self):
+        """Initialize the backtesting engine"""
+        self.indicators = TechnicalIndicatorService()
+        self.strategy_engine = StrategyEngine()
+        self.default_capital = 10000  # $10,000 starting capital
+        self.commission = 0.001  # 0.1% commission
+        self.slippage = 0.001  # 0.1% slippage
+        
+    async def backtest_rsi_strategy(
+        self,
+        symbol: str,
+        price_data: pd.DataFrame,
+        rsi_period: int = 14,
+        oversold_level: float = 30,
+        overbought_level: float = 70,
+        initial_capital: float = None
+    ) -> BacktestResult:
+        """
+        Backtest RSI mean reversion strategy
+        
+        Args:
+            symbol: Trading symbol
+            price_data: OHLCV DataFrame with datetime index
+            rsi_period: RSI calculation period
+            oversold_level: RSI level to trigger buy
+            overbought_level: RSI level to trigger sell
+            initial_capital: Starting capital (default $10,000)
+            
+        Returns:
+            BacktestResult with performance metrics
+        """
+        try:
+            start_time = datetime.now()
+            capital = initial_capital or self.default_capital
+            
+            # Calculate RSI
+            rsi = await self.indicators.calculate_rsi(price_data['close'], period=rsi_period)
+            
+            # Generate entry and exit signals
+            entries = (rsi < oversold_level).astype(int)  # Buy when oversold
+            exits = (rsi > overbought_level).astype(int)   # Sell when overbought
+            
+            # Run vectorized backtest
+            portfolio = vbt.Portfolio.from_signals(
+                price_data['close'],
+                entries=entries,
+                exits=exits,
+                init_cash=capital,
+                fees=self.commission,
+                slippage=self.slippage,
+                freq='D'
+            )
+            
+            # Calculate performance metrics
+            result = await self._calculate_metrics(
+                portfolio,
+                "RSI_MEAN_REVERSION",
+                symbol,
+                price_data.index[0],
+                price_data.index[-1],
+                capital,
+                start_time
+            )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error in RSI backtest for {symbol}: {e}")
+            raise
+    
+    async def backtest_macd_strategy(
+        self,
+        symbol: str,
+        price_data: pd.DataFrame,
+        fast_period: int = 12,
+        slow_period: int = 26,
+        signal_period: int = 9,
+        initial_capital: float = None
+    ) -> BacktestResult:
+        """
+        Backtest MACD momentum strategy
+        
+        Args:
+            symbol: Trading symbol
+            price_data: OHLCV DataFrame
+            fast_period: Fast EMA period
+            slow_period: Slow EMA period
+            signal_period: Signal line EMA period
+            initial_capital: Starting capital
+            
+        Returns:
+            BacktestResult with performance metrics
+        """
+        try:
+            start_time = datetime.now()
+            capital = initial_capital or self.default_capital
+            
+            # Calculate MACD
+            macd_data = await self.indicators.calculate_macd(
+                price_data['close'],
+                fast_period=fast_period,
+                slow_period=slow_period,
+                signal_period=signal_period
+            )
+            
+            macd = macd_data['macd']
+            signal = macd_data['signal']
+            
+            # Generate crossover signals
+            macd_above = (macd > signal).fillna(False)
+            entries = macd_above & ~macd_above.shift(1).fillna(False)  # Crossover up
+            exits = ~macd_above & macd_above.shift(1).fillna(False)     # Crossover down
+            
+            # Run vectorized backtest
+            portfolio = vbt.Portfolio.from_signals(
+                price_data['close'],
+                entries=entries.fillna(False),
+                exits=exits.fillna(False),
+                init_cash=capital,
+                fees=self.commission,
+                slippage=self.slippage,
+                freq='D'
+            )
+            
+            # Calculate performance metrics
+            result = await self._calculate_metrics(
+                portfolio,
+                "MACD_MOMENTUM",
+                symbol,
+                price_data.index[0],
+                price_data.index[-1],
+                capital,
+                start_time
+            )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error in MACD backtest for {symbol}: {e}")
+            raise
+    
+    async def backtest_bollinger_strategy(
+        self,
+        symbol: str,
+        price_data: pd.DataFrame,
+        period: int = 20,
+        std_dev: float = 2.0,
+        initial_capital: float = None
+    ) -> BacktestResult:
+        """
+        Backtest Bollinger Band breakout strategy
+        
+        Args:
+            symbol: Trading symbol
+            price_data: OHLCV DataFrame
+            period: BB period
+            std_dev: Number of standard deviations
+            initial_capital: Starting capital
+            
+        Returns:
+            BacktestResult with performance metrics
+        """
+        try:
+            start_time = datetime.now()
+            capital = initial_capital or self.default_capital
+            
+            # Calculate Bollinger Bands
+            bb_data = await self.indicators.calculate_bollinger_bands(
+                price_data['close'],
+                period=period,
+                std_dev=std_dev
+            )
+            
+            upper = bb_data['upper']
+            lower = bb_data['lower']
+            close = price_data['close']
+            
+            # Generate breakout signals
+            entries = close > upper  # Buy on upper band breakout
+            exits = close < lower     # Sell on lower band breakdown
+            
+            # Run vectorized backtest
+            portfolio = vbt.Portfolio.from_signals(
+                close,
+                entries=entries.fillna(False),
+                exits=exits.fillna(False),
+                init_cash=capital,
+                fees=self.commission,
+                slippage=self.slippage,
+                freq='D'
+            )
+            
+            # Calculate performance metrics
+            result = await self._calculate_metrics(
+                portfolio,
+                "BOLLINGER_BREAKOUT",
+                symbol,
+                price_data.index[0],
+                price_data.index[-1],
+                capital,
+                start_time
+            )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error in Bollinger backtest for {symbol}: {e}")
+            raise
+    
+    async def _calculate_metrics(
+        self,
+        portfolio: vbt.Portfolio,
+        strategy_name: str,
+        symbol: str,
+        start_date: datetime,
+        end_date: datetime,
+        initial_capital: float,
+        start_time: datetime
+    ) -> BacktestResult:
+        """
+        Calculate comprehensive performance metrics
+        
+        Args:
+            portfolio: Vectorbt Portfolio object
+            strategy_name: Name of the strategy
+            symbol: Trading symbol
+            start_date: Backtest start date
+            end_date: Backtest end date
+            initial_capital: Starting capital
+            start_time: Backtest start time for execution timing
+            
+        Returns:
+            BacktestResult with all metrics
+        """
+        try:
+            # Get basic stats
+            stats = portfolio.stats()
+            
+            # Calculate returns
+            returns = portfolio.returns()
+            total_return = portfolio.total_return()
+            
+            # Calculate Sharpe ratio (annualized)
+            # Using 252 trading days for annualization
+            sharpe_ratio = 0.0
+            if len(returns) > 0 and returns.std() > 0:
+                sharpe_ratio = np.sqrt(252) * returns.mean() / returns.std()
+            
+            # Calculate max drawdown
+            drawdown = portfolio.drawdown()
+            max_drawdown = portfolio.max_drawdown() if len(drawdown) > 0 else 0
+            
+            # Get trade statistics
+            trades = portfolio.trades.records_readable
+            total_trades = len(trades)
+            
+            if total_trades > 0:
+                winning_trades = len(trades[trades['PnL'] > 0])
+                losing_trades = len(trades[trades['PnL'] < 0])
+                win_rate = winning_trades / total_trades if total_trades > 0 else 0
+                
+                # Calculate profit factor
+                total_wins = trades[trades['PnL'] > 0]['PnL'].sum() if winning_trades > 0 else 0
+                total_losses = abs(trades[trades['PnL'] < 0]['PnL'].sum()) if losing_trades > 0 else 0
+                profit_factor = total_wins / total_losses if total_losses > 0 else 0
+                
+                # Average win/loss
+                avg_win = trades[trades['PnL'] > 0]['PnL'].mean() if winning_trades > 0 else 0
+                avg_loss = trades[trades['PnL'] < 0]['PnL'].mean() if losing_trades > 0 else 0
+                
+                # Best/worst trades
+                best_trade = trades['PnL'].max()
+                worst_trade = trades['PnL'].min()
+                
+                # Average trade duration (in days)
+                if 'Duration' in trades.columns:
+                    avg_duration = trades['Duration'].mean()
+                else:
+                    avg_duration = 0
+            else:
+                winning_trades = losing_trades = 0
+                win_rate = profit_factor = 0
+                avg_win = avg_loss = best_trade = worst_trade = avg_duration = 0
+            
+            # Calculate final capital
+            final_capital = initial_capital * (1 + total_return)
+            
+            # Get equity curve
+            equity_curve = portfolio.value()
+            
+            # Calculate execution time
+            execution_time = (datetime.now() - start_time).total_seconds()
+            
+            return BacktestResult(
+                strategy_name=strategy_name,
+                symbol=symbol,
+                start_date=start_date,
+                end_date=end_date,
+                initial_capital=initial_capital,
+                final_capital=final_capital,
+                total_return=total_return,
+                total_return_pct=total_return * 100,
+                sharpe_ratio=sharpe_ratio,
+                max_drawdown=max_drawdown,
+                max_drawdown_pct=max_drawdown * 100,
+                win_rate=win_rate,
+                profit_factor=profit_factor,
+                total_trades=total_trades,
+                winning_trades=winning_trades,
+                losing_trades=losing_trades,
+                avg_win=avg_win,
+                avg_loss=avg_loss,
+                best_trade=best_trade,
+                worst_trade=worst_trade,
+                avg_trade_duration=avg_duration,
+                equity_curve=equity_curve,
+                trades=trades if total_trades > 0 else pd.DataFrame(),
+                execution_time=execution_time
+            )
+            
+        except Exception as e:
+            logger.error(f"Error calculating metrics: {e}")
+            # Return a default result on error
+            return BacktestResult(
+                strategy_name=strategy_name,
+                symbol=symbol,
+                start_date=start_date,
+                end_date=end_date,
+                initial_capital=initial_capital,
+                final_capital=initial_capital,
+                total_return=0,
+                total_return_pct=0,
+                sharpe_ratio=0,
+                max_drawdown=0,
+                max_drawdown_pct=0,
+                win_rate=0,
+                profit_factor=0,
+                total_trades=0,
+                winning_trades=0,
+                losing_trades=0,
+                avg_win=0,
+                avg_loss=0,
+                best_trade=0,
+                worst_trade=0,
+                avg_trade_duration=0,
+                equity_curve=pd.Series([initial_capital]),
+                trades=pd.DataFrame(),
+                execution_time=(datetime.now() - start_time).total_seconds()
+            )
+    
+    async def compare_strategies(
+        self,
+        symbol: str,
+        price_data: pd.DataFrame,
+        strategies: List[str] = None
+    ) -> Dict[str, BacktestResult]:
+        """
+        Compare multiple strategies on the same data
+        
+        Args:
+            symbol: Trading symbol
+            price_data: OHLCV DataFrame
+            strategies: List of strategy names to test (default: all)
+            
+        Returns:
+            Dictionary of strategy results
+        """
+        try:
+            if strategies is None:
+                strategies = ["RSI", "MACD", "BOLLINGER"]
+            
+            results = {}
+            
+            for strategy in strategies:
+                if strategy.upper() == "RSI":
+                    result = await self.backtest_rsi_strategy(symbol, price_data)
+                    results["RSI_MEAN_REVERSION"] = result
+                elif strategy.upper() == "MACD":
+                    result = await self.backtest_macd_strategy(symbol, price_data)
+                    results["MACD_MOMENTUM"] = result
+                elif strategy.upper() == "BOLLINGER":
+                    result = await self.backtest_bollinger_strategy(symbol, price_data)
+                    results["BOLLINGER_BREAKOUT"] = result
+            
+            # Log comparison summary
+            logger.info(f"Strategy comparison for {symbol}:")
+            for name, result in results.items():
+                logger.info(f"  {name}: Sharpe={result.sharpe_ratio:.2f}, "
+                          f"Return={result.total_return_pct:.2f}%, "
+                          f"MaxDD={result.max_drawdown_pct:.2f}%")
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Error comparing strategies for {symbol}: {e}")
+            return {}
