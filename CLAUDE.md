@@ -44,6 +44,20 @@ This is the AlphaStrat Trading Platform - an AI-powered personal trading system 
 - **OS**: Windows with WSL2 (Linux subsystem)
 - **Container Orchestration**: Docker Compose for local development
 
+### Docker Setup Instructions
+1. **Start Containers**: `docker-compose up -d`
+2. **Check Status**: `docker-compose ps`
+3. **Stop Containers**: `docker-compose down`
+4. **Rebuild After Dependencies Change**: `docker-compose up --build -d`
+5. **View Logs**: `docker-compose logs [service_name]`
+
+### Service URLs
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+- **PostgreSQL**: localhost:5432
+- **Redis**: localhost:6379
+
 ## Current Status
 - Documentation is complete and ready for implementation
 - Architecture and scope are fully aligned
@@ -77,11 +91,14 @@ To build this project:
   - `/docs/flowplane/50-implementation/50-3001-F001-US002-file-02.md`
 - **Progress Summary**: `/PROGRESS_SUMMARY.md`
 
-### 🚧 Current Status: F001-US002 In Progress
-- **Previous**: F001-US001 Complete (38 original tasks + 8 scope creep tasks)
-- **Current Feature**: F001-US002 - Strategy Complexity Optimization
-- **Active Slice**: Slice 1 - Core Happy Path (10 tasks)
-- **Description**: Implementing complexity scoring and optimization for discovered strategies
+### ✅ Current Status: F002-US001 Slice 2 Complete
+- **Previous**: F001-US001 Complete (38 tasks), F001-US002 Complete (27 tasks)
+- **Current Feature**: F002-US001 - Real Strategy Engine with Backtesting  
+- **Completed**: Slice 1 (Core Happy Path), Slice 2 (Alternative Strategy Types)
+- **Description**: MACD & Bollinger Bands strategies with multi-strategy comparison interface
+
+### 🚧 Next: F002-US001 Slice 3 - Error Handling (9 tasks)
+- Market data fallback system, timeout handling, validation errors
 
 ### 🔑 API Keys Status
 - **Polygon.io**: ⏳ Needed (get free key at https://polygon.io/)
