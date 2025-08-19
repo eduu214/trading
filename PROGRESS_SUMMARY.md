@@ -1,7 +1,7 @@
 # AlphaStrat Trading Platform - Implementation Progress Summary
 
 ## Overview
-This file tracks the detailed progress of implementing the AlphaStrat Trading Platform according to the documentation in `/docs/alphastrat/50-implementation/`.
+This file tracks the detailed progress of implementing the AlphaStrat Trading Platform according to the documentation in `/docs/flowplane/50-implementation/`.
 
 ## Implementation Status Summary
 
@@ -263,4 +263,4 @@ Or proceed to next feature:
 
 ---
 **Last Updated**: 2025-08-17
-**Implementation Reference**: `/docs/alphastrat/50-implementation/50-2001-F001-US001-plan.md`
+**Implementation Reference**: `/docs/flowplane/50-implementation/50-2001-F001-US001-plan.md`

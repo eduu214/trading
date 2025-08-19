@@ -1,4 +1,4 @@
-# AlphaStrat Trading Platform
+# AlphaStrat Trading Intelligence
 An AI-powered personal trading system that autonomously discovers and validates institutional-grade trading strategies
 
 ## Overview
@@ -79,7 +79,7 @@ Unlike traditional platforms that require existing trading expertise and strateg
 Currently in active development. The system architecture is fully designed and aligned with comprehensive scope requirements. Implementation focuses on delivering a robust MVP with clear paths for future expansion.
 
 ## Documentation
-Detailed technical documentation is available in the `/docs/alphastrat/` directory:
+Detailed technical documentation is available in the `/docs/flowplane/` directory:
 - `20-1001-scope.md`: Complete feature specifications and user stories
 - `20-2001-architecture.md`: Technical architecture and implementation details
 - `20-3001-alignment-analysis.md`: Scope-architecture alignment verification

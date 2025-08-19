@@ -1,7 +1,7 @@
 # Batch Processing Summary
 
 **Generation Date:** 2025-08-15T04:57:51.926Z
-**Batch ID:** /Users/andywillis/dev/workspace/trading/docs/alphastrat/30-refinement
+**Batch ID:** /Users/andywillis/dev/workspace/trading/docs/flowplane/30-refinement
 **Model:** claude-3-5-haiku-20241022
 **Temperature:** 0.3
 **Processing Mode:** Streaming API
@@ -99,11 +99,11 @@ Estimated costs for this same workload using different Claude models:
 ## File Processing Details
 
 ### Input Files Used
-- ./docs/alphastrat/20-scope/20-2001-architecture.md
-- ./docs/alphastrat/30-refinement/30-1001-feature-registry.yaml
-- ./docs/alphastrat/30-refinement/30-1002-story-registry.yaml
-- ./docs/alphastrat/30-refinement/30-1003-scope-overview.md
-- ./docs/alphastrat/30-refinement/30-2001-design-system.yaml
+- ./docs/flowplane/20-scope/20-2001-architecture.md
+- ./docs/flowplane/30-refinement/30-1001-feature-registry.yaml
+- ./docs/flowplane/30-refinement/30-1002-story-registry.yaml
+- ./docs/flowplane/30-refinement/30-1003-scope-overview.md
+- ./docs/flowplane/30-refinement/30-2001-design-system.yaml
 
 ### Output Files Created
 - 30-3001-infrastructure-registry.yaml

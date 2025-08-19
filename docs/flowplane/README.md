@@ -1,10 +1,10 @@
-# jack-trading
+# AlphaStrat Trading Intelligence
 
-A AlphaStrat project
+A Flowplane project
 
-## AlphaStrat Methodology
+## Flowplane Methodology
 
-This project uses AlphaStrat to systematically generate documentation from initial ideas to implementation.
+This project uses Flowplane to systematically generate documentation from initial ideas to implementation.
 
 ### Document Structure
 
@@ -17,10 +17,10 @@ This project uses AlphaStrat to systematically generate documentation from initi
 
 ## Getting Started
 
-1. Run initial discovery: `alphastrat runflow P10-10`
-2. Check status: `alphastrat status`
+1. Run initial discovery: `flowplane runflow P10-10`
+2. Check status: `flowplane status`
 3. Continue with methodology steps as needed
 
 ## Generated Documents
 
-_Documents will appear here as you run AlphaStrat steps_
+_Documents will appear here as you run Flowplane steps_

@@ -1,7 +1,7 @@
 # Batch Processing Summary
 
 **Generation Date:** 2025-08-15T04:20:56.556Z
-**Batch ID:** /Users/andywillis/dev/workspace/trading/docs/alphastrat/20-scope
+**Batch ID:** /Users/andywillis/dev/workspace/trading/docs/flowplane/20-scope
 **Model:** claude-sonnet-4-20250514
 **Temperature:** 0.3
 **Processing Mode:** Streaming API
@@ -99,11 +99,11 @@ Estimated costs for this same workload using different Claude models:
 ## File Processing Details
 
 ### Input Files Used
-- ./docs/alphastrat/20-scope/20-1001-scope.md
-- ./docs/alphastrat/20-scope/20-2001-architecture.md
-- ./docs/alphastrat/20-scope/20-3001-alignment-analysis.md
-- ./docs/alphastrat/20-scope/20-3002-scope-updates.md
-- ./docs/alphastrat/20-scope/20-3003-architecture-updates.md
+- ./docs/flowplane/20-scope/20-1001-scope.md
+- ./docs/flowplane/20-scope/20-2001-architecture.md
+- ./docs/flowplane/20-scope/20-3001-alignment-analysis.md
+- ./docs/flowplane/20-scope/20-3002-scope-updates.md
+- ./docs/flowplane/20-scope/20-3003-architecture-updates.md
 
 ### Output Files Created
 - 20-3001-alignment-analysis.md

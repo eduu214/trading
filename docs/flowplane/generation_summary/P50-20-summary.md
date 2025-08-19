@@ -1,7 +1,7 @@
 # Batch Processing Summary
 
 **Generation Date:** 2025-08-16T11:08:45.121Z
-**Output Path:** /Users/andywillis/dev/workspace/trading/docs/alphastrat/50-implementation
+**Output Path:** /Users/andywillis/dev/workspace/trading/docs/flowplane/50-implementation
 **Model:** claude-sonnet-4-20250514
 **Temperature:** 0.3
 **Processing Mode:** Streaming API
@@ -96,8 +96,8 @@ Estimated costs for this same workload using different Claude models:
 ## File Processing Details
 
 ### Input Files Used
-- ./docs/alphastrat/30-refinement/30-1002-story-registry.yaml
-- ./docs/alphastrat/30-refinement/30-1004-infrastructure-requirements.md
+- ./docs/flowplane/30-refinement/30-1002-story-registry.yaml
+- ./docs/flowplane/30-refinement/30-1004-infrastructure-requirements.md
 
 ### Output Files Created
 No output files were created.
