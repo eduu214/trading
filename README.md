@@ -75,6 +75,31 @@ Unlike traditional platforms that require existing trading expertise and strateg
 ## Getting Started
 *[Setup instructions will be added as development progresses]*
 
+## Testing
+
+The AlphaStrat project maintains comprehensive test coverage across all components:
+
+### Test Organization
+- **Backend Tests**: `backend/tests/` - FastAPI endpoints, services, and database tests
+- **Frontend Tests**: `frontend/src/__tests__/` - React components and integration tests  
+- **Integration Tests**: `tests/integration/` - End-to-end testing across services
+- **Test Scripts**: `tests/scripts/` - Automated test execution and validation scripts
+- **Test Documentation**: `tests/docs/` - Test reports and summaries
+
+### Running Tests
+```bash
+# Backend tests
+cd backend && pytest
+
+# Frontend tests  
+cd frontend && npm test
+
+# Integration tests
+./tests/scripts/test_complexity_api.sh
+```
+
+For detailed testing documentation, see [`tests/README.md`](tests/README.md).
+
 ## Project Status
 Currently in active development. The system architecture is fully designed and aligned with comprehensive scope requirements. Implementation focuses on delivering a robust MVP with clear paths for future expansion.
 
