@@ -17,8 +17,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Don't switch to non-root user for now to avoid permission issues
-# RUN useradd -m -u 1000 flowplane && chown -R flowplane:flowplane /app
-# USER flowplane
+# RUN useradd -m -u 1000 alphastrat && chown -R alphastrat:alphastrat /app
+# USER alphastrat
 
 EXPOSE 8000
 

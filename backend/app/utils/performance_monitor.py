@@ -1,5 +1,5 @@
 """
-Performance monitoring and alerting system for the FlowPlane trading platform
+Performance monitoring and alerting system for the AlphaStrat trading platform
 """
 import asyncio
 import time

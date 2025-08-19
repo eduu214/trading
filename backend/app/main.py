@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Starting FlowPlane Trading Platform...")
+    logger.info("Starting AlphaStrat Trading Platform...")
     try:
         await init_db()
         logger.info("Database initialized successfully")
@@ -20,11 +20,11 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to initialize database: {e}")
         logger.warning("Starting without database - some features may not work")
     yield
-    logger.info("Shutting down FlowPlane Trading Platform...")
+    logger.info("Shutting down AlphaStrat Trading Platform...")
 
 
 app = FastAPI(
-    title="FlowPlane Trading Platform",
+    title="AlphaStrat Trading Platform",
     description="AI-powered trading strategy discovery and validation system",
     version="0.1.0",
     lifespan=lifespan
@@ -46,7 +46,7 @@ app.include_router(api_router, prefix="/api/v1")
 @app.get("/")
 async def root():
     return {
-        "message": "FlowPlane Trading Platform API",
+        "message": "AlphaStrat Trading Platform API",
         "version": "0.1.0",
         "status": "operational"
     }

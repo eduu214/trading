@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document outlines changes to FlowPlane features F002, F001-US003, and F003-US001 to build real trading strategies on our existing scanner and complexity optimization foundation. These modifications transform planned features from demo-level implementations to production-ready trading capabilities without adding new features or changing the overall roadmap sequence.
+This document outlines changes to AlphaStrat features F002, F001-US003, and F003-US001 to build real trading strategies on our existing scanner and complexity optimization foundation. These modifications transform planned features from demo-level implementations to production-ready trading capabilities without adding new features or changing the overall roadmap sequence.
 
 ## Current Feature Status
 
@@ -20,7 +20,7 @@ This document outlines changes to FlowPlane features F002, F001-US003, and F003-
 - **Infrastructure**: Risk-adjusted scoring, validation framework, UI components
 - **Next Dependency**: F001-US003 (Diversification-Focused Discovery)
 
-### 🔄 **Current FlowPlane Sequence (Original Plan)**
+### 🔄 **Current AlphaStrat Sequence (Original Plan)**
 ```
 F001-US001 ✅ → F001-US002 ✅ → F001-US003 → F001-US004 → F001-US005
                                      ↓
@@ -47,7 +47,7 @@ F001-US001 ✅ → F001-US002 ✅ → F002-US001* → F001-US003* → F003-US001
 
 #### **F002-US001: Multi-Platform Code Generator**
 
-**CURRENT FEATURE SCOPE** (from flowplane docs):
+**CURRENT FEATURE SCOPE** (from alphastrat docs):
 ```yaml
 title: Multi-Platform Code Generator
 description: Convert strategies to platform-specific code without manual translation errors
@@ -183,7 +183,7 @@ Backtested performance        Diversification scoring          Risk-adjusted ret
 
 ## Timeline and Resource Impact
 
-### **Original FlowPlane Timeline**
+### **Original AlphaStrat Timeline**
 - F002-US001: 4-6 weeks (code generation)
 - F001-US003: 2-3 weeks (correlation UI)
 - F003-US001: 3-4 weeks (portfolio allocation)
@@ -244,6 +244,6 @@ Backtested performance        Diversification scoring          Risk-adjusted ret
 
 ## Conclusion
 
-These feature enhancements transform FlowPlane from an impressive technical demonstration into a potentially profitable trading system while maintaining the exact same development timeline and approach. By building real trading capabilities on our solid infrastructure foundation, we create genuine user value without scope creep or architectural changes.
+These feature enhancements transform AlphaStrat from an impressive technical demonstration into a potentially profitable trading system while maintaining the exact same development timeline and approach. By building real trading capabilities on our solid infrastructure foundation, we create genuine user value without scope creep or architectural changes.
 
 The modifications leverage every component we've built while addressing the fundamental value gap between sophisticated market scanning and actual trading profitability. This represents the natural evolution of our scanner and complexity analysis capabilities into a production-ready trading platform.

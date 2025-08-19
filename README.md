@@ -1,10 +1,10 @@
-# FlowPlane Trading Platform
+# AlphaStrat Trading Platform
 An AI-powered personal trading system that autonomously discovers and validates institutional-grade trading strategies
 
 ## Overview
-FlowPlane is an intelligent trading platform that acts as your institutional-grade research team—autonomously discovering market opportunities, rigorously validating them through sophisticated testing, and presenting only proven strategies with clear explanations of why they work and how to safely implement them.
+AlphaStrat is an intelligent trading platform that acts as your institutional-grade research team—autonomously discovering market opportunities, rigorously validating them through sophisticated testing, and presenting only proven strategies with clear explanations of why they work and how to safely implement them.
 
-Unlike traditional platforms that require existing trading expertise and strategy ideas, FlowPlane handles the complex analysis and presents clear insights, enabling ambitious traders to achieve institutional-quality results without requiring institutional knowledge.
+Unlike traditional platforms that require existing trading expertise and strategy ideas, AlphaStrat handles the complex analysis and presents clear insights, enabling ambitious traders to achieve institutional-quality results without requiring institutional knowledge.
 
 ## Key Features
 
@@ -79,7 +79,7 @@ Unlike traditional platforms that require existing trading expertise and strateg
 Currently in active development. The system architecture is fully designed and aligned with comprehensive scope requirements. Implementation focuses on delivering a robust MVP with clear paths for future expansion.
 
 ## Documentation
-Detailed technical documentation is available in the `/docs/flowplane/` directory:
+Detailed technical documentation is available in the `/docs/alphastrat/` directory:
 - `20-1001-scope.md`: Complete feature specifications and user stories
 - `20-2001-architecture.md`: Technical architecture and implementation details
 - `20-3001-alignment-analysis.md`: Scope-architecture alignment verification

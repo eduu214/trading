@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Starting FlowPlane Trading Platform locally..."
+echo "Starting AlphaStrat Trading Platform locally..."
 
 # Start Redis (if installed)
 if command -v redis-server &> /dev/null; then
@@ -16,9 +16,9 @@ if command -v psql &> /dev/null; then
     echo "✓ PostgreSQL started"
     
     # Create database
-    sudo -u postgres psql -c "CREATE DATABASE flowplane;" 2>/dev/null || true
-    sudo -u postgres psql -c "CREATE USER flowplane WITH PASSWORD 'flowplane_dev_password';" 2>/dev/null || true
-    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE flowplane TO flowplane;" 2>/dev/null || true
+    sudo -u postgres psql -c "CREATE DATABASE alphastrat;" 2>/dev/null || true
+    sudo -u postgres psql -c "CREATE USER alphastrat WITH PASSWORD 'alphastrat_dev_password';" 2>/dev/null || true
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE alphastrat TO alphastrat;" 2>/dev/null || true
 else
     echo "⚠ PostgreSQL not found - install with: sudo apt-get install postgresql"
 fi
@@ -33,7 +33,7 @@ pip install -q -r requirements-simple.txt
 echo "✓ Backend dependencies installed"
 
 # Run migrations
-export DATABASE_URL="postgresql://flowplane:flowplane_dev_password@localhost:5432/flowplane"
+export DATABASE_URL="postgresql://alphastrat:alphastrat_dev_password@localhost:5432/alphastrat"
 alembic upgrade head 2>/dev/null || echo "⚠ Migrations skipped"
 
 # Start backend
@@ -50,7 +50,7 @@ echo "✓ Frontend started on http://localhost:3000"
 
 echo ""
 echo "================================"
-echo "FlowPlane Trading Platform Ready!"
+echo "AlphaStrat Trading Platform Ready!"
 echo "Frontend: http://localhost:3000"
 echo "Backend API: http://localhost:8000"
 echo "API Docs: http://localhost:8000/docs"

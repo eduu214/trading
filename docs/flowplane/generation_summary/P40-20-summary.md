@@ -1,7 +1,7 @@
 # Batch Processing Summary
 
 **Generation Date:** 2025-08-15T05:06:22.038Z
-**Batch ID:** /Users/andywillis/dev/workspace/trading/docs/flowplane/40-design
+**Batch ID:** /Users/andywillis/dev/workspace/trading/docs/alphastrat/40-design
 **Model:** claude-sonnet-4-20250514
 **Temperature:** 0.3
 **Processing Mode:** Streaming API
@@ -99,11 +99,11 @@ Estimated costs for this same workload using different Claude models:
 ## File Processing Details
 
 ### Input Files Used
-- ./docs/flowplane/30-refinement/30-1001-feature-registry.yaml
-- ./docs/flowplane/30-refinement/30-2001-design-system.yaml
-- ./docs/flowplane/30-refinement/30-4001-requirements-catalog.md
-- ./docs/flowplane/40-design/40-1001-shared-components.yaml
-- ./docs/flowplane/40-design/40-1002-token-contributions.yaml
+- ./docs/alphastrat/30-refinement/30-1001-feature-registry.yaml
+- ./docs/alphastrat/30-refinement/30-2001-design-system.yaml
+- ./docs/alphastrat/30-refinement/30-4001-requirements-catalog.md
+- ./docs/alphastrat/40-design/40-1001-shared-components.yaml
+- ./docs/alphastrat/40-design/40-1002-token-contributions.yaml
 
 ### Output Files Created
 - 40-2001-F001-US001-ux-spec.md

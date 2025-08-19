@@ -1,5 +1,5 @@
 """
-Comprehensive logging configuration for the FlowPlane trading platform
+Comprehensive logging configuration for the AlphaStrat trading platform
 """
 import logging
 import logging.config

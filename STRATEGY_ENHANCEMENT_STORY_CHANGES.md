@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document provides detailed story-level modifications for F002-US001, F001-US003, and F003-US001 that build real trading strategies on our existing FlowPlane infrastructure. Each story enhancement leverages completed work from F001-US001 (scanner) and F001-US002 (complexity optimizer) while transforming planned features from demo-level to production-ready trading capabilities.
+This document provides detailed story-level modifications for F002-US001, F001-US003, and F003-US001 that build real trading strategies on our existing AlphaStrat infrastructure. Each story enhancement leverages completed work from F001-US001 (scanner) and F001-US002 (complexity optimizer) while transforming planned features from demo-level to production-ready trading capabilities.
 
 ## Current Implementation Foundation
 

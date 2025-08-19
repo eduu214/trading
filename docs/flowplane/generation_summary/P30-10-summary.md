@@ -1,7 +1,7 @@
 # Batch Processing Summary
 
 **Generation Date:** 2025-08-15T04:50:41.741Z
-**Batch ID:** /Users/andywillis/dev/workspace/trading/docs/flowplane/30-refinement
+**Batch ID:** /Users/andywillis/dev/workspace/trading/docs/alphastrat/30-refinement
 **Model:** claude-sonnet-4-20250514
 **Temperature:** 0.3
 **Processing Mode:** Streaming API
@@ -97,9 +97,9 @@ Estimated costs for this same workload using different Claude models:
 ## File Processing Details
 
 ### Input Files Used
-- ./docs/flowplane/00-misc/00-100-ux-guidelines.md
-- ./docs/flowplane/20-scope/20-1001-scope.md
-- ./docs/flowplane/20-scope/20-2001-architecture.md
+- ./docs/alphastrat/00-misc/00-100-ux-guidelines.md
+- ./docs/alphastrat/20-scope/20-1001-scope.md
+- ./docs/alphastrat/20-scope/20-2001-architecture.md
 
 ### Output Files Created
 - 30-1001-feature-registry.yaml

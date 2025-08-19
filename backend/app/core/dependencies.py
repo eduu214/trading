@@ -20,7 +20,7 @@ async def get_current_user(
     if not credentials:
         return {
             "id": "test-user",
-            "email": "test@flowplane.ai",
+            "email": "test@alphastrat.ai",
             "is_active": True
         }
     
@@ -28,6 +28,6 @@ async def get_current_user(
     # For now, just return a test user
     return {
         "id": "authenticated-user",
-        "email": "user@flowplane.ai",
+        "email": "user@alphastrat.ai",
         "is_active": True
     }

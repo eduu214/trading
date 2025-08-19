@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document analyzes the need to enhance FlowPlane's strategy discovery capabilities by building real, profitable trading strategies on top of our existing scanner and complexity optimization infrastructure. Rather than adding new features, this enhancement refocuses existing planned features (F002, F001-US003, F003-US001) to create actual trading value instead of demo-level functionality.
+This document analyzes the need to enhance AlphaStrat's strategy discovery capabilities by building real, profitable trading strategies on top of our existing scanner and complexity optimization infrastructure. Rather than adding new features, this enhancement refocuses existing planned features (F002, F001-US003, F003-US001) to create actual trading value instead of demo-level functionality.
 
 ## Current State Analysis
 
@@ -54,7 +54,7 @@ else:
 
 ### **User Problem Statement (Current Reality)**
 
-**As a trader using FlowPlane, I have:**
+**As a trader using AlphaStrat, I have:**
 - A sophisticated system that finds stocks that moved up or down
 - Beautiful visualizations of essentially random data
 - "Complexity optimization" of meaningless strategies
@@ -171,6 +171,6 @@ Actual trading edge  Proven performance  Real portfolio value
 
 ## Conclusion
 
-The strategy enhancement builds naturally on our solid infrastructure foundation by transforming the discovery and analysis capabilities from demo-level to production-ready. This evolution maintains the professional FlowPlane development approach while creating actual trading value that could generate real returns.
+The strategy enhancement builds naturally on our solid infrastructure foundation by transforming the discovery and analysis capabilities from demo-level to production-ready. This evolution maintains the professional AlphaStrat development approach while creating actual trading value that could generate real returns.
 
-The proposed changes leverage every component we've built while addressing the fundamental gap between impressive technical demonstration and profitable trading system. This enhancement transforms FlowPlane from "sophisticated market data viewer" to "potentially profitable trading platform."
+The proposed changes leverage every component we've built while addressing the fundamental gap between impressive technical demonstration and profitable trading system. This enhancement transforms AlphaStrat from "sophisticated market data viewer" to "potentially profitable trading platform."

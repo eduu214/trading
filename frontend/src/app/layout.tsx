@@ -5,7 +5,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'FlowPlane Trading Platform',
+  title: 'AlphaStrat Trading Platform',
   description: 'AI-powered trading strategy discovery and validation system',
 }
 

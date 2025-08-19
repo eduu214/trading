@@ -1,7 +1,7 @@
-# FlowPlane Trading Platform - Project Context for Claude
+# AlphaStrat Trading Platform - Project Context for Claude
 
 ## Project Overview
-This is the FlowPlane Trading Platform - an AI-powered personal trading system that autonomously discovers and validates institutional-grade trading strategies.
+This is the AlphaStrat Trading Platform - an AI-powered personal trading system that autonomously discovers and validates institutional-grade trading strategies.
 
 ## Documentation Structure
 

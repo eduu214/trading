@@ -8,7 +8,7 @@ from app.core.database import Base, get_db
 
 
 # Test database URL
-TEST_DATABASE_URL = "postgresql+asyncpg://flowplane:flowplane_dev_password@localhost:5432/flowplane_test"
+TEST_DATABASE_URL = "postgresql+asyncpg://alphastrat:alphastrat_dev_password@localhost:5432/alphastrat_test"
 
 
 @pytest.fixture(scope="session")

@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document outlines the technical architecture changes required to implement real trading strategies on FlowPlane's existing infrastructure. All enhancements build on the completed F001-US001 (scanner) and F001-US002 (complexity optimizer) foundation, leveraging existing Docker, FastAPI, PostgreSQL, and React components while adding financial libraries and strategy-specific services.
+This document outlines the technical architecture changes required to implement real trading strategies on AlphaStrat's existing infrastructure. All enhancements build on the completed F001-US001 (scanner) and F001-US002 (complexity optimizer) foundation, leveraging existing Docker, FastAPI, PostgreSQL, and React components while adding financial libraries and strategy-specific services.
 
 ## Current Technical Foundation
 
@@ -476,6 +476,6 @@ def test_portfolio_rebalancing_workflow():
 
 ## Conclusion
 
-These technical architecture enhancements build directly on FlowPlane's existing infrastructure while adding production-ready trading capabilities. All new services integrate with our proven Docker, FastAPI, PostgreSQL foundation, ensuring reliable performance and maintainability.
+These technical architecture enhancements build directly on AlphaStrat's existing infrastructure while adding production-ready trading capabilities. All new services integrate with our proven Docker, FastAPI, PostgreSQL foundation, ensuring reliable performance and maintainability.
 
 The enhanced architecture transforms our market data pipeline from demo-level opportunity detection to sophisticated strategy execution and portfolio management, creating a technically robust platform for systematic trading.

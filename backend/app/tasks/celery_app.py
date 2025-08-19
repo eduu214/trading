@@ -2,7 +2,7 @@ from celery import Celery
 from app.core.config import settings
 
 celery_app = Celery(
-    "flowplane",
+    "alphastrat",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
     include=["app.tasks.scanner_tasks", "app.tasks.analysis_tasks"]
