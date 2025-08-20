@@ -243,8 +243,8 @@ async def backtest_strategy(
         else:
             start_dt = end_dt - timedelta(days=180)  # 6 months default
         
-        # Get historical data
-        price_data = await data_service.get_historical_data(
+        # Get historical data with fallback system
+        price_data, data_metadata = await data_service.get_historical_data(
             symbol=symbol,
             start_date=start_dt,
             end_date=end_dt
@@ -252,6 +252,9 @@ async def backtest_strategy(
         
         if price_data.empty:
             raise HTTPException(status_code=404, detail=f"No data available for {symbol}")
+        
+        # Log data source information
+        logger.info(f"Using {data_metadata['source']} data for {symbol} backtest ({data_metadata['rows']} rows)")
         
         # Run backtest based on strategy
         result = None
@@ -343,7 +346,7 @@ async def compare_strategies(
         end_dt = datetime.now()
         start_dt = end_dt - timedelta(days=180)
         
-        price_data = await data_service.get_historical_data(
+        price_data, data_metadata = await data_service.get_historical_data(
             symbol=symbol,
             start_date=start_dt,
             end_date=end_dt
@@ -410,6 +413,40 @@ async def compare_strategies(
         raise
     except Exception as e:
         logger.error(f"Error comparing strategies: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/system/stats")
+async def get_system_stats():
+    """
+    Get backtesting system performance statistics
+    F002-US001 Slice 3 Task 15: Timeout and performance monitoring
+    """
+    try:
+        from app.services.backtesting_engine import BacktestingEngine
+        from app.services.historical_data_service import HistoricalDataService
+        
+        # Get backtesting stats
+        backtest_engine = BacktestingEngine()
+        backtest_stats = await backtest_engine.get_backtest_stats()
+        
+        # Get data fallback stats
+        data_service = HistoricalDataService()
+        fallback_stats = await data_service.get_fallback_stats()
+        
+        return {
+            "status": "success",
+            "backtesting": backtest_stats,
+            "data_fallback": fallback_stats,
+            "system_limits": {
+                "max_backtest_timeout": "300s (5 minutes)",
+                "soft_timeout_warning": "240s (4 minutes)",
+                "max_data_fallback_time": "5s",
+                "retry_attempts": 3
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting system stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{strategy_id}/performance")

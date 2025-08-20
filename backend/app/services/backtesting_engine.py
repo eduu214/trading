@@ -10,6 +10,8 @@ from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 from loguru import logger
+import asyncio
+import time
 import vectorbt as vbt
 from app.services.technical_indicators import TechnicalIndicatorService
 from app.services.strategy_engine import StrategyEngine, SignalType
@@ -42,21 +44,133 @@ class BacktestResult:
     trades: pd.DataFrame
     execution_time: float
 
+class BacktestingTimeoutError(Exception):
+    """Raised when backtesting operation times out"""
+    pass
+
 class BacktestingEngine:
     """
     Comprehensive backtesting engine using Vectorbt
+    F002-US001 Slice 3 Task 15: Enhanced with timeout handling and progress tracking
     Implements F002-US001 requirements for strategy validation
     """
     
     def __init__(self):
-        """Initialize the backtesting engine"""
+        """Initialize the backtesting engine with timeout configuration"""
         self.indicators = TechnicalIndicatorService()
         self.strategy_engine = StrategyEngine()
         self.default_capital = 10000  # $10,000 starting capital
         self.commission = 0.001  # 0.1% commission
         self.slippage = 0.001  # 0.1% slippage
         
+        # Timeout configuration (Task 15 requirement)
+        self.max_timeout = 300  # 5 minutes maximum
+        self.soft_timeout = 240  # 4 minutes soft warning
+        self.progress_callbacks = []  # For progress tracking
+        
+        # Performance tracking
+        self.backtest_stats = {
+            'total_backtests': 0,
+            'completed_backtests': 0,
+            'timeout_errors': 0,
+            'avg_execution_time': 0.0
+        }
+    
+    async def _run_with_timeout(
+        self,
+        coro,
+        operation_name: str = "backtest",
+        timeout: Optional[float] = None
+    ):
+        """
+        Run a coroutine with timeout protection
+        F002-US001 Slice 3 Task 15: 5-minute timeout with progress tracking
+        """
+        timeout = timeout or self.max_timeout
+        start_time = time.time()
+        
+        try:
+            self.backtest_stats['total_backtests'] += 1
+            
+            # Create timeout task
+            result = await asyncio.wait_for(coro, timeout=timeout)
+            
+            # Update success stats
+            execution_time = time.time() - start_time
+            self.backtest_stats['completed_backtests'] += 1
+            self._update_avg_execution_time(execution_time)
+            
+            return result
+            
+        except asyncio.TimeoutError:
+            execution_time = time.time() - start_time
+            self.backtest_stats['timeout_errors'] += 1
+            
+            error_msg = (
+                f"{operation_name} operation timed out after {execution_time:.1f}s "
+                f"(limit: {timeout}s). This may indicate insufficient computational resources "
+                f"or extremely complex strategy parameters."
+            )
+            logger.error(error_msg)
+            raise BacktestingTimeoutError(error_msg)
+    
+    def _update_avg_execution_time(self, execution_time: float):
+        """Update rolling average execution time"""
+        current_avg = self.backtest_stats['avg_execution_time']
+        completed = self.backtest_stats['completed_backtests']
+        
+        self.backtest_stats['avg_execution_time'] = (
+            (current_avg * (completed - 1) + execution_time) / completed
+        )
+    
+    async def _notify_progress(self, stage: str, progress: float, details: str = ""):
+        """Notify progress callbacks of current status"""
+        for callback in self.progress_callbacks:
+            try:
+                if asyncio.iscoroutinefunction(callback):
+                    await callback(stage, progress, details)
+                else:
+                    callback(stage, progress, details)
+            except Exception as e:
+                logger.warning(f"Progress callback error: {e}")
+    
+    def add_progress_callback(self, callback):
+        """Add a progress tracking callback"""
+        self.progress_callbacks.append(callback)
+    
+    async def get_backtest_stats(self) -> Dict:
+        """Get current backtesting performance statistics"""
+        total = self.backtest_stats['total_backtests']
+        completed = self.backtest_stats['completed_backtests']
+        
+        return {
+            **self.backtest_stats,
+            'success_rate': (completed / max(1, total)) * 100,
+            'timeout_rate': (self.backtest_stats['timeout_errors'] / max(1, total)) * 100,
+            'avg_execution_time_formatted': f"{self.backtest_stats['avg_execution_time']:.2f}s"
+        }
+        
     async def backtest_rsi_strategy(
+        self,
+        symbol: str,
+        price_data: pd.DataFrame,
+        rsi_period: int = 14,
+        oversold_level: float = 30,
+        overbought_level: float = 70,
+        initial_capital: float = None
+    ) -> BacktestResult:
+        """
+        Backtest RSI mean reversion strategy with timeout protection
+        F002-US001 Slice 3 Task 15: Enhanced with timeout and progress tracking
+        """
+        return await self._run_with_timeout(
+            self._backtest_rsi_strategy_impl(
+                symbol, price_data, rsi_period, oversold_level, overbought_level, initial_capital
+            ),
+            f"RSI backtest for {symbol}"
+        )
+    
+    async def _backtest_rsi_strategy_impl(
         self,
         symbol: str,
         price_data: pd.DataFrame,
@@ -83,14 +197,20 @@ class BacktestingEngine:
             start_time = datetime.now()
             capital = initial_capital or self.default_capital
             
+            # Progress: Starting backtest
+            await self._notify_progress("initialization", 0.1, f"Starting RSI backtest for {symbol}")
+            
             # Calculate RSI
+            await self._notify_progress("indicators", 0.3, "Calculating RSI indicator")
             rsi = await self.indicators.calculate_rsi(price_data['close'], period=rsi_period)
             
             # Generate entry and exit signals
+            await self._notify_progress("signals", 0.5, "Generating buy/sell signals")
             entries = (rsi < oversold_level).astype(int)  # Buy when oversold
             exits = (rsi > overbought_level).astype(int)   # Sell when overbought
             
             # Run vectorized backtest
+            await self._notify_progress("backtesting", 0.7, "Running vectorized backtest")
             portfolio = vbt.Portfolio.from_signals(
                 price_data['close'],
                 entries=entries,
@@ -102,6 +222,7 @@ class BacktestingEngine:
             )
             
             # Calculate performance metrics
+            await self._notify_progress("metrics", 0.9, "Calculating performance metrics")
             result = await self._calculate_metrics(
                 portfolio,
                 "RSI_MEAN_REVERSION",
@@ -111,6 +232,9 @@ class BacktestingEngine:
                 capital,
                 start_time
             )
+            
+            # Progress: Completion
+            await self._notify_progress("completed", 1.0, f"RSI backtest completed successfully")
             
             return result
             
