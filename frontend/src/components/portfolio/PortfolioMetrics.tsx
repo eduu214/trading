@@ -84,7 +84,7 @@ export const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({
   const [portfolioState, setPortfolioState] = useState<PortfolioState | null>(null)
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([])
   const [loading, setLoading] = useState(false)
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   const [autoRefresh, setAutoRefresh] = useState(true)
 
   // Fetch portfolio metrics
@@ -104,7 +104,9 @@ export const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({
       if (response.ok) {
         const data = await response.json()
         setMetrics(data.metrics)
-        setLastUpdate(new Date())
+        if (typeof window !== 'undefined') {
+          setLastUpdate(new Date())
+        }
       }
     } catch (error) {
       console.error('Error fetching metrics:', error)
@@ -149,7 +151,7 @@ export const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({
       const drawdown = (value - peak) / peak
       
       data.push({
-        date: new Date(Date.now() - (days - i) * 24 * 60 * 60 * 1000).toLocaleDateString(),
+        date: new Date(Date.now() - (days - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         value: Math.round(value),
         return: dailyReturn * 100,
         drawdown: drawdown * 100
@@ -158,6 +160,13 @@ export const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({
     
     setPerformanceData(data)
   }, [])
+
+  // Initialize lastUpdate on client side only
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !lastUpdate) {
+      setLastUpdate(new Date())
+    }
+  }, [lastUpdate])
 
   // Initial load and refresh
   useEffect(() => {
@@ -183,7 +192,7 @@ export const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({
   }, [autoRefresh, refreshInterval, allocations, fetchMetrics, fetchPortfolioState])
 
   const formatPercent = (value: number) => `${(value * 100).toFixed(2)}%`
-  const formatCurrency = (value: number) => `$${value.toLocaleString()}`
+  const formatCurrency = (value: number) => `$${Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
   const formatNumber = (value: number, decimals: number = 2) => value.toFixed(decimals)
 
   // Risk level calculation
@@ -295,7 +304,7 @@ export const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({
           </h2>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-xs">
-              Last update: {lastUpdate.toLocaleTimeString()}
+              Last update: {lastUpdate ? lastUpdate.toISOString().split('T')[1].split('.')[0] : '--:--:--'}
             </Badge>
             <button
               onClick={() => {
@@ -447,7 +456,7 @@ export const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({
                   <Tooltip />
                   <Bar
                     dataKey="return"
-                    fill={(entry: any) => entry.return >= 0 ? '#10b981' : '#ef4444'}
+                    fill="#3b82f6"
                   />
                 </BarChart>
               </ResponsiveContainer>
