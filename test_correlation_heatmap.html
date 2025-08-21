@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correlation Heatmap Test</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+        
+        .header h1 {
+            margin: 0 0 8px 0;
+            color: #1f2937;
+            font-size: 28px;
+        }
+        
+        .header p {
+            margin: 0;
+            color: #6b7280;
+        }
+        
+        .controls {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .controls select {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .controls button {
+            padding: 8px 16px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .controls button:hover {
+            background: #4338ca;
+        }
+        
+        .heatmap-container {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card h3 {
+            margin: 0 0 8px 0;
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .stat-card .subtitle {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        
+        .warnings-container {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .warning-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .warning-critical {
+            background: #fee2e2;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .warning-high {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .tooltip {
+            position: absolute;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        #heatmap svg {
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .cell {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        .cell:hover {
+            stroke-width: 2;
+            stroke: #1f2937;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 Strategy Correlation Analysis</h1>
+            <p>Visualize correlations between trading strategies to optimize portfolio diversification</p>
+        </div>
+        
+        <div class="controls">
+            <label>
+                Time Period:
+                <select id="timePeriod">
+                    <option value="30d">30 Days</option>
+                    <option value="60d">60 Days</option>
+                    <option value="90d">90 Days</option>
+                    <option value="1y">1 Year</option>
+                </select>
+            </label>
+            <button onclick="refreshData()">🔄 Refresh</button>
+            <button onclick="calculateDiversification()">📊 Diversification Score</button>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Average Correlation</h3>
+                <div class="value" id="avgCorrelation">--</div>
+                <div class="subtitle">Lower is better</div>
+            </div>
+            <div class="stat-card">
+                <h3>Max Correlation</h3>
+                <div class="value" id="maxCorrelation">--</div>
+                <div class="subtitle">Highest pair correlation</div>
+            </div>
+            <div class="stat-card">
+                <h3>Number of Strategies</h3>
+                <div class="value" id="numStrategies">--</div>
+                <div class="subtitle">Total in matrix</div>
+            </div>
+            <div class="stat-card">
+                <h3>High Correlation Pairs</h3>
+                <div class="value" id="highPairs">--</div>
+                <div class="subtitle">Above 0.6 threshold</div>
+            </div>
+        </div>
+        
+        <div class="heatmap-container">
+            <h2>Correlation Heatmap</h2>
+            <div id="heatmap" class="loading">Loading correlation data...</div>
+        </div>
+        
+        <div class="warnings-container" id="warningsContainer" style="display: none;">
+            <h2>⚠️ High Correlation Warnings</h2>
+            <div id="warnings"></div>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+        let currentData = null;
+        
+        async function loadCorrelationData() {
+            const timePeriod = document.getElementById('timePeriod').value;
+            const heatmapDiv = document.getElementById('heatmap');
+            
+            try {
+                heatmapDiv.innerHTML = '<div class="loading">Loading correlation data...</div>';
+                
+                const response = await fetch(`${API_BASE}/correlation/matrix?time_period=${timePeriod}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch correlation data');
+                }
+                
+                const data = await response.json();
+                currentData = data;
+                
+                // Update statistics
+                document.getElementById('avgCorrelation').textContent = 
+                    data.statistics.avg_correlation.toFixed(3);
+                document.getElementById('maxCorrelation').textContent = 
+                    data.statistics.max_correlation.toFixed(3);
+                document.getElementById('numStrategies').textContent = 
+                    data.statistics.num_strategies;
+                document.getElementById('highPairs').textContent = 
+                    data.high_correlations.length;
+                
+                // Draw heatmap
+                drawHeatmap(data);
+                
+                // Show warnings
+                showWarnings(data.high_correlations);
+                
+            } catch (error) {
+                heatmapDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                console.error('Error loading correlation data:', error);
+            }
+        }
+        
+        function drawHeatmap(data) {
+            const { strategies, matrix } = data;
+            const cellSize = 60;
+            const margin = { top: 120, right: 50, bottom: 100, left: 120 };
+            const width = strategies.length * cellSize;
+            const height = strategies.length * cellSize;
+            
+            // Clear previous content
+            d3.select('#heatmap').selectAll('*').remove();
+            
+            const svg = d3.select('#heatmap')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom);
+            
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Color scale
+            const colorScale = (value) => {
+                const absValue = Math.abs(value);
+                if (absValue > 0.7) {
+                    return `rgba(220, 38, 38, ${0.3 + absValue * 0.7})`;
+                } else if (absValue > 0.3) {
+                    return `rgba(251, 191, 36, ${0.3 + absValue * 0.7})`;
+                } else {
+                    return `rgba(34, 197, 94, ${0.3 + absValue * 0.7})`;
+                }
+            };
+            
+            // Create cells
+            const cells = g.selectAll('.cell')
+                .data(matrix.flatMap((row, i) => 
+                    row.map((value, j) => ({ row: i, col: j, value }))
+                ))
+                .enter()
+                .append('g')
+                .attr('class', 'cell')
+                .attr('transform', d => `translate(${d.col * cellSize},${d.row * cellSize})`);
+            
+            // Add rectangles
+            cells.append('rect')
+                .attr('width', cellSize - 2)
+                .attr('height', cellSize - 2)
+                .attr('fill', d => colorScale(d.value))
+                .attr('stroke', '#e5e7eb')
+                .attr('stroke-width', 1)
+                .attr('rx', 4)
+                .on('mouseenter', function(event, d) {
+                    const tooltip = document.getElementById('tooltip');
+                    tooltip.innerHTML = `
+                        <strong>${strategies[d.row]} ↔ ${strategies[d.col]}</strong><br>
+                        Correlation: ${d.value.toFixed(3)}
+                    `;
+                    tooltip.style.opacity = '1';
+                    tooltip.style.left = (event.pageX + 10) + 'px';
+                    tooltip.style.top = (event.pageY - 28) + 'px';
+                    
+                    // Highlight row and column
+                    d3.selectAll('.cell rect')
+                        .style('opacity', cell => 
+                            (cell.row === d.row || cell.col === d.col) ? 1 : 0.3
+                        );
+                })
+                .on('mouseleave', function() {
+                    document.getElementById('tooltip').style.opacity = '0';
+                    d3.selectAll('.cell rect').style('opacity', 1);
+                });
+            
+            // Add text values
+            cells.append('text')
+                .attr('x', cellSize / 2)
+                .attr('y', cellSize / 2)
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'middle')
+                .style('font-size', '11px')
+                .style('font-weight', '500')
+                .style('fill', d => Math.abs(d.value) > 0.5 ? 'white' : '#1f2937')
+                .style('pointer-events', 'none')
+                .text(d => d.value.toFixed(2));
+            
+            // Add row labels
+            g.selectAll('.row-label')
+                .data(strategies)
+                .enter()
+                .append('text')
+                .attr('class', 'row-label')
+                .attr('x', -10)
+                .attr('y', (d, i) => i * cellSize + cellSize / 2)
+                .attr('text-anchor', 'end')
+                .attr('dominant-baseline', 'middle')
+                .style('font-size', '12px')
+                .style('fill', '#6b7280')
+                .text(d => d.replace('_', ' '));
+            
+            // Add column labels
+            g.selectAll('.col-label')
+                .data(strategies)
+                .enter()
+                .append('text')
+                .attr('class', 'col-label')
+                .attr('x', 0)
+                .attr('y', 0)
+                .attr('text-anchor', 'start')
+                .attr('dominant-baseline', 'middle')
+                .style('font-size', '12px')
+                .style('fill', '#6b7280')
+                .attr('transform', (d, i) => 
+                    `translate(${i * cellSize + cellSize / 2}, -10) rotate(-45)`
+                )
+                .text(d => d.replace('_', ' '));
+            
+            // Add color legend
+            addColorLegend(svg, width, height, margin);
+        }
+        
+        function addColorLegend(svg, width, height, margin) {
+            const legendWidth = 300;
+            const legendHeight = 20;
+            
+            const legend = svg.append('g')
+                .attr('transform', `translate(${margin.left}, ${height + margin.top + 40})`);
+            
+            // Create gradient
+            const gradient = svg.append('defs')
+                .append('linearGradient')
+                .attr('id', 'correlation-gradient')
+                .attr('x1', '0%')
+                .attr('x2', '100%');
+            
+            gradient.append('stop')
+                .attr('offset', '0%')
+                .attr('stop-color', 'rgb(34, 197, 94)');
+            
+            gradient.append('stop')
+                .attr('offset', '43%')
+                .attr('stop-color', 'rgb(251, 191, 36)');
+            
+            gradient.append('stop')
+                .attr('offset', '100%')
+                .attr('stop-color', 'rgb(220, 38, 38)');
+            
+            legend.append('rect')
+                .attr('width', legendWidth)
+                .attr('height', legendHeight)
+                .style('fill', 'url(#correlation-gradient)')
+                .attr('rx', 4);
+            
+            // Add labels
+            const labels = [0, 0.3, 0.7, 1.0];
+            labels.forEach((label, i) => {
+                legend.append('text')
+                    .attr('x', (legendWidth / 3) * i)
+                    .attr('y', legendHeight + 15)
+                    .attr('text-anchor', i === 0 ? 'start' : i === 3 ? 'end' : 'middle')
+                    .text(label.toFixed(1))
+                    .style('font-size', '11px')
+                    .style('fill', '#6b7280');
+            });
+            
+            legend.append('text')
+                .attr('x', legendWidth / 2)
+                .attr('y', -5)
+                .attr('text-anchor', 'middle')
+                .text('Correlation Strength')
+                .style('font-size', '12px')
+                .style('font-weight', '500')
+                .style('fill', '#1f2937');
+        }
+        
+        function showWarnings(highCorrelations) {
+            const container = document.getElementById('warningsContainer');
+            const warningsDiv = document.getElementById('warnings');
+            
+            if (highCorrelations.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            warningsDiv.innerHTML = '';
+            
+            highCorrelations.slice(0, 10).forEach(pair => {
+                const div = document.createElement('div');
+                div.className = `warning-item ${pair.severity === 'critical' ? 'warning-critical' : 'warning-high'}`;
+                div.innerHTML = `
+                    <span>${pair.strategy_1.replace('_', ' ')} ↔ ${pair.strategy_2.replace('_', ' ')}</span>
+                    <strong>${pair.correlation.toFixed(3)}</strong>
+                `;
+                warningsDiv.appendChild(div);
+            });
+        }
+        
+        async function calculateDiversification() {
+            try {
+                const response = await fetch(`${API_BASE}/correlation/diversification?portfolio_id=main`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch diversification score');
+                }
+                
+                const data = await response.json();
+                
+                alert(`
+Diversification Score: ${data.overall_score.toFixed(1)}/100
+
+📊 Metrics:
+• Correlation Score: ${data.correlation_score.toFixed(1)}
+• Average Correlation: ${data.avg_correlation.toFixed(3)}
+• High Correlation Pairs: ${data.high_correlation_pairs}
+
+💡 Recommendations:
+${data.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')}
+                `);
+                
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+        
+        function refreshData() {
+            loadCorrelationData();
+        }
+        
+        // Load initial data
+        loadCorrelationData();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadCorrelationData, 30000);
+    </script>
+</body>
+</html>
