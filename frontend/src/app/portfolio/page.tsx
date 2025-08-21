@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { EfficientFrontier, StrategyAllocation, PortfolioMetrics } from '@/components/portfolio'
+import { EfficientFrontier, StrategyAllocation, PortfolioMetrics, CorrelationAnalysis } from '@/components/portfolio'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -139,6 +139,13 @@ export default function PortfolioPage() {
         portfolioId="main"
         allocations={currentAllocations}
         refreshInterval={5000}
+        className="mb-8"
+      />
+
+      {/* Correlation Analysis */}
+      <CorrelationAnalysis
+        portfolioId="main"
+        timePeriod="30d"
         className="mb-8"
       />
 

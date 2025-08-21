@@ -41,16 +41,17 @@ export default function Home() {
             <p className="text-sm text-gray-500 mt-2">Coming Soon</p>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 opacity-75">
-            <div className="text-3xl mb-4">📊</div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Portfolio Management
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              Monitor and optimize your portfolio with real-time analytics
-            </p>
-            <p className="text-sm text-gray-500 mt-2">Coming Soon</p>
-          </div>
+          <Link href="/portfolio" className="transform hover:scale-105 transition-transform">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 h-full cursor-pointer hover:shadow-xl">
+              <div className="text-3xl mb-4">📊</div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Portfolio Management
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300">
+                Monitor and optimize your portfolio with correlation analysis
+              </p>
+            </div>
+          </Link>
         </div>
         
         <div className="text-center mt-12">
