@@ -5,7 +5,13 @@
  */
 
 import React, { useState } from 'react';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
+
+// Simple SVG icons to replace heroicons
+const ChevronDownIcon = ({ className }: { className?: string }) => (
+  <svg className={className || "h-5 w-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+  </svg>
+);
 
 interface StrategyParameters {
   // RSI Parameters
@@ -40,7 +46,7 @@ const STRATEGY_OPTIONS = [
   {
     id: 'rsi_mean_reversion',
     name: 'RSI Mean Reversion',
-    description: 'Buy when RSI is oversold (<30), sell when overbought (>70)',
+    description: 'Buy when RSI is oversold (&lt;30), sell when overbought (&gt;70)',
     parameters: ['rsi_period', 'oversold_level', 'overbought_level']
   },
   {
@@ -299,9 +305,9 @@ export default function StrategyBuilder({ onStrategyRun }: StrategyBuilderProps)
                 <div className="border-t border-gray-200 pt-4">
                   <h6 className="font-medium text-gray-900 mb-2">Validation Criteria:</h6>
                   <div className="text-sm space-y-1 text-gray-600">
-                    <div>• Sharpe Ratio > 1.0</div>
-                    <div>• Max Drawdown < 15%</div>
-                    <div>• Win Rate > 45%</div>
+                    <div>• Sharpe Ratio &gt; 1.0</div>
+                    <div>• Max Drawdown &lt; 15%</div>
+                    <div>• Win Rate &gt; 45%</div>
                     <div>• 6+ months historical data</div>
                   </div>
                 </div>

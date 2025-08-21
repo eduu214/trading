@@ -1,6 +1,7 @@
 """
 Historical Data Service with Market Data Fallback System
 F002-US001 Slice 3 Task 14: Enhanced with Polygon.io fallback and retry logic
+F002-US001 Slice 3 Task 17: Enhanced with data quality validation and gap handling
 Fetches historical market data for backtesting with robust error handling
 """
 
@@ -13,11 +14,17 @@ from loguru import logger
 import asyncio
 import time
 from app.core.config import settings
+from app.core.logging_config import structured_logger
+
+class DataQualityError(Exception):
+    """Raised when data quality validation fails"""
+    pass
 
 class HistoricalDataService:
     """
     Fetches historical data for backtesting with fallback system
     F002-US001 Slice 3 Task 14: Market Data Fallback System
+    F002-US001 Slice 3 Task 17: Data Quality Validation
     
     Data Source Priority:
     1. yfinance (primary - free, reliable)
@@ -27,6 +34,8 @@ class HistoricalDataService:
     Features:
     - Automatic retry logic with exponential backoff
     - 5-second failover requirement compliance
+    - 6-month minimum data validation
+    - Gap detection and handling
     - Comprehensive error logging
     """
     
@@ -53,6 +62,14 @@ class HistoricalDataService:
             'avg_response_time': 0.0
         }
         
+        # Data quality validation configuration (Task 17)
+        self.min_data_months = 6  # Minimum 6 months of data required
+        self.max_gap_days = 5     # Maximum allowed consecutive missing days
+        self.min_trading_days = 120  # Minimum trading days for 6 months (approx 22 days/month * 6)
+        
+        # Structured logging (Task 18)
+        self.logger = structured_logger
+        
     async def get_historical_data(
         self,
         symbol: str,
@@ -75,6 +92,9 @@ class HistoricalDataService:
         """
         start_time = time.time()
         self.fallback_stats['total_requests'] += 1
+        
+        # Generate correlation ID for this data fetch operation (Task 18)
+        correlation_id = self.logger.generate_correlation_id()
         
         try:
             # Default to 6 months of data if dates not specified
@@ -99,6 +119,22 @@ class HistoricalDataService:
             
             # Ensure we have required columns
             data = self._validate_and_clean_data(data)
+            
+            # Perform data quality validation (Task 17)
+            validation_start = time.time()
+            quality_result = await self._validate_data_quality(data, symbol, start_date, end_date)
+            validation_time = time.time() - validation_start
+            
+            # Log data quality validation results (Task 18)
+            self.logger.log_data_quality_validation(
+                correlation_id=correlation_id,
+                symbol=symbol,
+                validation_result=quality_result,
+                data_source=metadata.get('source', 'unknown'),
+                execution_time=validation_time
+            )
+            
+            metadata.update(quality_result)
             
             # Cache the data with metadata
             elapsed = time.time() - start_time
@@ -168,6 +204,15 @@ class HistoricalDataService:
             error_msg = f"yfinance failed: {e}"
             errors.append(error_msg)
             logger.warning(error_msg)
+            
+            # Log data fetch error with structured logging (Task 18)
+            self.logger.log_data_fetch_error(
+                correlation_id="fallback_" + str(int(time.time())),
+                symbol=symbol,
+                data_source="yfinance",
+                error=e,
+                fallback_used=True
+            )
         
         # Try Polygon.io if available
         if self.use_polygon:
@@ -503,6 +548,291 @@ class HistoricalDataService:
         except Exception as e:
             logger.error(f"Error validating data: {e}")
             return data
+    
+    async def _validate_data_quality(
+        self,
+        data: pd.DataFrame,
+        symbol: str,
+        start_date: datetime,
+        end_date: datetime
+    ) -> Dict:
+        """
+        Validate data quality for backtesting requirements
+        F002-US001 Slice 3 Task 17: Data Quality Validation
+        
+        Validates:
+        1. Minimum 6 months of data
+        2. Gap detection and handling
+        3. Sufficient trading days
+        4. Data integrity checks
+        
+        Args:
+            data: OHLCV DataFrame
+            symbol: Trading symbol
+            start_date: Expected start date
+            end_date: Expected end date
+            
+        Returns:
+            Dict with validation results and metadata
+        """
+        try:
+            validation_result = {
+                'data_quality_passed': False,
+                'validation_details': {},
+                'quality_warnings': [],
+                'quality_errors': []
+            }
+            
+            if data.empty:
+                validation_result['quality_errors'].append("No data available")
+                return validation_result
+            
+            # Check 1: Minimum data period (6 months)
+            actual_days = (data.index[-1] - data.index[0]).days
+            required_days = self.min_data_months * 30  # Approximate 180 days
+            
+            if actual_days < required_days:
+                validation_result['quality_errors'].append(
+                    f"Insufficient data period: {actual_days} days < {required_days} days required"
+                )
+            else:
+                validation_result['validation_details']['period_check'] = 'PASS'
+            
+            # Check 2: Minimum trading days
+            trading_days = len(data)
+            if trading_days < self.min_trading_days:
+                validation_result['quality_errors'].append(
+                    f"Insufficient trading days: {trading_days} < {self.min_trading_days} required"
+                )
+            else:
+                validation_result['validation_details']['trading_days_check'] = 'PASS'
+            
+            # Check 3: Gap detection
+            gap_analysis = await self._detect_data_gaps(data, symbol)
+            validation_result['validation_details']['gap_analysis'] = gap_analysis
+            
+            if gap_analysis['critical_gaps'] > 0:
+                validation_result['quality_errors'].append(
+                    f"Critical data gaps detected: {gap_analysis['critical_gaps']} gaps > {self.max_gap_days} days"
+                )
+            elif gap_analysis['total_gaps'] > 0:
+                validation_result['quality_warnings'].append(
+                    f"Minor data gaps detected: {gap_analysis['total_gaps']} gaps ≤ {self.max_gap_days} days"
+                )
+            
+            # Check 4: Data integrity (price relationships)
+            integrity_check = await self._check_data_integrity(data)
+            validation_result['validation_details']['integrity_check'] = integrity_check
+            
+            if not integrity_check['valid']:
+                validation_result['quality_errors'].append(
+                    f"Data integrity issues: {integrity_check['issues']}"
+                )
+            
+            # Check 5: Volume data availability
+            if 'volume' not in data.columns or data['volume'].isna().all():
+                validation_result['quality_warnings'].append("Volume data not available")
+            elif (data['volume'] == 0).sum() > len(data) * 0.1:  # More than 10% zero volume
+                validation_result['quality_warnings'].append("High percentage of zero volume days")
+            
+            # Overall validation result
+            validation_result['data_quality_passed'] = len(validation_result['quality_errors']) == 0
+            
+            # Add summary statistics
+            validation_result['validation_details']['summary'] = {
+                'total_days': actual_days,
+                'trading_days': trading_days,
+                'data_completeness': (trading_days / max(1, actual_days)) * 100,
+                'start_date': data.index[0].isoformat(),
+                'end_date': data.index[-1].isoformat(),
+                'gaps_detected': gap_analysis['total_gaps'],
+                'critical_gaps': gap_analysis['critical_gaps']
+            }
+            
+            # Log validation results
+            if validation_result['data_quality_passed']:
+                logger.info(f"Data quality validation PASSED for {symbol}")
+            else:
+                logger.warning(f"Data quality validation FAILED for {symbol}: {validation_result['quality_errors']}")
+            
+            if validation_result['quality_warnings']:
+                logger.info(f"Data quality warnings for {symbol}: {validation_result['quality_warnings']}")
+            
+            return validation_result
+            
+        except Exception as e:
+            logger.error(f"Error validating data quality for {symbol}: {e}")
+            return {
+                'data_quality_passed': False,
+                'validation_details': {},
+                'quality_warnings': [],
+                'quality_errors': [f"Validation error: {str(e)}"]
+            }
+    
+    async def _detect_data_gaps(self, data: pd.DataFrame, symbol: str) -> Dict:
+        """
+        Detect gaps in the data timeline
+        F002-US001 Slice 3 Task 17: Gap detection and handling
+        
+        Args:
+            data: OHLCV DataFrame with datetime index
+            symbol: Trading symbol for logging
+            
+        Returns:
+            Dict with gap analysis results
+        """
+        try:
+            if data.empty:
+                return {
+                    'total_gaps': 0,
+                    'critical_gaps': 0,
+                    'max_gap_days': 0,
+                    'gap_details': []
+                }
+            
+            # Generate expected business days (trading days)
+            start_date = data.index[0]
+            end_date = data.index[-1]
+            expected_dates = pd.bdate_range(start=start_date, end=end_date)
+            
+            # Find missing dates
+            missing_dates = expected_dates.difference(data.index)
+            
+            if len(missing_dates) == 0:
+                return {
+                    'total_gaps': 0,
+                    'critical_gaps': 0,
+                    'max_gap_days': 0,
+                    'gap_details': []
+                }
+            
+            # Group consecutive missing dates into gaps
+            gaps = []
+            current_gap = []
+            
+            for i, date in enumerate(missing_dates):
+                if i == 0 or (date - missing_dates[i-1]).days == 1:
+                    # Continue current gap
+                    current_gap.append(date)
+                else:
+                    # Start new gap
+                    if current_gap:
+                        gaps.append(current_gap)
+                    current_gap = [date]
+            
+            # Add the last gap
+            if current_gap:
+                gaps.append(current_gap)
+            
+            # Analyze gaps
+            gap_details = []
+            critical_gaps = 0
+            max_gap_days = 0
+            
+            for gap in gaps:
+                gap_days = len(gap)
+                max_gap_days = max(max_gap_days, gap_days)
+                
+                gap_info = {
+                    'start_date': gap[0].isoformat(),
+                    'end_date': gap[-1].isoformat(),
+                    'days': gap_days,
+                    'is_critical': gap_days > self.max_gap_days
+                }
+                gap_details.append(gap_info)
+                
+                if gap_days > self.max_gap_days:
+                    critical_gaps += 1
+            
+            logger.debug(f"Gap analysis for {symbol}: {len(gaps)} gaps, {critical_gaps} critical")
+            
+            return {
+                'total_gaps': len(gaps),
+                'critical_gaps': critical_gaps,
+                'max_gap_days': max_gap_days,
+                'gap_details': gap_details,
+                'missing_days_total': len(missing_dates),
+                'expected_trading_days': len(expected_dates),
+                'actual_trading_days': len(data)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error detecting data gaps for {symbol}: {e}")
+            return {
+                'total_gaps': 0,
+                'critical_gaps': 0,
+                'max_gap_days': 0,
+                'gap_details': [],
+                'error': str(e)
+            }
+    
+    async def _check_data_integrity(self, data: pd.DataFrame) -> Dict:
+        """
+        Check data integrity for price relationships and anomalies
+        F002-US001 Slice 3 Task 17: Data integrity validation
+        
+        Args:
+            data: OHLCV DataFrame
+            
+        Returns:
+            Dict with integrity check results
+        """
+        try:
+            issues = []
+            
+            if data.empty:
+                return {'valid': False, 'issues': ['No data to validate']}
+            
+            # Check 1: High >= Low for all days
+            high_low_violations = (data['high'] < data['low']).sum()
+            if high_low_violations > 0:
+                issues.append(f"High < Low violations: {high_low_violations} days")
+            
+            # Check 2: Close and Open within High/Low range
+            close_violations = ((data['close'] > data['high']) | (data['close'] < data['low'])).sum()
+            if close_violations > 0:
+                issues.append(f"Close outside High/Low range: {close_violations} days")
+            
+            open_violations = ((data['open'] > data['high']) | (data['open'] < data['low'])).sum()
+            if open_violations > 0:
+                issues.append(f"Open outside High/Low range: {open_violations} days")
+            
+            # Check 3: Extreme price movements (> 50% in one day)
+            price_changes = data['close'].pct_change().abs()
+            extreme_moves = (price_changes > 0.5).sum()
+            if extreme_moves > 0:
+                issues.append(f"Extreme price movements (>50%): {extreme_moves} days")
+            
+            # Check 4: Zero or negative prices
+            zero_prices = ((data['close'] <= 0) | (data['open'] <= 0) | 
+                          (data['high'] <= 0) | (data['low'] <= 0)).sum()
+            if zero_prices > 0:
+                issues.append(f"Zero or negative prices: {zero_prices} occurrences")
+            
+            # Check 5: Missing or NaN values
+            nan_values = data.isna().sum().sum()
+            if nan_values > 0:
+                issues.append(f"NaN values found: {nan_values} occurrences")
+            
+            return {
+                'valid': len(issues) == 0,
+                'issues': issues,
+                'checks_performed': [
+                    'high_low_relationship',
+                    'close_in_range',
+                    'open_in_range', 
+                    'extreme_movements',
+                    'positive_prices',
+                    'missing_values'
+                ]
+            }
+            
+        except Exception as e:
+            logger.error(f"Error checking data integrity: {e}")
+            return {
+                'valid': False,
+                'issues': [f"Integrity check error: {str(e)}"]
+            }
     
     async def get_multiple_symbols(
         self,

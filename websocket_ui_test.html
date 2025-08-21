@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Real-Time Progress Test - Task 19</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .test-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .status-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-connected { background: #27ae60; }
+        .status-connecting { background: #f39c12; }
+        .status-disconnected { background: #e74c3c; }
+        
+        .progress-container {
+            background: #ecf0f1;
+            border-radius: 25px;
+            height: 30px;
+            margin: 15px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            border-radius: 25px;
+            transition: width 0.5s ease;
+            position: relative;
+            min-width: 0%;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #2c3e50;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .log-container {
+            background: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 8px;
+            height: 300px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+        
+        .log-timestamp {
+            color: #95a5a6;
+            margin-right: 10px;
+        }
+        
+        .log-success { color: #2ecc71; }
+        .log-error { color: #e74c3c; }
+        .log-warning { color: #f39c12; }
+        .log-info { color: #3498db; }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .strategy-selector {
+            margin-bottom: 15px;
+        }
+        
+        .strategy-selector select {
+            padding: 10px 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 1em;
+            background: white;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .symbol-input {
+            margin-bottom: 15px;
+        }
+        
+        .symbol-input input {
+            padding: 10px 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 1em;
+            width: 100%;
+            max-width: 200px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulsing {
+            animation: pulse 1s infinite;
+        }
+        
+        .task-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .task-id {
+            font-family: monospace;
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+        
+        .task-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .status-running { background: #fff3cd; color: #856404; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-failed { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 WebSocket Real-Time Progress Test</h1>
+            <p>Task 19: Interactive Testing Interface for &lt;1s Latency Validation</p>
+        </div>
+        
+        <div class="content">
+            <!-- WebSocket Connection Section -->
+            <div class="test-section">
+                <h3>🔌 WebSocket Connection</h3>
+                <div class="status-card">
+                    <div id="connectionStatus">
+                        <span id="statusIndicator" class="status-indicator status-disconnected"></span>
+                        <span id="statusText">Disconnected</span>
+                        <span id="clientId" style="float: right; font-family: monospace; color: #7f8c8d;"></span>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button id="connectBtn" class="btn btn-success">Connect to WebSocket</button>
+                    <button id="disconnectBtn" class="btn btn-danger" disabled>Disconnect</button>
+                    <button id="pingBtn" class="btn btn-primary" disabled>Send Ping</button>
+                </div>
+            </div>
+            
+            <!-- Strategy Testing Section -->
+            <div class="test-section">
+                <h3>📊 Strategy Backtesting with Real-Time Progress</h3>
+                
+                <div class="strategy-selector">
+                    <label for="strategySelect"><strong>Strategy:</strong></label>
+                    <select id="strategySelect">
+                        <option value="rsi_mean_reversion">RSI Mean Reversion</option>
+                        <option value="macd_momentum">MACD Momentum</option>
+                        <option value="bollinger_breakout">Bollinger Band Breakout</option>
+                    </select>
+                </div>
+                
+                <div class="symbol-input">
+                    <label for="symbolInput"><strong>Symbol:</strong></label>
+                    <input type="text" id="symbolInput" value="AAPL" placeholder="Enter symbol (e.g., AAPL)">
+                </div>
+                
+                <div class="controls">
+                    <button id="startBacktestBtn" class="btn btn-primary" disabled>Start Backtest with Progress</button>
+                    <button id="clearTasksBtn" class="btn btn-danger">Clear All Tasks</button>
+                </div>
+                
+                <div id="activeTasks" style="margin-top: 20px;"></div>
+            </div>
+            
+            <!-- Real-Time Progress Section -->
+            <div class="test-section">
+                <h3>⏱️ Real-Time Progress Monitoring</h3>
+                <div id="progressDisplay">
+                    <div class="status-card">
+                        <div><strong>Current Task:</strong> <span id="currentTask">None</span></div>
+                        <div><strong>Stage:</strong> <span id="currentStage">-</span></div>
+                        <div><strong>Message:</strong> <span id="currentMessage">-</span></div>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div id="progressBar" class="progress-bar" style="width: 0%;"></div>
+                        <div class="progress-text" id="progressText">0%</div>
+                    </div>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div id="latencyValue" class="metric-value">-</div>
+                            <div class="metric-label">Latency (ms)</div>
+                        </div>
+                        <div class="metric-card">
+                            <div id="updateCount" class="metric-value">0</div>
+                            <div class="metric-label">Updates Received</div>
+                        </div>
+                        <div class="metric-card">
+                            <div id="avgLatency" class="metric-value">-</div>
+                            <div class="metric-label">Avg Latency (ms)</div>
+                        </div>
+                        <div class="metric-card">
+                            <div id="maxLatency" class="metric-value">-</div>
+                            <div class="metric-label">Max Latency (ms)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Message Log Section -->
+            <div class="test-section">
+                <h3>📝 Message Log</h3>
+                <div class="controls">
+                    <button id="clearLogBtn" class="btn btn-danger">Clear Log</button>
+                    <button id="exportLogBtn" class="btn btn-primary">Export Log</button>
+                </div>
+                <div id="messageLog" class="log-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class WebSocketTester {
+            constructor() {
+                this.ws = null;
+                this.isConnected = false;
+                this.clientId = null;
+                this.activeTasks = new Map();
+                this.latencyMeasurements = [];
+                this.updateCount = 0;
+                this.lastUpdateTime = null;
+                
+                this.initializeElements();
+                this.attachEventListeners();
+                this.updateUI();
+            }
+            
+            initializeElements() {
+                // Connection elements
+                this.connectBtn = document.getElementById('connectBtn');
+                this.disconnectBtn = document.getElementById('disconnectBtn');
+                this.pingBtn = document.getElementById('pingBtn');
+                this.statusIndicator = document.getElementById('statusIndicator');
+                this.statusText = document.getElementById('statusText');
+                this.clientIdSpan = document.getElementById('clientId');
+                
+                // Strategy elements
+                this.strategySelect = document.getElementById('strategySelect');
+                this.symbolInput = document.getElementById('symbolInput');
+                this.startBacktestBtn = document.getElementById('startBacktestBtn');
+                this.clearTasksBtn = document.getElementById('clearTasksBtn');
+                this.activeTasksDiv = document.getElementById('activeTasks');
+                
+                // Progress elements
+                this.currentTask = document.getElementById('currentTask');
+                this.currentStage = document.getElementById('currentStage');
+                this.currentMessage = document.getElementById('currentMessage');
+                this.progressBar = document.getElementById('progressBar');
+                this.progressText = document.getElementById('progressText');
+                
+                // Metrics elements
+                this.latencyValue = document.getElementById('latencyValue');
+                this.updateCountSpan = document.getElementById('updateCount');
+                this.avgLatencySpan = document.getElementById('avgLatency');
+                this.maxLatencySpan = document.getElementById('maxLatency');
+                
+                // Log elements
+                this.messageLog = document.getElementById('messageLog');
+                this.clearLogBtn = document.getElementById('clearLogBtn');
+                this.exportLogBtn = document.getElementById('exportLogBtn');
+            }
+            
+            attachEventListeners() {
+                this.connectBtn.addEventListener('click', () => this.connect());
+                this.disconnectBtn.addEventListener('click', () => this.disconnect());
+                this.pingBtn.addEventListener('click', () => this.sendPing());
+                this.startBacktestBtn.addEventListener('click', () => this.startBacktest());
+                this.clearTasksBtn.addEventListener('click', () => this.clearTasks());
+                this.clearLogBtn.addEventListener('click', () => this.clearLog());
+                this.exportLogBtn.addEventListener('click', () => this.exportLog());
+            }
+            
+            connect() {
+                this.log('Connecting to WebSocket...', 'info');
+                this.updateConnectionStatus('connecting', 'Connecting...');
+                
+                try {
+                    this.ws = new WebSocket('ws://localhost:8000/ws');
+                    
+                    this.ws.onopen = () => {
+                        this.isConnected = true;
+                        this.updateConnectionStatus('connected', 'Connected');
+                        this.log('✅ WebSocket connected successfully', 'success');
+                    };
+                    
+                    this.ws.onmessage = (event) => {
+                        this.handleMessage(event.data);
+                    };
+                    
+                    this.ws.onclose = () => {
+                        this.isConnected = false;
+                        this.updateConnectionStatus('disconnected', 'Disconnected');
+                        this.log('❌ WebSocket disconnected', 'warning');
+                        this.updateUI();
+                    };
+                    
+                    this.ws.onerror = (error) => {
+                        this.log(`❌ WebSocket error: ${error}`, 'error');
+                    };
+                    
+                } catch (error) {
+                    this.log(`❌ Connection error: ${error.message}`, 'error');
+                    this.updateConnectionStatus('disconnected', 'Connection Failed');
+                }
+            }
+            
+            disconnect() {
+                if (this.ws) {
+                    this.ws.close();
+                    this.ws = null;
+                }
+                this.isConnected = false;
+                this.clientId = null;
+                this.updateUI();
+            }
+            
+            sendPing() {
+                if (this.isConnected) {
+                    const pingTime = Date.now();
+                    this.sendMessage({
+                        type: 'ping',
+                        timestamp: pingTime
+                    });
+                }
+            }
+            
+            sendMessage(message) {
+                if (this.ws && this.isConnected) {
+                    this.ws.send(JSON.stringify(message));
+                    this.log(`📤 Sent: ${JSON.stringify(message)}`, 'info');
+                }
+            }
+            
+            async startBacktest() {
+                const strategy = this.strategySelect.value;
+                const symbol = this.symbolInput.value.trim().toUpperCase() || 'AAPL';
+                
+                this.log(`🚀 Starting backtest: ${strategy} on ${symbol}`, 'info');
+                
+                try {
+                    const response = await fetch(`http://localhost:8000/api/v1/strategies/${strategy}/backtest-with-progress?symbol=${symbol}`, {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const taskId = data.task_id;
+                        
+                        this.log(`✅ Backtest started with task ID: ${taskId}`, 'success');
+                        
+                        // Subscribe to task progress
+                        if (this.isConnected) {
+                            this.sendMessage({
+                                type: 'subscribe',
+                                task_id: taskId
+                            });
+                            
+                            // Add to active tasks
+                            this.activeTasks.set(taskId, {
+                                strategy,
+                                symbol,
+                                status: 'running',
+                                progress: 0,
+                                startTime: Date.now()
+                            });
+                            
+                            this.updateActiveTasksDisplay();
+                        } else {
+                            this.log('⚠️ Not connected to WebSocket - cannot receive progress updates', 'warning');
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        this.log(`❌ Failed to start backtest: ${response.status} - ${errorText}`, 'error');
+                    }
+                } catch (error) {
+                    this.log(`❌ Error starting backtest: ${error.message}`, 'error');
+                }
+            }
+            
+            handleMessage(data) {
+                const currentTime = Date.now();
+                
+                // Calculate latency if we have a previous update
+                if (this.lastUpdateTime) {
+                    const latency = currentTime - this.lastUpdateTime;
+                    this.latencyMeasurements.push(latency);
+                    this.updateLatencyMetrics(latency);
+                }
+                this.lastUpdateTime = currentTime;
+                
+                try {
+                    const message = JSON.parse(data);
+                    this.log(`📥 Received: ${data}`, 'info');
+                    
+                    switch (message.type) {
+                        case 'connection':
+                            this.handleConnectionMessage(message);
+                            break;
+                        case 'subscription_confirmed':
+                            this.handleSubscriptionConfirmed(message);
+                            break;
+                        case 'progress':
+                            this.handleProgressMessage(message);
+                            break;
+                        case 'completion':
+                            this.handleCompletionMessage(message);
+                            break;
+                        case 'pong':
+                            this.handlePongMessage(message);
+                            break;
+                        case 'error':
+                            this.log(`❌ Server error: ${message.message}`, 'error');
+                            break;
+                        default:
+                            this.log(`⚠️ Unknown message type: ${message.type}`, 'warning');
+                    }
+                } catch (error) {
+                    this.log(`❌ Error parsing message: ${error.message}`, 'error');
+                }
+                
+                this.updateCount++;
+                this.updateCountSpan.textContent = this.updateCount;
+            }
+            
+            handleConnectionMessage(message) {
+                this.clientId = message.client_id;
+                this.clientIdSpan.textContent = `Client: ${this.clientId}`;
+                this.log(`✅ Connection confirmed - Client ID: ${this.clientId}`, 'success');
+                this.updateUI();
+            }
+            
+            handleSubscriptionConfirmed(message) {
+                this.log(`✅ Subscribed to task: ${message.task_id}`, 'success');
+            }
+            
+            handleProgressMessage(message) {
+                const taskId = message.task_id;
+                const data = message.data;
+                
+                // Update current progress display
+                this.currentTask.textContent = taskId.substring(0, 8) + '...';
+                this.currentStage.textContent = data.status || '-';
+                this.currentMessage.textContent = data.details?.message || '-';
+                
+                const percentage = data.percentage || 0;
+                this.progressBar.style.width = `${percentage}%`;
+                this.progressText.textContent = `${percentage.toFixed(1)}%`;
+                
+                // Update active task
+                if (this.activeTasks.has(taskId)) {
+                    const task = this.activeTasks.get(taskId);
+                    task.progress = percentage;
+                    task.stage = data.status;
+                    this.updateActiveTasksDisplay();
+                }
+                
+                // Add pulsing effect for active progress
+                this.progressBar.classList.add('pulsing');
+                setTimeout(() => this.progressBar.classList.remove('pulsing'), 500);
+                
+                this.log(`📊 Progress: ${percentage.toFixed(1)}% - ${data.status}`, 'success');
+            }
+            
+            handleCompletionMessage(message) {
+                const taskId = message.task_id;
+                const success = message.success;
+                
+                if (this.activeTasks.has(taskId)) {
+                    const task = this.activeTasks.get(taskId);
+                    task.status = success ? 'completed' : 'failed';
+                    task.progress = 100;
+                    this.updateActiveTasksDisplay();
+                }
+                
+                if (success) {
+                    this.log(`✅ Task completed successfully: ${taskId}`, 'success');
+                    if (message.result) {
+                        const metrics = message.result.metrics;
+                        this.log(`📈 Results: Sharpe ${metrics?.sharpe_ratio?.toFixed(2)}, Return ${(metrics?.total_return * 100)?.toFixed(2)}%`, 'success');
+                    }
+                } else {
+                    this.log(`❌ Task failed: ${taskId} - ${message.error}`, 'error');
+                }
+            }
+            
+            handlePongMessage(message) {
+                const latency = Date.now() - message.timestamp;
+                this.log(`🏓 Pong received - Round trip: ${latency}ms`, 'success');
+            }
+            
+            updateConnectionStatus(status, text) {
+                this.statusIndicator.className = `status-indicator status-${status}`;
+                this.statusText.textContent = text;
+            }
+            
+            updateLatencyMetrics(latency) {
+                this.latencyValue.textContent = latency;
+                
+                if (this.latencyMeasurements.length > 0) {
+                    const avg = this.latencyMeasurements.reduce((a, b) => a + b, 0) / this.latencyMeasurements.length;
+                    const max = Math.max(...this.latencyMeasurements);
+                    
+                    this.avgLatencySpan.textContent = avg.toFixed(1);
+                    this.maxLatencySpan.textContent = max;
+                    
+                    // Color code latency values
+                    this.latencyValue.style.color = latency < 1000 ? '#27ae60' : '#e74c3c';
+                }
+            }
+            
+            updateActiveTasksDisplay() {
+                this.activeTasksDiv.innerHTML = '';
+                
+                this.activeTasks.forEach((task, taskId) => {
+                    const taskCard = document.createElement('div');
+                    taskCard.className = 'task-card';
+                    
+                    const statusClass = task.status === 'running' ? 'status-running' : 
+                                       task.status === 'completed' ? 'status-completed' : 'status-failed';
+                    
+                    taskCard.innerHTML = `
+                        <div class="task-header">
+                            <div>
+                                <strong>${task.strategy}</strong> on <strong>${task.symbol}</strong>
+                                <br><span class="task-id">${taskId}</span>
+                            </div>
+                            <span class="task-status ${statusClass}">${task.status.toUpperCase()}</span>
+                        </div>
+                        <div class="progress-container" style="height: 20px;">
+                            <div class="progress-bar" style="width: ${task.progress}%; height: 100%;"></div>
+                            <div class="progress-text" style="font-size: 0.8em;">${task.progress.toFixed(1)}%</div>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.9em; color: #6c757d;">
+                            Stage: ${task.stage || 'Initializing'}
+                        </div>
+                    `;
+                    
+                    this.activeTasksDiv.appendChild(taskCard);
+                });
+            }
+            
+            clearTasks() {
+                this.activeTasks.clear();
+                this.updateActiveTasksDisplay();
+                this.log('🗑️ Cleared all active tasks', 'info');
+            }
+            
+            updateUI() {
+                this.connectBtn.disabled = this.isConnected;
+                this.disconnectBtn.disabled = !this.isConnected;
+                this.pingBtn.disabled = !this.isConnected;
+                this.startBacktestBtn.disabled = !this.isConnected;
+            }
+            
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `
+                    <span class="log-timestamp">[${timestamp}]</span>
+                    <span class="log-${type}">${message}</span>
+                `;
+                
+                this.messageLog.appendChild(logEntry);
+                this.messageLog.scrollTop = this.messageLog.scrollHeight;
+            }
+            
+            clearLog() {
+                this.messageLog.innerHTML = '';
+                this.log('📝 Log cleared', 'info');
+            }
+            
+            exportLog() {
+                const logText = Array.from(this.messageLog.children)
+                    .map(entry => entry.textContent)
+                    .join('\n');
+                
+                const blob = new Blob([logText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `websocket-test-log-${new Date().toISOString().split('T')[0]}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                this.log('💾 Log exported', 'success');
+            }
+        }
+        
+        // Initialize the tester when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.tester = new WebSocketTester();
+        });
+    </script>
+</body>
+</html>

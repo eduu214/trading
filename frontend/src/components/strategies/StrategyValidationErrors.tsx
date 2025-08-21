@@ -5,20 +5,39 @@
  */
 
 import React from 'react';
-import { 
-  XCircleIcon, 
-  ExclamationTriangleIcon, 
-  InformationCircleIcon,
-  ArrowPathIcon
-} from '@heroicons/react/24/outline';
+
+// Simple SVG icons to replace heroicons
+const XCircleIcon = ({ className }: { className?: string }) => (
+  <svg className={className || "h-5 w-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const ExclamationTriangleIcon = ({ className }: { className?: string }) => (
+  <svg className={className || "h-5 w-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+  </svg>
+);
+
+const InformationCircleIcon = ({ className }: { className?: string }) => (
+  <svg className={className || "h-5 w-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const ArrowPathIcon = ({ className }: { className?: string }) => (
+  <svg className={className || "h-5 w-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+  </svg>
+);
 
 interface ValidationError {
   type: 'error' | 'warning' | 'info';
   field: string;
   message: string;
-  suggestion?: string;
   value?: number;
   threshold?: number;
+  suggestion?: string;
 }
 
 interface StrategyValidationErrorsProps {
@@ -236,7 +255,7 @@ export default function StrategyValidationErrors({
 
         {/* Help Text */}
         <div className="mt-4 text-xs text-gray-500 text-center">
-          Strategies must achieve a Sharpe ratio > 1.0, maximum drawdown < 15%, and win rate > 45% to qualify for paper trading.
+          Strategies must achieve a Sharpe ratio &gt; 1.0, maximum drawdown &lt; 15%, and win rate &gt; 45% to qualify for paper trading.
         </div>
       </div>
     </div>

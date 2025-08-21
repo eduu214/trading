@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategy Allocation Interface Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .header {
+            display: flex;
+            justify-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: #f5f5f5;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .strategy-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .strategy-item:last-child {
+            border-bottom: none;
+        }
+        .strategy-header {
+            display: flex;
+            justify-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .strategy-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .lock-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .lock-btn:hover {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+        .weight-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .weight-input {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: right;
+        }
+        .slider-container {
+            position: relative;
+            height: 24px;
+            display: flex;
+            align-items: center;
+        }
+        .slider {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+        .slider-fill {
+            height: 100%;
+            background: #3b82f6;
+            border-radius: 2px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            transition: width 0.2s;
+        }
+        .slider-thumb {
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+        }
+        .slider-thumb:active {
+            cursor: grabbing;
+        }
+        .total-allocation {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            justify-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        .total-valid { color: #10b981; }
+        .total-invalid { color: #ef4444; }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+        .metric-item {
+            text-align: center;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .metric-value {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .metric-value.green { color: #10b981; }
+        .metric-value.red { color: #ef4444; }
+        .metric-value.blue { color: #3b82f6; }
+        .allocation-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .allocation-bar-name {
+            min-width: 180px;
+            font-size: 14px;
+        }
+        .allocation-bar-container {
+            flex: 1;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .allocation-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .allocation-bar-percent {
+            min-width: 50px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .alert {
+            background: #fee;
+            border: 1px solid #fcc;
+            padding: 12px;
+            border-radius: 6px;
+            color: #c00;
+            margin-top: 20px;
+        }
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .alert-message {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Strategy Allocation Interface -->
+        <div class="card">
+            <div class="header">
+                <div>
+                    <div class="title">
+                        📊 Strategy Allocation
+                    </div>
+                    <div class="subtitle">Adjust portfolio weights to optimize risk-return profile</div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="resetToEqualWeights()">🔄 Equal Weights</button>
+                    <button class="btn" onclick="applyOptimalAllocation()">🧮 Optimize</button>
+                    <button class="btn btn-primary" onclick="saveAllocation()" id="saveBtn">💾 Save</button>
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="autoBalance" checked onchange="toggleAutoBalance()">
+                <label for="autoBalance">Auto-balance allocations when adjusting weights</label>
+            </div>
+
+            <div id="strategyList"></div>
+
+            <div class="total-allocation">
+                <span>Total Allocation</span>
+                <span id="totalAllocation" class="total-valid">100.0%</span>
+            </div>
+
+            <div id="validationAlert" class="alert" style="display: none;">
+                <div class="alert-title">Validation Issues</div>
+                <div class="alert-message" id="validationMessage"></div>
+            </div>
+        </div>
+
+        <!-- Portfolio Metrics -->
+        <div class="card">
+            <div class="title">📈 Portfolio Metrics</div>
+            <div class="metrics-grid" id="metricsGrid">
+                <div class="metric-item">
+                    <div class="metric-label">Expected Return</div>
+                    <div class="metric-value green" id="expectedReturn">--%</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Volatility</div>
+                    <div class="metric-value" id="volatility">--%</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Sharpe Ratio</div>
+                    <div class="metric-value blue" id="sharpeRatio">--</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Max Drawdown</div>
+                    <div class="metric-value red" id="maxDrawdown">--%</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">VaR (95%)</div>
+                    <div class="metric-value" id="var95">--%</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Sortino Ratio</div>
+                    <div class="metric-value" id="sortinoRatio">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Allocation Breakdown -->
+        <div class="card">
+            <div class="title">📊 Allocation Breakdown</div>
+            <div id="allocationBreakdown"></div>
+        </div>
+    </div>
+
+    <script>
+        const STRATEGIES = [
+            { id: 'rsi_mean_reversion', name: 'RSI Mean Reversion', color: '#3b82f6' },
+            { id: 'macd_momentum', name: 'MACD Momentum', color: '#10b981' },
+            { id: 'bollinger_breakout', name: 'Bollinger Breakout', color: '#f59e0b' },
+            { id: 'mean_reversion_pairs', name: 'Mean Reversion Pairs', color: '#8b5cf6' },
+            { id: 'momentum_breakout', name: 'Momentum Breakout', color: '#ef4444' }
+        ];
+
+        let allocations = STRATEGIES.map(s => ({ ...s, weight: 0.20, locked: false }));
+        let autoBalance = true;
+        let isDragging = false;
+        let dragStrategy = null;
+
+        function initializeInterface() {
+            renderStrategies();
+            updateMetrics();
+            updateAllocationBreakdown();
+        }
+
+        function renderStrategies() {
+            const container = document.getElementById('strategyList');
+            container.innerHTML = '';
+
+            allocations.forEach(strategy => {
+                const div = document.createElement('div');
+                div.className = 'strategy-item';
+                div.innerHTML = `
+                    <div class="strategy-header">
+                        <div class="strategy-name">
+                            <div class="color-dot" style="background: ${strategy.color}"></div>
+                            <span>${strategy.name}</span>
+                            <button class="lock-btn" onclick="toggleLock('${strategy.id}')">
+                                ${strategy.locked ? '🔒' : '🔓'}
+                            </button>
+                        </div>
+                        <div class="weight-input-group">
+                            <input type="number" class="weight-input" 
+                                   value="${(strategy.weight * 100).toFixed(1)}"
+                                   onchange="handleInputChange('${strategy.id}', this.value)"
+                                   ${strategy.locked ? 'disabled' : ''}
+                                   min="0" max="30" step="0.1">
+                            <span>%</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider" id="slider-${strategy.id}">
+                            <div class="slider-fill" style="width: ${strategy.weight * 100}%"></div>
+                            <div class="slider-thumb" style="left: ${strategy.weight * 100}%"
+                                 onmousedown="startDrag(event, '${strategy.id}')"
+                                 ${strategy.locked ? 'style="cursor: not-allowed;"' : ''}></div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            updateTotal();
+        }
+
+        function startDrag(event, strategyId) {
+            const strategy = allocations.find(s => s.id === strategyId);
+            if (strategy.locked) return;
+
+            isDragging = true;
+            dragStrategy = strategyId;
+            document.addEventListener('mousemove', handleDrag);
+            document.addEventListener('mouseup', stopDrag);
+            event.preventDefault();
+        }
+
+        function handleDrag(event) {
+            if (!isDragging || !dragStrategy) return;
+
+            const slider = document.getElementById(`slider-${dragStrategy}`);
+            const rect = slider.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const width = rect.width;
+            const percentage = Math.max(0, Math.min(30, (x / width) * 30));
+            
+            updateAllocation(dragStrategy, percentage / 100);
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            dragStrategy = null;
+            document.removeEventListener('mousemove', handleDrag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+
+        function handleInputChange(strategyId, value) {
+            const percentage = parseFloat(value);
+            if (!isNaN(percentage) && percentage >= 0 && percentage <= 30) {
+                updateAllocation(strategyId, percentage / 100);
+            }
+        }
+
+        function updateAllocation(strategyId, newWeight) {
+            const strategyIndex = allocations.findIndex(s => s.id === strategyId);
+            if (strategyIndex === -1) return;
+
+            const oldWeight = allocations[strategyIndex].weight;
+            const weightDiff = newWeight - oldWeight;
+
+            allocations[strategyIndex].weight = newWeight;
+
+            if (autoBalance && Math.abs(weightDiff) > 0.001) {
+                const unlockedStrategies = allocations.filter((s, i) => i !== strategyIndex && !s.locked);
+                if (unlockedStrategies.length > 0) {
+                    const adjustmentPerStrategy = -weightDiff / unlockedStrategies.length;
+                    allocations.forEach((strategy, i) => {
+                        if (i !== strategyIndex && !strategy.locked) {
+                            strategy.weight = Math.max(0, Math.min(1, strategy.weight + adjustmentPerStrategy));
+                        }
+                    });
+                }
+            }
+
+            // Normalize to ensure total is 1.0
+            const total = allocations.reduce((sum, s) => sum + s.weight, 0);
+            if (Math.abs(total - 1.0) > 0.001) {
+                const scale = 1.0 / total;
+                allocations.forEach(s => {
+                    s.weight = s.weight * scale;
+                });
+            }
+
+            renderStrategies();
+            updateMetrics();
+            updateAllocationBreakdown();
+            validateAllocation();
+        }
+
+        function toggleLock(strategyId) {
+            const strategy = allocations.find(s => s.id === strategyId);
+            if (strategy) {
+                strategy.locked = !strategy.locked;
+                renderStrategies();
+            }
+        }
+
+        function toggleAutoBalance() {
+            autoBalance = document.getElementById('autoBalance').checked;
+        }
+
+        function resetToEqualWeights() {
+            const equalWeight = 1.0 / STRATEGIES.length;
+            allocations.forEach(s => {
+                s.weight = equalWeight;
+                s.locked = false;
+            });
+            renderStrategies();
+            updateMetrics();
+            updateAllocationBreakdown();
+            validateAllocation();
+        }
+
+        async function applyOptimalAllocation() {
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/portfolio/optimize?optimization_method=max_sharpe', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.optimization_result?.optimal_weights) {
+                        const weights = data.optimization_result.optimal_weights;
+                        allocations.forEach(s => {
+                            s.weight = weights[s.id] || 0;
+                            s.locked = false;
+                        });
+                        renderStrategies();
+                        updateMetrics();
+                        updateAllocationBreakdown();
+                        validateAllocation();
+                    }
+                }
+            } catch (error) {
+                console.error('Error applying optimal allocation:', error);
+            }
+        }
+
+        async function updateMetrics() {
+            const weights = {};
+            allocations.forEach(s => {
+                weights[s.id] = s.weight;
+            });
+
+            try {
+                const params = new URLSearchParams({
+                    allocation: JSON.stringify(weights),
+                    portfolio_id: 'main'
+                });
+                
+                const response = await fetch(`http://localhost:8000/api/v1/portfolio/metrics?${params}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const metrics = data.metrics;
+                    
+                    document.getElementById('expectedReturn').textContent = `${(metrics.expected_annual_return * 100).toFixed(1)}%`;
+                    document.getElementById('volatility').textContent = `${(metrics.annual_volatility * 100).toFixed(1)}%`;
+                    document.getElementById('sharpeRatio').textContent = metrics.sharpe_ratio.toFixed(2);
+                    document.getElementById('maxDrawdown').textContent = `${(metrics.max_drawdown * 100).toFixed(1)}%`;
+                    document.getElementById('var95').textContent = `${(metrics.var_95 * 100).toFixed(1)}%`;
+                    document.getElementById('sortinoRatio').textContent = metrics.sortino_ratio.toFixed(2);
+                }
+            } catch (error) {
+                console.error('Error fetching metrics:', error);
+            }
+        }
+
+        async function validateAllocation() {
+            const weights = {};
+            allocations.forEach(s => {
+                weights[s.id] = s.weight;
+            });
+
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/portfolio/validate-allocation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(weights)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const validation = data.validation_result;
+                    
+                    const alert = document.getElementById('validationAlert');
+                    const message = document.getElementById('validationMessage');
+                    const saveBtn = document.getElementById('saveBtn');
+                    
+                    if (!validation.is_valid) {
+                        alert.style.display = 'block';
+                        const violations = validation.violations.map(v => 
+                            `${v.strategy}: ${(v.current_weight * 100).toFixed(1)}% exceeds max ${(v.max_allowed * 100).toFixed(1)}%`
+                        ).join(', ');
+                        message.textContent = violations;
+                        saveBtn.disabled = true;
+                    } else {
+                        alert.style.display = 'none';
+                        saveBtn.disabled = false;
+                    }
+                }
+            } catch (error) {
+                console.error('Error validating allocation:', error);
+            }
+        }
+
+        function updateTotal() {
+            const total = allocations.reduce((sum, s) => sum + s.weight, 0);
+            const totalElement = document.getElementById('totalAllocation');
+            totalElement.textContent = `${(total * 100).toFixed(1)}%`;
+            totalElement.className = Math.abs(total - 1.0) < 0.001 ? 'total-valid' : 'total-invalid';
+            
+            const saveBtn = document.getElementById('saveBtn');
+            if (Math.abs(total - 1.0) >= 0.001) {
+                saveBtn.disabled = true;
+            }
+        }
+
+        function updateAllocationBreakdown() {
+            const container = document.getElementById('allocationBreakdown');
+            container.innerHTML = '';
+            
+            const sorted = [...allocations]
+                .filter(s => s.weight > 0.001)
+                .sort((a, b) => b.weight - a.weight);
+            
+            sorted.forEach(strategy => {
+                const div = document.createElement('div');
+                div.className = 'allocation-bar';
+                div.innerHTML = `
+                    <div class="allocation-bar-name">${strategy.name}</div>
+                    <div class="allocation-bar-container">
+                        <div class="allocation-bar-fill" 
+                             style="width: ${strategy.weight * 100}%; background: ${strategy.color}"></div>
+                    </div>
+                    <div class="allocation-bar-percent">${(strategy.weight * 100).toFixed(1)}%</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function saveAllocation() {
+            alert('Allocation saved successfully! (In a real app, this would save to the backend)');
+        }
+
+        // Initialize on page load
+        initializeInterface();
+    </script>
+</body>
+</html>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efficient Frontier Visualization Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .header {
+            display: flex;
+            justify-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+        .portfolio-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .portfolio-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .portfolio-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        .portfolio-card.selected {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        .portfolio-header {
+            display: flex;
+            justify-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        .portfolio-title {
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .metric {
+            text-align: center;
+        }
+        .metric-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .metric-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .metric-value.green { color: #10b981; }
+        .metric-value.blue { color: #3b82f6; }
+        .allocation-list {
+            margin-top: 20px;
+        }
+        .allocation-item {
+            display: flex;
+            justify-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .allocation-bar {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 0 12px;
+            position: relative;
+        }
+        .allocation-fill {
+            height: 100%;
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: #f5f5f5;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            padding: 12px;
+            border-radius: 6px;
+            color: #c00;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div>
+                    <div class="title">Efficient Frontier Analysis</div>
+                    <div class="subtitle">Risk-return optimization using Modern Portfolio Theory</div>
+                </div>
+                <button class="btn" onclick="refreshData()">Refresh</button>
+            </div>
+            
+            <div id="loading" class="loading">Loading efficient frontier data...</div>
+            <div id="error" class="error" style="display: none;"></div>
+            
+            <div id="chartContainer" style="display: none;">
+                <div class="chart-container">
+                    <canvas id="frontierChart"></canvas>
+                </div>
+                
+                <div class="portfolio-cards" id="portfolioCards"></div>
+                
+                <div class="card" id="allocationDetails" style="display: none;">
+                    <h3>Portfolio Allocation</h3>
+                    <div id="allocationList" class="allocation-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart = null;
+        let frontierData = null;
+        let selectedPortfolio = null;
+
+        async function fetchEfficientFrontier() {
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/portfolio/efficient-frontier?portfolio_id=main&n_points=20');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.efficient_frontier) {
+                    return data.efficient_frontier;
+                } else {
+                    throw new Error(data.error || 'Failed to fetch efficient frontier');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                throw error;
+            }
+        }
+
+        function createChart(data) {
+            const ctx = document.getElementById('frontierChart').getContext('2d');
+            
+            // Prepare frontier points
+            const frontierPoints = data.frontier_points.map(p => ({
+                x: p.volatility * 100,
+                y: p.expected_return * 100,
+                sharpe: p.sharpe_ratio
+            }));
+            
+            // Prepare optimal portfolios
+            const optimalPoints = [];
+            if (data.optimal_portfolios?.max_sharpe) {
+                optimalPoints.push({
+                    x: data.optimal_portfolios.max_sharpe.volatility * 100,
+                    y: data.optimal_portfolios.max_sharpe.expected_return * 100,
+                    label: 'Max Sharpe'
+                });
+            }
+            if (data.optimal_portfolios?.min_volatility) {
+                optimalPoints.push({
+                    x: data.optimal_portfolios.min_volatility.volatility * 100,
+                    y: data.optimal_portfolios.min_volatility.expected_return * 100,
+                    label: 'Min Volatility'
+                });
+            }
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Efficient Frontier',
+                            data: frontierPoints,
+                            borderColor: '#3b82f6',
+                            backgroundColor: '#3b82f6',
+                            showLine: true,
+                            tension: 0.4,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
+                        },
+                        {
+                            label: 'Optimal Portfolios',
+                            data: optimalPoints,
+                            borderColor: '#10b981',
+                            backgroundColor: '#10b981',
+                            pointRadius: 8,
+                            pointHoverRadius: 10
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const x = context.parsed.x.toFixed(1);
+                                    const y = context.parsed.y.toFixed(1);
+                                    if (context.raw.label) {
+                                        return `${context.raw.label}: ${y}% return, ${x}% volatility`;
+                                    }
+                                    return `${label}: ${y}% return, ${x}% volatility`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Volatility (%)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Expected Return (%)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createPortfolioCards(data) {
+            const container = document.getElementById('portfolioCards');
+            container.innerHTML = '';
+            
+            if (data.optimal_portfolios?.max_sharpe) {
+                const card = createPortfolioCard(
+                    'Maximum Sharpe Ratio',
+                    'Optimal risk-adjusted returns',
+                    data.optimal_portfolios.max_sharpe,
+                    'success',
+                    'Recommended'
+                );
+                container.appendChild(card);
+            }
+            
+            if (data.optimal_portfolios?.min_volatility) {
+                const card = createPortfolioCard(
+                    'Minimum Volatility',
+                    'Lowest risk portfolio',
+                    data.optimal_portfolios.min_volatility,
+                    'info',
+                    'Conservative'
+                );
+                container.appendChild(card);
+            }
+        }
+
+        function createPortfolioCard(title, subtitle, portfolio, badgeType, badgeText) {
+            const card = document.createElement('div');
+            card.className = 'portfolio-card';
+            card.onclick = () => selectPortfolio(portfolio, title);
+            
+            card.innerHTML = `
+                <div class="portfolio-header">
+                    <div>
+                        <div class="portfolio-title">${title}</div>
+                        <div class="subtitle">${subtitle}</div>
+                    </div>
+                    <span class="badge badge-${badgeType}">${badgeText}</span>
+                </div>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-label">Return</div>
+                        <div class="metric-value green">${(portfolio.expected_return * 100).toFixed(1)}%</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Volatility</div>
+                        <div class="metric-value">${(portfolio.volatility * 100).toFixed(1)}%</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Sharpe</div>
+                        <div class="metric-value blue">${portfolio.sharpe_ratio.toFixed(2)}</div>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function selectPortfolio(portfolio, name) {
+            selectedPortfolio = portfolio;
+            
+            // Update card selection
+            document.querySelectorAll('.portfolio-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // Show allocation details
+            const allocationDiv = document.getElementById('allocationDetails');
+            const allocationList = document.getElementById('allocationList');
+            
+            allocationDiv.style.display = 'block';
+            allocationList.innerHTML = '';
+            
+            Object.entries(portfolio.weights)
+                .filter(([_, weight]) => weight > 0.001)
+                .sort((a, b) => b[1] - a[1])
+                .forEach(([strategy, weight]) => {
+                    const item = document.createElement('div');
+                    item.className = 'allocation-item';
+                    item.innerHTML = `
+                        <span style="min-width: 180px">${strategy.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                        <div class="allocation-bar">
+                            <div class="allocation-fill" style="width: ${weight * 100}%"></div>
+                        </div>
+                        <span style="min-width: 50px; text-align: right; font-weight: 600">${(weight * 100).toFixed(1)}%</span>
+                    `;
+                    allocationList.appendChild(item);
+                });
+        }
+
+        async function refreshData() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const chartContainer = document.getElementById('chartContainer');
+            
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            chartContainer.style.display = 'none';
+            
+            try {
+                frontierData = await fetchEfficientFrontier();
+                
+                loading.style.display = 'none';
+                chartContainer.style.display = 'block';
+                
+                createChart(frontierData);
+                createPortfolioCards(frontierData);
+                
+                // Auto-select max Sharpe portfolio
+                if (frontierData.optimal_portfolios?.max_sharpe) {
+                    const cards = document.querySelectorAll('.portfolio-card');
+                    if (cards.length > 0) {
+                        cards[0].click();
+                    }
+                }
+                
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = `Error: ${err.message}`;
+            }
+        }
+
+        // Load data on page load
+        refreshData();
+    </script>
+</body>
+</html>

@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://localhost:8000",
+        "http://localhost:8080",  # UI test server
+        "http://localhost:8081",  # Test server for efficient frontier
         "http://frontend:3000"
     ]
     

@@ -1,10 +1,13 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+import json
 from app.core.config import settings
 from app.core.database import init_db
 from app.api.v1.router import api_router
+from app.services.websocket_manager import get_websocket_manager
+from app.services.portfolio_websocket import get_portfolio_websocket_service
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -66,12 +69,48 @@ async def health_check():
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
+    """WebSocket endpoint for real-time progress updates and portfolio streaming"""
+    manager = get_websocket_manager()
+    portfolio_service = await get_portfolio_websocket_service()
+    client_id = None
+    
     try:
+        # Connect client
+        client_id = await manager.connect(websocket)
+        
+        # Handle messages
         while True:
+            # Receive message from client
             data = await websocket.receive_text()
-            await websocket.send_text(f"Echo: {data}")
+            
+            # Parse JSON message
+            try:
+                message = json.loads(data)
+                msg_type = message.get("type", "")
+                
+                # Route portfolio-specific messages
+                if msg_type.startswith("portfolio_") or msg_type in [
+                    "subscribe_portfolio", "unsubscribe_portfolio", 
+                    "request_portfolio_refresh", "request_risk_metrics"
+                ]:
+                    await portfolio_service.handle_portfolio_message(client_id, message)
+                else:
+                    # Handle general WebSocket messages
+                    await manager.handle_client_message(client_id, message)
+                    
+            except json.JSONDecodeError:
+                await websocket.send_json({
+                    "type": "error",
+                    "message": "Invalid JSON format"
+                })
+            
+    except WebSocketDisconnect:
+        if client_id:
+            await manager.disconnect(client_id)
+            await portfolio_service.cleanup_client(client_id)
+        logger.info(f"WebSocket client {client_id} disconnected")
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
-    finally:
-        await websocket.close()
+        if client_id:
+            await manager.disconnect(client_id)
+            await portfolio_service.cleanup_client(client_id)

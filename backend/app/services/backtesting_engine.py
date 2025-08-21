@@ -15,6 +15,7 @@ import time
 import vectorbt as vbt
 from app.services.technical_indicators import TechnicalIndicatorService
 from app.services.strategy_engine import StrategyEngine, SignalType
+from app.core.logging_config import structured_logger
 
 @dataclass
 class BacktestResult:
@@ -75,6 +76,9 @@ class BacktestingEngine:
             'timeout_errors': 0,
             'avg_execution_time': 0.0
         }
+        
+        # Structured logging (Task 18)
+        self.logger = structured_logger
     
     async def _run_with_timeout(
         self,
@@ -105,6 +109,18 @@ class BacktestingEngine:
         except asyncio.TimeoutError:
             execution_time = time.time() - start_time
             self.backtest_stats['timeout_errors'] += 1
+            
+            # Log timeout error with structured logging (Task 18)
+            self.logger.log_timeout_error(
+                correlation_id="timeout_" + str(int(start_time)),
+                operation=operation_name,
+                timeout_seconds=timeout,
+                elapsed_seconds=execution_time,
+                context={
+                    "total_backtests": self.backtest_stats['total_backtests'],
+                    "timeout_errors": self.backtest_stats['timeout_errors']
+                }
+            )
             
             error_msg = (
                 f"{operation_name} operation timed out after {execution_time:.1f}s "
@@ -197,12 +213,58 @@ class BacktestingEngine:
             start_time = datetime.now()
             capital = initial_capital or self.default_capital
             
+            # Generate correlation ID for this backtest operation (Task 18)
+            correlation_id = self.logger.generate_correlation_id()
+            
+            # Log backtest start with context (Task 18)
+            self.logger.log_backtest_start(
+                correlation_id=correlation_id,
+                symbol=symbol,
+                strategy="RSI_MEAN_REVERSION",
+                parameters={
+                    "rsi_period": rsi_period,
+                    "oversold_level": oversold_level,
+                    "overbought_level": overbought_level,
+                    "initial_capital": capital
+                },
+                data_period={
+                    "start": price_data.index[0].isoformat(),
+                    "end": price_data.index[-1].isoformat(),
+                    "data_points": len(price_data)
+                }
+            )
+            
             # Progress: Starting backtest
             await self._notify_progress("initialization", 0.1, f"Starting RSI backtest for {symbol}")
             
-            # Calculate RSI
+            # Calculate RSI with logging (Task 18)
             await self._notify_progress("indicators", 0.3, "Calculating RSI indicator")
-            rsi = await self.indicators.calculate_rsi(price_data['close'], period=rsi_period)
+            
+            indicator_start = time.time()
+            try:
+                rsi = await self.indicators.calculate_rsi(price_data['close'], period=rsi_period)
+                indicator_time = time.time() - indicator_start
+                
+                # Log successful indicator calculation (Task 18)
+                self.logger.log_indicator_calculation(
+                    correlation_id=correlation_id,
+                    indicator_name="RSI",
+                    symbol=symbol,
+                    parameters={"period": rsi_period},
+                    data_points=len(price_data),
+                    execution_time=indicator_time
+                )
+            except Exception as e:
+                # Log indicator calculation error (Task 18)
+                self.logger.log_indicator_error(
+                    correlation_id=correlation_id,
+                    indicator_name="RSI",
+                    symbol=symbol,
+                    error=e,
+                    parameters={"period": rsi_period},
+                    data_points=len(price_data)
+                )
+                raise
             
             # Generate entry and exit signals
             await self._notify_progress("signals", 0.5, "Generating buy/sell signals")
@@ -236,9 +298,41 @@ class BacktestingEngine:
             # Progress: Completion
             await self._notify_progress("completed", 1.0, f"RSI backtest completed successfully")
             
+            # Log successful backtest completion (Task 18)
+            self.logger.log_backtest_success(
+                correlation_id=correlation_id,
+                symbol=symbol,
+                strategy="RSI_MEAN_REVERSION",
+                performance_metrics={
+                    "sharpe_ratio": result.sharpe_ratio,
+                    "total_return_pct": result.total_return_pct,
+                    "max_drawdown_pct": result.max_drawdown_pct,
+                    "win_rate": result.win_rate,
+                    "total_trades": result.total_trades
+                },
+                execution_time=result.execution_time
+            )
+            
             return result
             
         except Exception as e:
+            # Log backtest error with context (Task 18)
+            error_context = {
+                "rsi_period": rsi_period,
+                "oversold_level": oversold_level,
+                "overbought_level": overbought_level,
+                "data_points": len(price_data) if 'price_data' in locals() else None,
+                "execution_time": (datetime.now() - start_time).total_seconds() if 'start_time' in locals() else None
+            }
+            
+            self.logger.log_backtest_error(
+                correlation_id=correlation_id if 'correlation_id' in locals() else "unknown",
+                symbol=symbol,
+                strategy="RSI_MEAN_REVERSION",
+                error=e,
+                context=error_context
+            )
+            
             logger.error(f"Error in RSI backtest for {symbol}: {e}")
             raise
     
